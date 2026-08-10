@@ -94,19 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _bgIndex = 0;
   double _fontSize = 32.0;
   Color _textColor = const Color(0xFFFFD700); // Golden Yellow
-  
-  // Diverse Frame Styles
-  int _selectedFrameIndex = 0;
-  final List<Map<String, dynamic>> _frameStyles = const [
-    {'name': '✨ 럭셔리 금빛', 'color': Color(0xFFFFD700), 'width': 5.0},
-    {'name': '💎 엘레강스 은빛', 'color': Color(0xFFE0E0E0), 'width': 5.0},
-    {'name': '💖 로맨틱 로즈골드', 'color': Color(0xFFB76E79), 'width': 5.0},
-    {'name': '🌿 청정 에메랄드', 'color': Color(0xFF00E676), 'width': 5.0},
-    {'name': '🍷 정열 루비레드', 'color': Color(0xFFFF1744), 'width': 5.0},
-    {'name': '🔮 신비 보라빛', 'color': Color(0xFFE040FB), 'width': 5.0},
-    {'name': '🍊 따스한 귤색', 'color': Color(0xFFFF9800), 'width': 5.0},
-    {'name': '❌ 테두리 없음', 'color': null, 'width': 0.0},
-  ];
+  Color? _borderColor = const Color(0xFFFFD700); // Border color (null = no border)
   final String _selectedFontFamily = 'Jua';
 
   // 5 Main Fast Text Colors
@@ -382,10 +370,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: _frameStyles[_selectedFrameIndex]['color'] != null
+                        border: _borderColor != null
                             ? Border.all(
-                                color: _frameStyles[_selectedFrameIndex]['color'],
-                                width: _frameStyles[_selectedFrameIndex]['width'],
+                                color: _borderColor!,
+                                width: 5.0,
                               )
                             : null,
                         gradient: LinearGradient(
@@ -445,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const Divider(height: 12),
-                      // Frame Style Selector: 4 Main Chips + '🖼️ 테두리 모양 고르기' Button
+                      // Frame Style Selector (Identical to Text Color Selector)
                       Row(
                         children: [
                           const Text('테두리 장식: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -455,53 +443,101 @@ class _HomeScreenState extends State<HomeScreen> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
-                                  ...List.generate(4, (index) {
-                                    final frame = _frameStyles[index];
-                                    final isSelected = _selectedFrameIndex == index;
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                                      child: ChoiceChip(
-                                        label: Text(frame['name']),
-                                        selected: isSelected,
-                                        selectedColor: isDark ? Colors.amber.withAlpha(80) : const Color(0xFFFEE500),
-                                        labelStyle: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                          color: isSelected
-                                              ? (isDark ? const Color(0xFFFFD700) : const Color(0xFF8B0000))
-                                              : (isDark ? Colors.white70 : Colors.black87),
+                                  // ❌ 테두리 없음 Toggle
+                                  GestureDetector(
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      setState(() => _borderColor = null);
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: _borderColor == null
+                                            ? (isDark ? Colors.red.withAlpha(80) : Colors.red.shade100)
+                                            : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: _borderColor == null ? Colors.red : Colors.grey.shade400,
+                                          width: _borderColor == null ? 2 : 1,
                                         ),
-                                        onSelected: (selected) {
-                                          if (selected) {
-                                            HapticFeedback.selectionClick();
-                                            setState(() => _selectedFrameIndex = index);
-                                          }
-                                        },
+                                      ),
+                                      child: Text(
+                                        '❌ 없음',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: _borderColor == null ? FontWeight.bold : FontWeight.normal,
+                                          color: _borderColor == null ? Colors.red : (isDark ? Colors.white70 : Colors.black87),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  // 5 Main Border Color Circles
+                                  ..._defaultColors.map((item) {
+                                    final Color color = item['color'];
+                                    final isSelected = _borderColor == color;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _borderColor = color);
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                                        width: 34,
+                                        height: 34,
+                                        decoration: BoxDecoration(
+                                          color: color,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade400,
+                                            width: isSelected ? 3.5 : 1,
+                                          ),
+                                          boxShadow: const [
+                                            BoxShadow(color: Colors.black12, blurRadius: 2),
+                                          ],
+                                        ),
+                                        child: isSelected
+                                            ? Icon(
+                                                Icons.check,
+                                                size: 20,
+                                                color: (color == Colors.white) ? Colors.black : Colors.white,
+                                              )
+                                            : null,
                                       ),
                                     );
                                   }),
-                                  const SizedBox(width: 4),
-                                  // Frame Picker Modal Button
+                                  const SizedBox(width: 6),
+                                  // Custom RGB Frame Color Picker Button
                                   InkWell(
-                                    onTap: () => _showSimpleFramePicker(context),
+                                    onTap: () => _showRGBColorPicker(context, isBorder: true),
                                     borderRadius: BorderRadius.circular(20),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                                       decoration: BoxDecoration(
-                                        color: isDark ? Colors.amber.withAlpha(40) : Colors.amber.shade50,
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
+                                        ),
                                         borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade800),
+                                        boxShadow: const [
+                                          BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
+                                        ],
                                       ),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.crop_square, size: 16, color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade900),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '🖼️ 테두리 모양 고르기',
+                                          Container(
+                                            padding: const EdgeInsets.all(2),
+                                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                            child: const Icon(Icons.crop_square, size: 14, color: Colors.black87),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          const Text(
+                                            '🎨 RGB 테두리 선택',
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.bold,
-                                              color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade900,
+                                              color: Colors.white,
+                                              shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
                                             ),
                                           ),
                                         ],
@@ -515,7 +551,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const Divider(height: 12),
-                      // Text Colors: 5 Main Colors + '🎨 더 많은 색상 보기' Button
+                      // Text Colors: 5 Main Colors + '🎨 RGB 글자 선택' Button
                       Row(
                         children: [
                           const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -559,9 +595,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     );
                                   }),
                                   const SizedBox(width: 6),
-                                  // Custom RGB Color Picker Button (No Numbers)
+                                  // Custom RGB Text Color Picker Button
                                   InkWell(
-                                    onTap: () => _showRGBColorPicker(context),
+                                    onTap: () => _showRGBColorPicker(context, isBorder: false),
                                     borderRadius: BorderRadius.circular(20),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -583,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                           const SizedBox(width: 6),
                                           const Text(
-                                            '🎨 RGB 색상 선택',
+                                            '🎨 RGB 글자 선택',
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.bold,
@@ -702,9 +738,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // RGB Color Picker (Clean Visual Palette Wheel, No Numbers or Text Inputs)
-  void _showRGBColorPicker(BuildContext context) {
+  void _showRGBColorPicker(BuildContext context, {bool isBorder = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color tempColor = _textColor;
+    Color tempColor = isBorder ? (_borderColor ?? const Color(0xFFFFD700)) : _textColor;
 
     showDialog(
       context: context,
@@ -716,10 +752,10 @@ class _HomeScreenState extends State<HomeScreen> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           title: Row(
             children: [
-              const Icon(Icons.palette, color: Color(0xFFD81B60), size: 24),
+              Icon(isBorder ? Icons.crop_square : Icons.palette, color: const Color(0xFFD81B60), size: 24),
               const SizedBox(width: 8),
               Text(
-                '🎨 RGB 색상 자유 선택',
+                isBorder ? '🖼️ RGB 테두리 색상 선택' : '🎨 RGB 글자 색상 선택',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -768,134 +804,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               onPressed: () {
                 HapticFeedback.selectionClick();
-                setState(() => _textColor = tempColor);
+                setState(() {
+                  if (isBorder) {
+                    _borderColor = tempColor;
+                  } else {
+                    _textColor = tempColor;
+                  }
+                });
                 Navigator.of(context).pop();
               },
             ),
           ],
-        );
-      },
-    );
-  }
-
-  // 2. Simple Senior-friendly Frame / Border Style Bottom Sheet
-  void _showSimpleFramePicker(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.crop_square, color: Colors.amber, size: 24),
-                  const SizedBox(width: 8),
-                  Text(
-                    '액자 테두리 모양 선택',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Flexible(
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 2.5,
-                  ),
-                  itemCount: _frameStyles.length,
-                  itemBuilder: (context, index) {
-                    final frame = _frameStyles[index];
-                    final String name = frame['name'];
-                    final Color? color = frame['color'];
-                    final isSelected = _selectedFrameIndex == index;
-
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _selectedFrameIndex = index);
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isDark ? Colors.amber.withAlpha(40) : Colors.amber.shade50)
-                              : (isDark ? const Color(0xFF2B2B3D) : Colors.grey.shade100),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: isSelected
-                                ? (isDark ? const Color(0xFFFFD700) : Colors.amber.shade900)
-                                : (color ?? Colors.grey.shade400),
-                            width: isSelected ? 2.5 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: color ?? Colors.transparent,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: color != null ? Colors.white : Colors.grey.shade500,
-                                  width: color != null ? 1.5 : 1,
-                                ),
-                              ),
-                              child: color == null
-                                  ? const Icon(Icons.close, size: 14, color: Colors.red)
-                                  : null,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                name,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                  color: isSelected
-                                      ? (isDark ? const Color(0xFFFFD700) : Colors.amber.shade900)
-                                      : (isDark ? Colors.white : Colors.black87),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
         );
       },
     );

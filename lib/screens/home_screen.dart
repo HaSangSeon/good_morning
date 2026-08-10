@@ -441,6 +441,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                 },
                               ),
                               const Spacer(),
+                              // Emoji Picker Popup Button
+                              InkWell(
+                                onTap: () => _showEmojiPicker(context),
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.orange.withAlpha(50) : Colors.orange.shade50,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: isDark ? Colors.orangeAccent : Colors.orange.shade800),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.sentiment_satisfied_alt, size: 16, color: Colors.orange),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '😊 이모티콘 넣기',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.orangeAccent : Colors.orange.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           const Divider(height: 12),
@@ -828,6 +855,125 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ],
+        );
+      },
+    );
+  }
+
+  // Emoji Picker Popup Modal Bottom Sheet
+  void _showEmojiPicker(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final List<Map<String, dynamic>> emojiCategories = const [
+      {
+        'title': '🌅 아침/자연',
+        'emojis': ['🌅', '☀️', '🌸', '🌺', '🌻', '🍀', '🌿', '☕', '🍁', '🍃', '🌞', '🌲', '🌹', '💐', '🌴', '🌾', '🌊', '🌈']
+      },
+      {
+        'title': '❤️ 사랑/덕담',
+        'emojis': ['❤️', '💖', '💕', '💗', '🥰', '🙏', '🎁', '✨', '🌟', '💝', '💌', '🥳', '🎉', '👏', '🕊️', '👑', '💎', '🔥']
+      },
+      {
+        'title': '😊 표정/응원',
+        'emojis': ['😊', '😃', '👍', '💪', '✌️', '🎈', '🤩', '😍', '🤗', '⭐', '🍀', '🙌', '💯', '🍊', '🍎', '🍵', '🥂', '💖']
+      },
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DefaultTabController(
+          length: emojiCategories.length,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('😊', style: TextStyle(fontSize: 24)),
+                    const SizedBox(width: 8),
+                    Text(
+                      '이모티콘을 선택하세요',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TabBar(
+                  labelColor: isDark ? const Color(0xFFFFD700) : Colors.deepOrange,
+                  unselectedLabelColor: isDark ? Colors.white60 : Colors.black54,
+                  indicatorColor: isDark ? const Color(0xFFFFD700) : Colors.deepOrange,
+                  tabs: emojiCategories.map((cat) => Tab(text: cat['title'])).toList(),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 200,
+                  child: TabBarView(
+                    children: emojiCategories.map((cat) {
+                      final List<String> emojis = cat['emojis'];
+                      return GridView.builder(
+                        padding: const EdgeInsets.only(top: 8),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 6,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                        ),
+                        itemCount: emojis.length,
+                        itemBuilder: (context, index) {
+                          final emoji = emojis[index];
+                          return GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _textController.text = '${_textController.text} $emoji'.trim();
+                              });
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('문구에 $emoji 이모티콘이 추가되었습니다!'),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF2B2B3D) : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 28),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

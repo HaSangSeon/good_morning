@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -107,6 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final ScrollController _quoteScrollController = ScrollController();
+  Timer? _marqueeTimer;
+  bool _isMarqueeRunning = true;
+  bool _isUserInteracting = false;
+  double _scrollStep = 0.8;
 
   @override
   void initState() {
@@ -119,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     widget.sharedTextNotifier?.addListener(_onExternalTextChange);
     AdService().loadInterstitialAd();
-    _nudgeQuoteScroll();
+    _startMarqueeFlow();
   }
 
   void _onExternalTextChange() {
@@ -133,12 +138,41 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     widget.sharedTextNotifier?.removeListener(_onExternalTextChange);
+    _stopMarqueeFlow();
     _quoteScrollController.dispose();
     super.dispose();
   }
 
+  void _startMarqueeFlow() {
+    _marqueeTimer?.cancel();
+    _marqueeTimer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+      if (!_isMarqueeRunning || _isUserInteracting || !_quoteScrollController.hasClients) return;
+      final maxScroll = _quoteScrollController.position.maxScrollExtent;
+      if (maxScroll <= 0) return;
+
+      double current = _quoteScrollController.offset;
+      double nextOffset = current + _scrollStep;
+
+      if (nextOffset >= maxScroll) {
+        _scrollStep = -0.8;
+        nextOffset = maxScroll;
+      } else if (nextOffset <= 0) {
+        _scrollStep = 0.8;
+        nextOffset = 0;
+      }
+
+      _quoteScrollController.jumpTo(nextOffset);
+    });
+  }
+
+  void _stopMarqueeFlow() {
+    _marqueeTimer?.cancel();
+    _marqueeTimer = null;
+  }
+
   void _scrollQuotes(bool next) {
     if (!_quoteScrollController.hasClients) return;
+    _isUserInteracting = true;
     double target = next
         ? _quoteScrollController.offset + 220
         : _quoteScrollController.offset - 220;
@@ -150,17 +184,9 @@ class _HomeScreenState extends State<HomeScreen> {
       target,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
-    );
-  }
-
-  void _nudgeQuoteScroll() {
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (!_quoteScrollController.hasClients) return;
-      _quoteScrollController
-          .animateTo(70, duration: const Duration(milliseconds: 500), curve: Curves.easeOut)
-          .then((_) {
-        if (!_quoteScrollController.hasClients) return;
-        _quoteScrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+    ).then((_) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) _isUserInteracting = false;
       });
     });
   }
@@ -395,7 +421,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _textController.text = catList.first;
                                   }
                                 });
-                                _nudgeQuoteScroll();
+                                if (_quoteScrollController.hasClients) {
+                                  _quoteScrollController.jumpTo(0);
+                                }
+                                _scrollStep = 0.8;
+                                _isUserInteracting = false;
                               }
                             },
                           ),
@@ -405,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // 2. Preset Quotes Header & Scrollable List with Arrow Buttons
+                  // 2. Preset Quotes Header & Scrollable List with Marquee Flow & Arrow Buttons
                   Row(
                     children: [
                       Text(
@@ -416,13 +446,55 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(👈 옆으로 밀어보세요 👉)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.amber.withAlpha(40) : Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isDark ? Colors.amber.shade700 : Colors.amber.shade400),
+                        ),
+                        child: Row(
+                          children: [
+                            const Text('🌊 옆으로 흐르는 중', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      // Pause / Play Flow Toggle
+                      InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _isMarqueeRunning = !_isMarqueeRunning;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.purple.withAlpha(50) : Colors.purple.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: isDark ? Colors.purpleAccent : Colors.purple.shade300),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _isMarqueeRunning ? Icons.pause_circle_filled : Icons.play_circle_fill,
+                                size: 14,
+                                color: isDark ? Colors.purpleAccent : Colors.purple.shade700,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _isMarqueeRunning ? '흐름 정지' : '자동 흐름',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.purpleAccent : Colors.purple.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -441,43 +513,55 @@ class _HomeScreenState extends State<HomeScreen> {
                         constraints: const BoxConstraints(minWidth: 26, minHeight: 36),
                         tooltip: '이전 문구',
                       ),
-                      // Scrollable Quotes List
+                      // Scrollable Quotes List with NotificationListener for manual touch pause
                       Expanded(
                         child: SizedBox(
                           height: 42,
-                          child: ListView.builder(
-                            controller: _quoteScrollController,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: (_presetCategories[_selectedCategory] ?? []).length,
-                            itemBuilder: (context, index) {
-                              final text = (_presetCategories[_selectedCategory] ?? [])[index];
-                              return Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                child: ActionChip(
-                                  avatar: const Icon(Icons.touch_app, size: 16, color: Colors.amber),
-                                  label: Text(
-                                    text,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.grey.shade200 : Colors.black87,
-                                    ),
-                                  ),
-                                  backgroundColor: isDark ? const Color(0xFF2E2E3E) : Colors.amber.shade50,
-                                  side: BorderSide(
-                                    color: isDark ? Colors.amber.shade700 : Colors.amber.shade300,
-                                  ),
-                                  onPressed: () {
-                                    HapticFeedback.selectionClick();
-                                    setState(() {
-                                      _textController.text = text;
-                                    });
-                                  },
-                                ),
-                              );
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              if (notification is ScrollStartNotification && notification.dragDetails != null) {
+                                _isUserInteracting = true;
+                              } else if (notification is ScrollEndNotification) {
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  if (mounted) _isUserInteracting = false;
+                                });
+                              }
+                              return false;
                             },
+                            child: ListView.builder(
+                              controller: _quoteScrollController,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: (_presetCategories[_selectedCategory] ?? []).length,
+                              itemBuilder: (context, index) {
+                                final text = (_presetCategories[_selectedCategory] ?? [])[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  child: ActionChip(
+                                    avatar: const Icon(Icons.touch_app, size: 16, color: Colors.amber),
+                                    label: Text(
+                                      text,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? Colors.grey.shade200 : Colors.black87,
+                                      ),
+                                    ),
+                                    backgroundColor: isDark ? const Color(0xFF2E2E3E) : Colors.amber.shade50,
+                                    side: BorderSide(
+                                      color: isDark ? Colors.amber.shade700 : Colors.amber.shade300,
+                                    ),
+                                    onPressed: () {
+                                      HapticFeedback.selectionClick();
+                                      setState(() {
+                                        _textController.text = text;
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

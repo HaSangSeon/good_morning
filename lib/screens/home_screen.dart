@@ -106,6 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
     {'name': '에메랄드', 'color': Color(0xFF00E676)},
   ];
 
+  final ScrollController _quoteScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -117,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     widget.sharedTextNotifier?.addListener(_onExternalTextChange);
     AdService().loadInterstitialAd();
+    _nudgeQuoteScroll();
   }
 
   void _onExternalTextChange() {
@@ -130,7 +133,36 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     widget.sharedTextNotifier?.removeListener(_onExternalTextChange);
+    _quoteScrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollQuotes(bool next) {
+    if (!_quoteScrollController.hasClients) return;
+    double target = next
+        ? _quoteScrollController.offset + 220
+        : _quoteScrollController.offset - 220;
+    if (target < 0) target = 0;
+    if (target > _quoteScrollController.position.maxScrollExtent) {
+      target = _quoteScrollController.position.maxScrollExtent;
+    }
+    _quoteScrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _nudgeQuoteScroll() {
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (!_quoteScrollController.hasClients) return;
+      _quoteScrollController
+          .animateTo(70, duration: const Duration(milliseconds: 500), curve: Curves.easeOut)
+          .then((_) {
+        if (!_quoteScrollController.hasClients) return;
+        _quoteScrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+      });
+    });
   }
 
   void _changeBackground() {
@@ -363,6 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _textController.text = catList.first;
                                   }
                                 });
+                                _nudgeQuoteScroll();
                               }
                             },
                           ),
@@ -370,46 +403,98 @@ class _HomeScreenState extends State<HomeScreen> {
                       }).toList(),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
-                  // 2. Preset Quotes Horizontal Scroll
-                  SizedBox(
-                    height: 42,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: (_presetCategories[_selectedCategory] ?? []).length,
-                      itemBuilder: (context, index) {
-                        final text = (_presetCategories[_selectedCategory] ?? [])[index];
-                        return Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          child: ActionChip(
-                            avatar: const Icon(Icons.touch_app, size: 16, color: Colors.amber),
-                            label: Text(
-                              text,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.grey.shade200 : Colors.black87,
-                              ),
-                            ),
-                            backgroundColor: isDark ? const Color(0xFF2E2E3E) : Colors.amber.shade50,
-                            side: BorderSide(
-                              color: isDark ? Colors.amber.shade700 : Colors.amber.shade300,
-                            ),
-                            onPressed: () {
-                              HapticFeedback.selectionClick();
-                              setState(() {
-                                _textController.text = text;
-                              });
+                  // 2. Preset Quotes Header & Scrollable List with Arrow Buttons
+                  Row(
+                    children: [
+                      Text(
+                        '💬 추천 문구 선택',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '(👈 옆으로 밀어보세요 👉)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      // Left Arrow Button ◀
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new, size: 16),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          _scrollQuotes(false);
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 26, minHeight: 36),
+                        tooltip: '이전 문구',
+                      ),
+                      // Scrollable Quotes List
+                      Expanded(
+                        child: SizedBox(
+                          height: 42,
+                          child: ListView.builder(
+                            controller: _quoteScrollController,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: (_presetCategories[_selectedCategory] ?? []).length,
+                            itemBuilder: (context, index) {
+                              final text = (_presetCategories[_selectedCategory] ?? [])[index];
+                              return Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                child: ActionChip(
+                                  avatar: const Icon(Icons.touch_app, size: 16, color: Colors.amber),
+                                  label: Text(
+                                    text,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.grey.shade200 : Colors.black87,
+                                    ),
+                                  ),
+                                  backgroundColor: isDark ? const Color(0xFF2E2E3E) : Colors.amber.shade50,
+                                  side: BorderSide(
+                                    color: isDark ? Colors.amber.shade700 : Colors.amber.shade300,
+                                  ),
+                                  onPressed: () {
+                                    HapticFeedback.selectionClick();
+                                    setState(() {
+                                      _textController.text = text;
+                                    });
+                                  },
+                                ),
+                              );
                             },
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                      // Right Arrow Button ▶
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          _scrollQuotes(true);
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 26, minHeight: 36),
+                        tooltip: '다음 문구',
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
                   // 3. Quick Toolbar: Size, Border Color, Text Color
                   Card(

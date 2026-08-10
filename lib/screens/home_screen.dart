@@ -29,47 +29,82 @@ class _HomeScreenState extends State<HomeScreen> {
     'assets/images/bg2.png', // Spring flowers
     'assets/images/bg3.png', // Autumn leaves
     'assets/images/bg4.png', // Red roses
+    'assets/images/bg_lake.png', // Lotus lake mist
+    'assets/images/bg_bamboo.png', // Bamboo forest
     'assets/images/bg5.png', // Bamboo & Lotus
     'assets/images/bg6.png', // Moonlight night
   ];
 
-  // Presets categorized for seniors
+  // Presets categorized for seniors (6 Rich Categories, 38 Heart-warming Sentences)
   final Map<String, List<String>> _presetCategories = {
-    '🌅 아침 인사': [
+    '🌅 아침 인사 & 덕담': [
       "좋은 아침입니다! 오늘도 희망차고 활기찬 하루 되세요 ☀️",
       "오늘 하루도 감사와 기쁨이 넘치시길 기도합니다 🌸",
       "상쾌한 아침! 웃음꽃 피는 행복한 하루 보내세요 😊",
-      "복되고 좋은 아침, 언제나 당신을 응원합니다! 🙏",
-      "오늘도 안녕한 하루, 따뜻한 마음을 전합니다 💞",
+      "복되고 좋은 아침, 언제나 당신을 마음 깊이 응원합니다! 🙏",
+      "오늘도 안녕하고 평안한 하루 되세요, 따뜻한 마음을 전합니다 💞",
+      "새 아침이 열렸습니다. 오늘도 행복의 꽃을 피워보세요 🌸",
+      "당신이 있어 세상이 더욱 따뜻합니다. 좋은 하루 보내세요 ✨",
+      "아침의 맑은 공기처럼 기분 좋은 일들만 가득하길 🍃",
     ],
-    '💖 건강 & 행복': [
+    '💖 건강 & 무병장수': [
       "첫째도 건강! 둘째도 건강! 오늘 하루도 무병장수하세요 💪",
-      "마음은 청춘! 기분 좋은 일만 가득한 날 되세요 🌿",
-      "소중한 사람들과 맛있는 음식 드시고 행복하세요 🍚🌸",
-      "몸도 마음도 평안하고 따뜻한 하루 보내세요 🍵",
-      "당신의 미소가 온 세상을 환하게 만듭니다 ✨",
+      "마음은 청춘! 기분 좋은 웃음과 건강이 함께하는 날 되세요 🌿",
+      "소중한 분들과 맛있는 음식 드시고 항상 만수무강하세요 🍚🌸",
+      "몸도 마음도 무탈하고 평안한 하루 되시길 기도합니다 🍵",
+      "당신의 맑은 미소가 온 세상을 환하게 밝힙니다 ✨",
+      "매일매일 더 건강해지시고 활기찬 날들 보내세요 🌿",
+      "건강이 최고의 자산입니다. 오늘 하루도 소중히 챙기세요 💪",
     ],
     '🍀 응원 & 격려': [
-      "당신이 있어 참 좋습니다! 오늘도 힘내세요 👍",
-      "꿈꾸는 모든 일들이 이루어지는 축복의 하루 되세요 ✨",
-      "오늘 하루도 수고 많으셨습니다. 당신은 최고입니다 ⭐",
-      "늘 변함없이 곁에 계셔주셔서 감사합니다 ❤️",
-      "오늘도 당신의 앞날에 꽃길만 가득하길 🌸🌼",
+      "당신이 있어 참 든든하고 좋습니다! 오늘도 힘내세요 👍",
+      "꿈꾸고 바라는 모든 일들이 잘 이루어지는 축복의 날 되세요 ✨",
+      "오늘 하루도 수고 많으셨습니다. 당신은 최고의 존재입니다 ⭐",
+      "늘 변함없이 곁에 계셔주셔서 진심으로 감사합니다 ❤️",
+      "오늘도 당신이 걷는 길마다 향기로운 꽃길만 가득하길 🌸🌼",
+      "어려운 일도 슬기롭게 잘 지나갈 것입니다. 힘내세요! 🔥",
+      "당신의 노력을 항상 마음 깊이 응원합니다. 파이팅! 👏",
     ],
-    '📜 오늘의 명언': [
+    '📜 오늘의 명언 & 지혜': [
       "가장 보람찬 날은 웃음으로 가득 찬 날이다.",
       "행복은 멀리 있지 않고 내 마음속에 있습니다.",
       "오늘이라는 선물에 감사하며 기쁘게 살아가자.",
       "웃으며 사는 인생이 가장 성공한 인생입니다.",
       "사랑하며 사는 삶에 슬픔이란 없습니다.",
+      "마음이 마음을 알아볼 때 비로소 참된 인연이 됩니다.",
+      "매일 만나는 소중한 하루하루가 삶의 가장 큰 기적입니다.",
+    ],
+    '🌙 저녁 & 안부 인사': [
+      "오늘 하루도 정말 수고 많으셨습니다. 편안한 밤 되세요 🌙",
+      "별빛처럼 고운 밤, 행복하고 예쁜 꿈 꾸시고 주무세요 ⭐",
+      "오늘의 지친 마음 내려놓고 따뜻하고 평안한 밤 맞이하세요 🛌",
+      "내일도 기분 좋은 상쾌한 아침으로 만나요 ✨",
+      "수고한 나 자신에게도 감사한 밤, 굿나잇 🌟",
+    ],
+    '🎂 축하 & 감사': [
+      "당신의 기쁜 날을 진심으로 함께 축하드립니다 🎉",
+      "베풀어주신 따뜻한 은혜와 사랑에 깊이 감사드립니다 💐",
+      "늘 좋은 기운 나누어 주셔서 감사합니다 ❤️",
+      "오늘처럼 특별하고 행복한 날, 축복이 가득하기를 🎂",
     ],
   };
 
-  String _selectedCategory = '🌅 아침 인사';
+  String _selectedCategory = '🌅 아침 인사 & 덕담';
   int _bgIndex = 0;
   double _fontSize = 32.0;
   Color _textColor = const Color(0xFFFFD700); // Golden Yellow
-  bool _showFrame = true;
+  
+  // Diverse Frame Styles (Gold, Silver, Rose Gold, Emerald, Ruby, Purple, None)
+  int _selectedFrameIndex = 0;
+  final List<Map<String, dynamic>> _frameStyles = const [
+    {'name': '✨ 금빛', 'color': Color(0xFFFFD700), 'width': 5.0},
+    {'name': '💎 은빛', 'color': Color(0xFFE0E0E0), 'width': 5.0},
+    {'name': '💖 로즈골드', 'color': Color(0xFFB76E79), 'width': 5.0},
+    {'name': '🌿 에메랄드', 'color': Color(0xFF00E676), 'width': 5.0},
+    {'name': '🍷 루비레드', 'color': Color(0xFFFF1744), 'width': 5.0},
+    {'name': '🔮 보라빛', 'color': Color(0xFFE040FB), 'width': 5.0},
+    {'name': '❌ 테두리 없음', 'color': null, 'width': 0.0},
+  ];
   final String _selectedFontFamily = 'Jua';
 
   final List<Map<String, dynamic>> _expandedColors = const [
@@ -351,8 +386,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: _showFrame
-                            ? Border.all(color: const Color(0xFFFFD700), width: 5)
+                        border: _frameStyles[_selectedFrameIndex]['color'] != null
+                            ? Border.all(
+                                color: _frameStyles[_selectedFrameIndex]['color'],
+                                width: _frameStyles[_selectedFrameIndex]['width'],
+                              )
                             : null,
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -386,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Column(
                     children: [
-                      // Size & Color Controls
+                      // Size Controls
                       Row(
                         children: [
                           const Text('글자 크기: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -408,22 +446,45 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                           ),
                           const Spacer(),
-                          // Frame Toggle
-                          TextButton.icon(
-                            icon: Icon(
-                              _showFrame ? Icons.check_box : Icons.check_box_outline_blank,
-                              color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade900,
-                            ),
-                            label: Text(
-                              '금빛 테두리',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black87,
+                        ],
+                      ),
+                      const Divider(height: 12),
+                      // Frame Style Selector
+                      Row(
+                        children: [
+                          const Text('테두리 장식: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(_frameStyles.length, (index) {
+                                  final frame = _frameStyles[index];
+                                  final isSelected = _selectedFrameIndex == index;
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                                    child: ChoiceChip(
+                                      label: Text(frame['name']),
+                                      selected: isSelected,
+                                      selectedColor: isDark ? Colors.amber.withAlpha(80) : const Color(0xFFFEE500),
+                                      labelStyle: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                        color: isSelected
+                                            ? (isDark ? const Color(0xFFFFD700) : const Color(0xFF8B0000))
+                                            : (isDark ? Colors.white70 : Colors.black87),
+                                      ),
+                                      onSelected: (selected) {
+                                        if (selected) {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _selectedFrameIndex = index);
+                                        }
+                                      },
+                                    ),
+                                  );
+                                }),
                               ),
                             ),
-                            onPressed: () {
-                              setState(() => _showFrame = !_showFrame);
-                            },
                           ),
                         ],
                       ),

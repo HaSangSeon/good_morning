@@ -20,24 +20,29 @@ class AdService {
   }
 
   void loadInterstitialAd() {
-    if (_isAdLoading || interstitialAdUnitId.isEmpty) return;
+    try {
+      if (_isAdLoading || interstitialAdUnitId.isEmpty) return;
 
-    _isAdLoading = true;
-    InterstitialAd.load(
-      adUnitId: interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (InterstitialAd ad) {
-          _interstitialAd = ad;
-          _isAdLoading = false;
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          debugPrint('InterstitialAd failed to load: $error');
-          _interstitialAd = null;
-          _isAdLoading = false;
-        },
-      ),
-    );
+      _isAdLoading = true;
+      InterstitialAd.load(
+        adUnitId: interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            _interstitialAd = ad;
+            _isAdLoading = false;
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            debugPrint('InterstitialAd failed to load: $error');
+            _interstitialAd = null;
+            _isAdLoading = false;
+          },
+        ),
+      );
+    } catch (e) {
+      debugPrint('Ad load exception: $e');
+      _isAdLoading = false;
+    }
   }
 
   void showInterstitialAd({required VoidCallback onAdDismissed}) {

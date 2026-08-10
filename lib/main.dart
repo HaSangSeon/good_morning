@@ -5,7 +5,11 @@ import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
+  try {
+    await MobileAds.instance.initialize();
+  } catch (e) {
+    debugPrint('AdMob Init Exception: $e');
+  }
   await ThemeService().init();
   runApp(const MyApp());
 }

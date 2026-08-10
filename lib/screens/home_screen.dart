@@ -72,13 +72,23 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showFrame = true;
   final String _selectedFontFamily = 'Jua';
 
-  final List<Color> _colorPalette = [
-    const Color(0xFFFFD700), // Gold
-    Colors.white,            // White
-    const Color(0xFFFFFF00), // Bright Yellow
-    const Color(0xFFFF4081), // Pink Rose
-    const Color(0xFF00E676), // Bright Green
-    const Color(0xFFFF1744), // Bright Red
+  final List<Map<String, dynamic>> _expandedColors = const [
+    {'name': '황금색', 'color': Color(0xFFFFD700)},
+    {'name': '순백색', 'color': Colors.white},
+    {'name': '선명 노랑', 'color': Color(0xFFFFFF00)},
+    {'name': '연황금 샴페인', 'color': Color(0xFFFFE082)},
+    {'name': '화려한 장미', 'color': Color(0xFFFF1744)},
+    {'name': '사랑스런 핑크', 'color': Color(0xFFFF4081)},
+    {'name': '정열 주황', 'color': Color(0xFFFF5722)},
+    {'name': '은은한 연주황', 'color': Color(0xFFFFB74D)},
+    {'name': '싱싱 에메랄드', 'color': Color(0xFF00E676)},
+    {'name': '연두빛 싹', 'color': Color(0xFFAEEA00)},
+    {'name': '청량 하늘색', 'color': Color(0xFF00E5FF)},
+    {'name': '딥 오션 블루', 'color': Color(0xFF2979FF)},
+    {'name': '고급 보라', 'color': Color(0xFFE040FB)},
+    {'name': '라벤더 퍼플', 'color': Color(0xFFB388FF)},
+    {'name': '칠흑 검정', 'color': Color(0xFF111111)},
+    {'name': '딥 브라운', 'color': Color(0xFF3E2723)},
   ];
 
   @override
@@ -418,43 +428,80 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const Divider(height: 12),
-                      // Text Colors
+                      // Text Colors Row with 16 Colors + Full Palette Button
                       Row(
                         children: [
                           const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 4),
                           Expanded(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: _colorPalette.map((color) {
-                                  final isSelected = _textColor == color;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      setState(() => _textColor = color);
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: color,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isSelected ? Colors.black : Colors.grey.shade400,
-                                          width: isSelected ? 3 : 1,
+                                children: [
+                                  ..._expandedColors.map((item) {
+                                    final Color color = item['color'];
+                                    final isSelected = _textColor == color;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _textColor = color);
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                                        width: 34,
+                                        height: 34,
+                                        decoration: BoxDecoration(
+                                          color: color,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade400,
+                                            width: isSelected ? 3.5 : 1,
+                                          ),
+                                          boxShadow: const [
+                                            BoxShadow(color: Colors.black12, blurRadius: 2),
+                                          ],
                                         ),
-                                        boxShadow: const [
-                                          BoxShadow(color: Colors.black12, blurRadius: 2),
+                                        child: isSelected
+                                            ? Icon(
+                                                Icons.check,
+                                                size: 20,
+                                                color: (color == Colors.white || color == const Color(0xFFFFFF00) || color == const Color(0xFFFFE082))
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                              )
+                                            : null,
+                                      ),
+                                    );
+                                  }),
+                                  const SizedBox(width: 4),
+                                  // Palette Dialog Button
+                                  InkWell(
+                                    onTap: () => _showColorPickerDialog(context),
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.amber.withAlpha(40) : Colors.pink.shade50,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.palette, size: 16, color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '전체 16색상',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60),
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                      child: isSelected
-                                          ? Icon(Icons.check, size: 18, color: color == Colors.white ? Colors.black : Colors.white)
-                                          : null,
                                     ),
-                                  );
-                                }).toList(),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -559,8 +606,120 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
-extension ColorsLight on Colors {
-  static Color get purpleLight => const Color(0xFFCE93D8);
+  void _showColorPickerDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.palette, color: Color(0xFFD81B60)),
+                  const SizedBox(width: 8),
+                  Text(
+                    '마음에 드는 글자 색상 선택',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: _expandedColors.length,
+                  itemBuilder: (context, index) {
+                    final item = _expandedColors[index];
+                    final Color color = item['color'];
+                    final String name = item['name'];
+                    final isSelected = _textColor == color;
+
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _textColor = color);
+                        Navigator.pop(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade300,
+                                width: isSelected ? 4 : 1.5,
+                              ),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                              ],
+                            ),
+                            child: isSelected
+                                ? Icon(
+                                    Icons.check,
+                                    size: 24,
+                                    color: (color == Colors.white || color == const Color(0xFFFFFF00) || color == const Color(0xFFFFE082))
+                                        ? Colors.black
+                                        : Colors.white,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? (isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60))
+                                  : (isDark ? Colors.grey.shade300 : Colors.black87),
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

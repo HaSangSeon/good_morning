@@ -259,480 +259,493 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 1. Category Selector (Tabs)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _presetCategories.keys.map((category) {
-                    final isSelected = category == _selectedCategory;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: FilterChip(
-                        selected: isSelected,
-                        label: Text(
-                          category,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected
-                                ? Colors.white
-                                : (isDark ? Colors.grey.shade200 : Colors.black87),
+      body: Column(
+        children: [
+          // FIXED STICKY TOP: Live Canvas Preview (Always visible while scrolling controls below!)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 260),
+                child: Screenshot(
+                  controller: _screenshotController,
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                        image: DecorationImage(
+                          image: AssetImage(_bgImages[_bgIndex]),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: _borderColor != null
+                              ? Border.all(
+                                  color: _borderColor!,
+                                  width: 5.0,
+                                )
+                              : null,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withAlpha(30),
+                              Colors.transparent,
+                              Colors.black.withAlpha(50),
+                            ],
                           ),
                         ),
-                        selectedColor: isDark ? const Color(0xFF8E24AA) : const Color(0xFFD81B60),
-                        backgroundColor: isDark ? const Color(0xFF262636) : Colors.white,
-                        elevation: 2,
-                        onSelected: (selected) {
-                          if (selected) {
-                            HapticFeedback.selectionClick();
-                            setState(() {
-                              _selectedCategory = category;
-                              final catList = _presetCategories[category] ?? [];
-                              if (catList.isNotEmpty) {
-                                _textController.text = catList.first;
+                        alignment: Alignment.center,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            _textController.text,
+                            textAlign: TextAlign.center,
+                            style: _getAppliedTextStyle(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // SCROLLABLE BOTTOM: Toolbars, Categories, Text Fields & Buttons
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 1. Category Selector (Tabs)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _presetCategories.keys.map((category) {
+                        final isSelected = category == _selectedCategory;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: FilterChip(
+                            selected: isSelected,
+                            label: Text(
+                              category,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDark ? Colors.grey.shade200 : Colors.black87),
+                              ),
+                            ),
+                            selectedColor: isDark ? const Color(0xFF8E24AA) : const Color(0xFFD81B60),
+                            backgroundColor: isDark ? const Color(0xFF262636) : Colors.white,
+                            elevation: 2,
+                            onSelected: (selected) {
+                              if (selected) {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _selectedCategory = category;
+                                  final catList = _presetCategories[category] ?? [];
+                                  if (catList.isNotEmpty) {
+                                    _textController.text = catList.first;
+                                  }
+                                });
                               }
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 10),
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
 
-              // 2. Preset Quotes Horizontal Scroll
-              SizedBox(
-                height: 42,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: (_presetCategories[_selectedCategory] ?? []).length,
-                  itemBuilder: (context, index) {
-                    final text = (_presetCategories[_selectedCategory] ?? [])[index];
-                    return Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      child: ActionChip(
-                        avatar: const Icon(Icons.touch_app, size: 16, color: Colors.amber),
-                        label: Text(
-                          text,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.grey.shade200 : Colors.black87,
+                  // 2. Preset Quotes Horizontal Scroll
+                  SizedBox(
+                    height: 42,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: (_presetCategories[_selectedCategory] ?? []).length,
+                      itemBuilder: (context, index) {
+                        final text = (_presetCategories[_selectedCategory] ?? [])[index];
+                        return Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          child: ActionChip(
+                            avatar: const Icon(Icons.touch_app, size: 16, color: Colors.amber),
+                            label: Text(
+                              text,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.grey.shade200 : Colors.black87,
+                              ),
+                            ),
+                            backgroundColor: isDark ? const Color(0xFF2E2E3E) : Colors.amber.shade50,
+                            side: BorderSide(
+                              color: isDark ? Colors.amber.shade700 : Colors.amber.shade300,
+                            ),
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _textController.text = text;
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // 3. Quick Toolbar: Size, Border Color, Text Color
+                  Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Column(
+                        children: [
+                          // Size Controls
+                          Row(
+                            children: [
+                              const Text('글자 크기: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline, color: Colors.deepOrange),
+                                onPressed: () {
+                                  if (_fontSize > 20) {
+                                    setState(() => _fontSize -= 2);
+                                  }
+                                },
+                              ),
+                              Text('${_fontSize.toInt()}pt', style: const TextStyle(fontWeight: FontWeight.bold)),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline, color: Colors.deepOrange),
+                                onPressed: () {
+                                  if (_fontSize < 50) {
+                                    setState(() => _fontSize += 2);
+                                  }
+                                },
+                              ),
+                              const Spacer(),
+                            ],
+                          ),
+                          const Divider(height: 12),
+                          // Frame Style Selector (Identical to Text Color Selector)
+                          Row(
+                            children: [
+                              const Text('테두리 장식: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      // ❌ 테두리 없음 Toggle
+                                      GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _borderColor = null);
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: _borderColor == null
+                                                ? (isDark ? Colors.red.withAlpha(80) : Colors.red.shade100)
+                                                : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: _borderColor == null ? Colors.red : Colors.grey.shade400,
+                                              width: _borderColor == null ? 2 : 1,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '❌ 없음',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: _borderColor == null ? FontWeight.bold : FontWeight.normal,
+                                              color: _borderColor == null ? Colors.red : (isDark ? Colors.white70 : Colors.black87),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      // 5 Main Border Color Circles
+                                      ..._defaultColors.map((item) {
+                                        final Color color = item['color'];
+                                        final isSelected = _borderColor == color;
+                                        return GestureDetector(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(() => _borderColor = color);
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                                            width: 34,
+                                            height: 34,
+                                            decoration: BoxDecoration(
+                                              color: color,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade400,
+                                                width: isSelected ? 3.5 : 1,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(color: Colors.black12, blurRadius: 2),
+                                              ],
+                                            ),
+                                            child: isSelected
+                                                ? Icon(
+                                                    Icons.check,
+                                                    size: 20,
+                                                    color: (color == Colors.white) ? Colors.black : Colors.white,
+                                                  )
+                                                : null,
+                                          ),
+                                        );
+                                      }),
+                                      const SizedBox(width: 6),
+                                      // Custom RGB Frame Color Picker Button
+                                      InkWell(
+                                        onTap: () => _showRGBColorPicker(context, isBorder: true),
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(
+                                              colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
+                                            ),
+                                            borderRadius: BorderRadius.circular(20),
+                                            boxShadow: const [
+                                              BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(2),
+                                                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                                child: const Icon(Icons.crop_square, size: 14, color: Colors.black87),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              const Text(
+                                                '🎨 RGB 테두리 선택',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 12),
+                          // Text Colors: 5 Main Colors + '🎨 RGB 글자 선택' Button
+                          Row(
+                            children: [
+                              const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      ..._defaultColors.map((item) {
+                                        final Color color = item['color'];
+                                        final isSelected = _textColor == color;
+                                        return GestureDetector(
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(() => _textColor = color);
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                                            width: 34,
+                                            height: 34,
+                                            decoration: BoxDecoration(
+                                              color: color,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade400,
+                                                width: isSelected ? 3.5 : 1,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(color: Colors.black12, blurRadius: 2),
+                                              ],
+                                            ),
+                                            child: isSelected
+                                                ? Icon(
+                                                    Icons.check,
+                                                    size: 20,
+                                                    color: (color == Colors.white) ? Colors.black : Colors.white,
+                                                  )
+                                                : null,
+                                          ),
+                                        );
+                                      }),
+                                      const SizedBox(width: 6),
+                                      // Custom RGB Text Color Picker Button
+                                      InkWell(
+                                        onTap: () => _showRGBColorPicker(context, isBorder: false),
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(
+                                              colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
+                                            ),
+                                            borderRadius: BorderRadius.circular(20),
+                                            boxShadow: const [
+                                              BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(2),
+                                                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                                child: const Icon(Icons.colorize, size: 14, color: Colors.black87),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              const Text(
+                                                '🎨 RGB 글자 선택',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // 4. Custom Text Field
+                  TextField(
+                    controller: _textController,
+                    decoration: InputDecoration(
+                      labelText: '✍️ 원하는 문구 직접 쓰기',
+                      labelStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? const Color(0xFFFFD700) : Colors.deepOrange,
+                      ),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: isDark ? Colors.amber : Colors.orange),
+                      ),
+                    ),
+                    maxLines: 2,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 5. Change Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _changeRandomQuote,
+                          icon: Icon(Icons.casino, color: isDark ? Colors.purple.shade200 : Colors.purple),
+                          label: const Text('문구 무작위', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark ? const Color(0xFF2D233C) : Colors.purple.shade50,
+                            foregroundColor: isDark ? Colors.purple.shade100 : Colors.purple.shade900,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
-                        backgroundColor: isDark ? const Color(0xFF2E2E3E) : Colors.amber.shade50,
-                        side: BorderSide(
-                          color: isDark ? Colors.amber.shade700 : Colors.amber.shade300,
-                        ),
-                        onPressed: () {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            _textController.text = text;
-                          });
-                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 14),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _changeBackground,
+                          icon: const Icon(Icons.photo_library, color: Colors.teal),
+                          label: const Text('배경 변경', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark ? const Color(0xFF1B3332) : Colors.teal.shade50,
+                            foregroundColor: isDark ? Colors.teal.shade100 : Colors.teal.shade900,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
 
-              // 3. Canvas Preview (Screenshot Widget - Responsive AspectRatio)
-              Screenshot(
-                controller: _screenshotController,
-                child: AspectRatio(
-                  aspectRatio: 1.0,
-                  child: Container(
+                  // 6. Main Action Button: Share / Save
+                  Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
-                          blurRadius: 10,
+                          blurRadius: 8,
                           offset: Offset(0, 4),
                         ),
                       ],
-                      image: DecorationImage(
-                        image: AssetImage(_bgImages[_bgIndex]),
-                        fit: BoxFit.cover,
-                      ),
                     ),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: _borderColor != null
-                            ? Border.all(
-                                color: _borderColor!,
-                                width: 5.0,
-                              )
-                            : null,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withAlpha(30),
-                            Colors.transparent,
-                            Colors.black.withAlpha(50),
-                          ],
-                        ),
+                    child: ElevatedButton.icon(
+                      onPressed: _shareImage,
+                      icon: const Icon(Icons.share, size: 30, color: Colors.black87),
+                      label: const Text(
+                        '📲 카카오톡 공유 / 갤러리 저장',
+                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
-                      alignment: Alignment.center,
-                      child: SingleChildScrollView(
-                        child: Text(
-                          _textController.text,
-                          textAlign: TextAlign.center,
-                          style: _getAppliedTextStyle(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFEE500), // Kakao Yellow
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: Color(0xFFFFD700), width: 2),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // 4. Quick Toolbar: Size, Color, Frame, Random
-              Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Column(
-                    children: [
-                      // Size Controls
-                      Row(
-                        children: [
-                          const Text('글자 크기: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline, color: Colors.deepOrange),
-                            onPressed: () {
-                              if (_fontSize > 20) {
-                                setState(() => _fontSize -= 2);
-                              }
-                            },
-                          ),
-                          Text('${_fontSize.toInt()}pt', style: const TextStyle(fontWeight: FontWeight.bold)),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle_outline, color: Colors.deepOrange),
-                            onPressed: () {
-                              if (_fontSize < 50) {
-                                setState(() => _fontSize += 2);
-                              }
-                            },
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                      const Divider(height: 12),
-                      // Frame Style Selector (Identical to Text Color Selector)
-                      Row(
-                        children: [
-                          const Text('테두리 장식: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  // ❌ 테두리 없음 Toggle
-                                  GestureDetector(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      setState(() => _borderColor = null);
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: _borderColor == null
-                                            ? (isDark ? Colors.red.withAlpha(80) : Colors.red.shade100)
-                                            : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: _borderColor == null ? Colors.red : Colors.grey.shade400,
-                                          width: _borderColor == null ? 2 : 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        '❌ 없음',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: _borderColor == null ? FontWeight.bold : FontWeight.normal,
-                                          color: _borderColor == null ? Colors.red : (isDark ? Colors.white70 : Colors.black87),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  // 5 Main Border Color Circles
-                                  ..._defaultColors.map((item) {
-                                    final Color color = item['color'];
-                                    final isSelected = _borderColor == color;
-                                    return GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _borderColor = color);
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                                        width: 34,
-                                        height: 34,
-                                        decoration: BoxDecoration(
-                                          color: color,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade400,
-                                            width: isSelected ? 3.5 : 1,
-                                          ),
-                                          boxShadow: const [
-                                            BoxShadow(color: Colors.black12, blurRadius: 2),
-                                          ],
-                                        ),
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                size: 20,
-                                                color: (color == Colors.white) ? Colors.black : Colors.white,
-                                              )
-                                            : null,
-                                      ),
-                                    );
-                                  }),
-                                  const SizedBox(width: 6),
-                                  // Custom RGB Frame Color Picker Button
-                                  InkWell(
-                                    onTap: () => _showRGBColorPicker(context, isBorder: true),
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: const [
-                                          BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
-                                        ],
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(2),
-                                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                                            child: const Icon(Icons.crop_square, size: 14, color: Colors.black87),
-                                          ),
-                                          const SizedBox(width: 6),
-                                          const Text(
-                                            '🎨 RGB 테두리 선택',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 12),
-                      // Text Colors: 5 Main Colors + '🎨 RGB 글자 선택' Button
-                      Row(
-                        children: [
-                          const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  ..._defaultColors.map((item) {
-                                    final Color color = item['color'];
-                                    final isSelected = _textColor == color;
-                                    return GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _textColor = color);
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                                        width: 34,
-                                        height: 34,
-                                        decoration: BoxDecoration(
-                                          color: color,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade400,
-                                            width: isSelected ? 3.5 : 1,
-                                          ),
-                                          boxShadow: const [
-                                            BoxShadow(color: Colors.black12, blurRadius: 2),
-                                          ],
-                                        ),
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                size: 20,
-                                                color: (color == Colors.white) ? Colors.black : Colors.white,
-                                              )
-                                            : null,
-                                      ),
-                                    );
-                                  }),
-                                  const SizedBox(width: 6),
-                                  // Custom RGB Text Color Picker Button
-                                  InkWell(
-                                    onTap: () => _showRGBColorPicker(context, isBorder: false),
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: const [
-                                          BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
-                                        ],
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(2),
-                                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                                            child: const Icon(Icons.colorize, size: 14, color: Colors.black87),
-                                          ),
-                                          const SizedBox(width: 6),
-                                          const Text(
-                                            '🎨 RGB 글자 선택',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // 5. Custom Text Field
-              TextField(
-                controller: _textController,
-                decoration: InputDecoration(
-                  labelText: '✍️ 원하는 문구 직접 쓰기',
-                  labelStyle: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFFFFD700) : Colors.deepOrange,
-                  ),
-                  filled: true,
-                  fillColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: isDark ? Colors.amber : Colors.orange),
-                  ),
-                ),
-                maxLines: 2,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                onChanged: (value) => setState(() {}),
-              ),
-              const SizedBox(height: 12),
-
-              // 6. Change Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _changeRandomQuote,
-                      icon: Icon(Icons.casino, color: isDark ? Colors.purple.shade200 : Colors.purple),
-                      label: const Text('문구 무작위', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? const Color(0xFF2D233C) : Colors.purple.shade50,
-                        foregroundColor: isDark ? Colors.purple.shade100 : Colors.purple.shade900,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _changeBackground,
-                      icon: const Icon(Icons.photo_library, color: Colors.teal),
-                      label: const Text('배경 변경', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? const Color(0xFF1B3332) : Colors.teal.shade50,
-                        foregroundColor: isDark ? Colors.teal.shade100 : Colors.teal.shade900,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 18),
-
-              // 7. Main Action Button: Share / Save
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ElevatedButton.icon(
-                  onPressed: _shareImage,
-                  icon: const Icon(Icons.share, size: 30, color: Colors.black87),
-                  label: const Text(
-                    '📲 카카오톡 공유 / 갤러리 저장',
-                    style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFEE500), // Kakao Yellow
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(color: Color(0xFFFFD700), width: 2),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

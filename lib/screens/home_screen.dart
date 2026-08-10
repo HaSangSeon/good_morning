@@ -570,7 +570,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                               const SizedBox(width: 6),
                                               const Text(
-                                                '🎨 RGB 테두리 선택',
+                                                '🎨 테두리 색상 선택',
                                                 style: TextStyle(
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.bold,
@@ -589,7 +589,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                           const Divider(height: 12),
-                          // Text Colors: 5 Main Colors + '🎨 RGB 글자 선택' Button
+                          // Text Colors: 5 Main Colors + '🎨 글자 색상 선택' Button
                           Row(
                             children: [
                               const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -633,7 +633,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         );
                                       }),
                                       const SizedBox(width: 6),
-                                      // Custom RGB Text Color Picker Button
+                                      // Custom Palette Text Color Picker Button
                                       InkWell(
                                         onTap: () => _showRGBColorPicker(context, isBorder: false),
                                         borderRadius: BorderRadius.circular(20),
@@ -657,7 +657,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                               const SizedBox(width: 6),
                                               const Text(
-                                                '🎨 RGB 글자 선택',
+                                                '🎨 글자 색상 선택',
                                                 style: TextStyle(
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.bold,
@@ -795,7 +795,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Icon(isBorder ? Icons.crop_square : Icons.palette, color: const Color(0xFFD81B60), size: 24),
               const SizedBox(width: 8),
               Text(
-                isBorder ? '🖼️ RGB 테두리 색상 선택' : '🎨 RGB 글자 색상 선택',
+                isBorder ? '🖼️ 테두리 색상 자유 선택' : '🎨 글자 색상 자유 선택',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

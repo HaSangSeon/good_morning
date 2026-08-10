@@ -6,7 +6,6 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../services/ad_service.dart';
 import '../services/theme_service.dart';
 import '../widgets/help_dialog.dart';
@@ -95,25 +94,47 @@ class _HomeScreenState extends State<HomeScreen> {
   double _fontSize = 32.0;
   Color _textColor = const Color(0xFFFFD700); // Golden Yellow
   
-  // Diverse Frame Styles (Gold, Silver, Rose Gold, Emerald, Ruby, Purple, None)
+  // Diverse Frame Styles
   int _selectedFrameIndex = 0;
   final List<Map<String, dynamic>> _frameStyles = const [
-    {'name': '✨ 금빛', 'color': Color(0xFFFFD700), 'width': 5.0},
-    {'name': '💎 은빛', 'color': Color(0xFFE0E0E0), 'width': 5.0},
-    {'name': '💖 로즈골드', 'color': Color(0xFFB76E79), 'width': 5.0},
-    {'name': '🌿 에메랄드', 'color': Color(0xFF00E676), 'width': 5.0},
-    {'name': '🍷 루비레드', 'color': Color(0xFFFF1744), 'width': 5.0},
-    {'name': '🔮 보라빛', 'color': Color(0xFFE040FB), 'width': 5.0},
+    {'name': '✨ 럭셔리 금빛', 'color': Color(0xFFFFD700), 'width': 5.0},
+    {'name': '💎 엘레강스 은빛', 'color': Color(0xFFE0E0E0), 'width': 5.0},
+    {'name': '💖 로맨틱 로즈골드', 'color': Color(0xFFB76E79), 'width': 5.0},
+    {'name': '🌿 청정 에메랄드', 'color': Color(0xFF00E676), 'width': 5.0},
+    {'name': '🍷 정열 루비레드', 'color': Color(0xFFFF1744), 'width': 5.0},
+    {'name': '🔮 신비 보라빛', 'color': Color(0xFFE040FB), 'width': 5.0},
+    {'name': '🍊 따스한 귤색', 'color': Color(0xFFFF9800), 'width': 5.0},
     {'name': '❌ 테두리 없음', 'color': null, 'width': 0.0},
   ];
   final String _selectedFontFamily = 'Jua';
 
+  // 5 Main Fast Text Colors
   final List<Map<String, dynamic>> _defaultColors = const [
     {'name': '황금색', 'color': Color(0xFFFFD700)},
     {'name': '순백색', 'color': Colors.white},
-    {'name': '화려한 장미', 'color': Color(0xFFFF1744)},
-    {'name': '사랑스런 핑크', 'color': Color(0xFFFF4081)},
+    {'name': '장미 빨강', 'color': Color(0xFFFF1744)},
+    {'name': '코랄 핑크', 'color': Color(0xFFFF4081)},
+    {'name': '에메랄드', 'color': Color(0xFF00E676)},
+  ];
+
+  // All 16 Simple Senior Color Palette
+  final List<Map<String, dynamic>> _allColors = const [
+    {'name': '황금색', 'color': Color(0xFFFFD700)},
+    {'name': '순백색', 'color': Colors.white},
+    {'name': '햇살 노랑', 'color': Color(0xFFFFFF00)},
+    {'name': '샴페인 골드', 'color': Color(0xFFFFE082)},
+    {'name': '장미 빨강', 'color': Color(0xFFFF1744)},
+    {'name': '코랄 핑크', 'color': Color(0xFFFF4081)},
+    {'name': '정열 주황', 'color': Color(0xFFFF5722)},
+    {'name': '은은한 살구', 'color': Color(0xFFFFB74D)},
     {'name': '싱싱 에메랄드', 'color': Color(0xFF00E676)},
+    {'name': '연두 새싹', 'color': Color(0xFFAEEA00)},
+    {'name': '청량 하늘', 'color': Color(0xFF00E5FF)},
+    {'name': '딥 오션 블루', 'color': Color(0xFF2979FF)},
+    {'name': '고급 보라', 'color': Color(0xFFE040FB)},
+    {'name': '라벤더 퍼플', 'color': Color(0xFFB388FF)},
+    {'name': '칠흑 검정', 'color': Color(0xFF111111)},
+    {'name': '딥 브라운', 'color': Color(0xFF3E2723)},
   ];
 
   @override
@@ -443,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const Divider(height: 12),
-                      // Frame Style Selector
+                      // Frame Style Selector: 4 Main Chips + '🖼️ 테두리 모양 고르기' Button
                       Row(
                         children: [
                           const Text('테두리 장식: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -452,38 +473,68 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: List.generate(_frameStyles.length, (index) {
-                                  final frame = _frameStyles[index];
-                                  final isSelected = _selectedFrameIndex == index;
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                                    child: ChoiceChip(
-                                      label: Text(frame['name']),
-                                      selected: isSelected,
-                                      selectedColor: isDark ? Colors.amber.withAlpha(80) : const Color(0xFFFEE500),
-                                      labelStyle: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                        color: isSelected
-                                            ? (isDark ? const Color(0xFFFFD700) : const Color(0xFF8B0000))
-                                            : (isDark ? Colors.white70 : Colors.black87),
+                                children: [
+                                  ...List.generate(4, (index) {
+                                    final frame = _frameStyles[index];
+                                    final isSelected = _selectedFrameIndex == index;
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                                      child: ChoiceChip(
+                                        label: Text(frame['name']),
+                                        selected: isSelected,
+                                        selectedColor: isDark ? Colors.amber.withAlpha(80) : const Color(0xFFFEE500),
+                                        labelStyle: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          color: isSelected
+                                              ? (isDark ? const Color(0xFFFFD700) : const Color(0xFF8B0000))
+                                              : (isDark ? Colors.white70 : Colors.black87),
+                                        ),
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            HapticFeedback.selectionClick();
+                                            setState(() => _selectedFrameIndex = index);
+                                          }
+                                        },
                                       ),
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          HapticFeedback.selectionClick();
-                                          setState(() => _selectedFrameIndex = index);
-                                        }
-                                      },
+                                    );
+                                  }),
+                                  const SizedBox(width: 4),
+                                  // Frame Picker Modal Button
+                                  InkWell(
+                                    onTap: () => _showSimpleFramePicker(context),
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.amber.withAlpha(40) : Colors.amber.shade50,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade800),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.crop_square, size: 16, color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade900),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '🖼️ 테두리 모양 고르기',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? const Color(0xFFFFD700) : Colors.amber.shade900,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  );
-                                }),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ],
                       ),
                       const Divider(height: 12),
-                      // Text Colors: 5 Main Colors + Custom RGB Picker Button
+                      // Text Colors: 5 Main Colors + '🎨 더 많은 색상 보기' Button
                       Row(
                         children: [
                           const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -527,36 +578,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                     );
                                   }),
                                   const SizedBox(width: 6),
-                                  // Custom RGB Color Picker Button
+                                  // Simple Text Color Modal Picker Button
                                   InkWell(
-                                    onTap: () => _showRGBColorPicker(context),
+                                    onTap: () => _showSimpleColorPicker(context),
                                     borderRadius: BorderRadius.circular(20),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                       decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
-                                        ),
+                                        color: isDark ? Colors.pink.withAlpha(50) : Colors.pink.shade50,
                                         borderRadius: BorderRadius.circular(20),
-                                        boxShadow: const [
-                                          BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
-                                        ],
+                                        border: Border.all(color: isDark ? Colors.pinkAccent : const Color(0xFFD81B60)),
                                       ),
                                       child: Row(
                                         children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(2),
-                                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                                            child: const Icon(Icons.colorize, size: 14, color: Colors.black87),
-                                          ),
-                                          const SizedBox(width: 6),
-                                          const Text(
-                                            '🎨 RGB 색상 고르기',
+                                          Icon(Icons.palette, size: 16, color: isDark ? Colors.pinkAccent : const Color(0xFFD81B60)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '🎨 더 많은 색상 보기',
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
+                                              color: isDark ? Colors.pinkAccent : const Color(0xFFD81B60),
                                             ),
                                           ),
                                         ],
@@ -669,68 +711,241 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showRGBColorPicker(BuildContext context) {
+  // 1. Simple Senior-friendly Text Color Bottom Sheet
+  void _showSimpleColorPicker(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color tempColor = _textColor;
-
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
+      backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.colorize, color: Color(0xFFD81B60)),
-              const SizedBox(width: 8),
-              Text(
-                'RGB 나만의 색상 선택',
-                style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.palette, color: Color(0xFFD81B60), size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    '마음에 드는 글자 색상 선택',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: _allColors.length,
+                  itemBuilder: (context, index) {
+                    final item = _allColors[index];
+                    final Color color = item['color'];
+                    final String name = item['name'];
+                    final isSelected = _textColor == color;
+
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _textColor = color);
+                        Navigator.pop(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade300,
+                                width: isSelected ? 4 : 1.5,
+                              ),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                              ],
+                            ),
+                            child: isSelected
+                                ? Icon(
+                                    Icons.check,
+                                    size: 24,
+                                    color: (color == Colors.white || color == const Color(0xFFFFFF00) || color == const Color(0xFFFFE082))
+                                        ? Colors.black
+                                        : Colors.white,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? (isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60))
+                                  : (isDark ? Colors.grey.shade300 : Colors.black87),
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: tempColor,
-              onColorChanged: (Color color) {
-                tempColor = color;
-              },
-              colorPickerWidth: 260,
-              pickerAreaHeightPercent: 0.6,
-              enableAlpha: false,
-              displayThumbColor: true,
-              paletteType: PaletteType.hsvWithHue,
-              labelTypes: const [ColorLabelType.rgb, ColorLabelType.hex],
-              pickerAreaBorderRadius: BorderRadius.circular(12),
-            ),
+        );
+      },
+    );
+  }
+
+  // 2. Simple Senior-friendly Frame / Border Style Bottom Sheet
+  void _showSimpleFramePicker(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.crop_square, color: Colors.amber, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    '액자 테두리 모양 선택',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 2.5,
+                  ),
+                  itemCount: _frameStyles.length,
+                  itemBuilder: (context, index) {
+                    final frame = _frameStyles[index];
+                    final String name = frame['name'];
+                    final Color? color = frame['color'];
+                    final isSelected = _selectedFrameIndex == index;
+
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _selectedFrameIndex = index);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? (isDark ? Colors.amber.withAlpha(40) : Colors.amber.shade50)
+                              : (isDark ? const Color(0xFF2B2B3D) : Colors.grey.shade100),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected
+                                ? (isDark ? const Color(0xFFFFD700) : Colors.amber.shade900)
+                                : (color ?? Colors.grey.shade400),
+                            width: isSelected ? 2.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: color ?? Colors.transparent,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: color != null ? Colors.white : Colors.grey.shade500,
+                                  width: color != null ? 1.5 : 1,
+                                ),
+                              ),
+                              child: color == null
+                                  ? const Icon(Icons.close, size: 14, color: Colors.red)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: isSelected
+                                      ? (isDark ? const Color(0xFFFFD700) : Colors.amber.shade900)
+                                      : (isDark ? Colors.white : Colors.black87),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                '취소',
-                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade700, fontSize: 16),
-              ),
-            ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.check, size: 18),
-              label: const Text('이 색상 적용', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD81B60),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                setState(() => _textColor = tempColor);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );

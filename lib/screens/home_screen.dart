@@ -317,47 +317,51 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 14),
 
-              // 3. Canvas Preview (Screenshot Widget)
+              // 3. Canvas Preview (Screenshot Widget - Responsive AspectRatio)
               Screenshot(
                 controller: _screenshotController,
-                child: Container(
-                  height: 380,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                    image: DecorationImage(
-                      image: AssetImage(_bgImages[_bgIndex]),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                child: AspectRatio(
+                  aspectRatio: 1.0,
                   child: Container(
-                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      border: _showFrame
-                          ? Border.all(color: const Color(0xFFFFD700), width: 5)
-                          : null,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withAlpha(30),
-                          Colors.transparent,
-                          Colors.black.withAlpha(50),
-                        ],
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                      image: DecorationImage(
+                        image: AssetImage(_bgImages[_bgIndex]),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _textController.text,
-                      textAlign: TextAlign.center,
-                      style: _getAppliedTextStyle(),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: _showFrame
+                            ? Border.all(color: const Color(0xFFFFD700), width: 5)
+                            : null,
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withAlpha(30),
+                            Colors.transparent,
+                            Colors.black.withAlpha(50),
+                          ],
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: SingleChildScrollView(
+                        child: Text(
+                          _textController.text,
+                          textAlign: TextAlign.center,
+                          style: _getAppliedTextStyle(),
+                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -132,7 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.sharedTextNotifier != null && widget.sharedTextNotifier!.value.isNotEmpty) {
       _textController.text = widget.sharedTextNotifier!.value;
     } else {
-      _textController.text = _presetCategories['🌅 아침 인사']![0];
+      final defaultList = _presetCategories[_selectedCategory] ?? _presetCategories.values.first;
+      _textController.text = defaultList.first;
     }
     widget.sharedTextNotifier?.addListener(_onExternalTextChange);
     AdService().loadInterstitialAd();
@@ -161,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _changeRandomQuote() {
     HapticFeedback.lightImpact();
-    final list = _presetCategories[_selectedCategory]!;
+    final list = _presetCategories[_selectedCategory] ?? _presetCategories.values.first;
     final random = Random();
     int newIndex;
     do {
@@ -312,7 +313,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             HapticFeedback.selectionClick();
                             setState(() {
                               _selectedCategory = category;
-                              _textController.text = _presetCategories[category]![0];
+                              final catList = _presetCategories[category] ?? [];
+                              if (catList.isNotEmpty) {
+                                _textController.text = catList.first;
+                              }
                             });
                           }
                         },
@@ -328,9 +332,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 42,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _presetCategories[_selectedCategory]!.length,
+                  itemCount: (_presetCategories[_selectedCategory] ?? []).length,
                   itemBuilder: (context, index) {
-                    final text = _presetCategories[_selectedCategory]![index];
+                    final text = (_presetCategories[_selectedCategory] ?? [])[index];
                     return Container(
                       margin: const EdgeInsets.only(right: 8),
                       child: ActionChip(

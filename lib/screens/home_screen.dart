@@ -6,6 +6,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../services/ad_service.dart';
 import '../services/theme_service.dart';
 import '../widgets/help_dialog.dart';
@@ -107,23 +108,12 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   final String _selectedFontFamily = 'Jua';
 
-  final List<Map<String, dynamic>> _expandedColors = const [
+  final List<Map<String, dynamic>> _defaultColors = const [
     {'name': '황금색', 'color': Color(0xFFFFD700)},
     {'name': '순백색', 'color': Colors.white},
-    {'name': '선명 노랑', 'color': Color(0xFFFFFF00)},
-    {'name': '연황금 샴페인', 'color': Color(0xFFFFE082)},
     {'name': '화려한 장미', 'color': Color(0xFFFF1744)},
     {'name': '사랑스런 핑크', 'color': Color(0xFFFF4081)},
-    {'name': '정열 주황', 'color': Color(0xFFFF5722)},
-    {'name': '은은한 연주황', 'color': Color(0xFFFFB74D)},
     {'name': '싱싱 에메랄드', 'color': Color(0xFF00E676)},
-    {'name': '연두빛 싹', 'color': Color(0xFFAEEA00)},
-    {'name': '청량 하늘색', 'color': Color(0xFF00E5FF)},
-    {'name': '딥 오션 블루', 'color': Color(0xFF2979FF)},
-    {'name': '고급 보라', 'color': Color(0xFFE040FB)},
-    {'name': '라벤더 퍼플', 'color': Color(0xFFB388FF)},
-    {'name': '칠흑 검정', 'color': Color(0xFF111111)},
-    {'name': '딥 브라운', 'color': Color(0xFF3E2723)},
   ];
 
   @override
@@ -493,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const Divider(height: 12),
-                      // Text Colors Row with 16 Colors + Full Palette Button
+                      // Text Colors: 5 Main Colors + Custom RGB Picker Button
                       Row(
                         children: [
                           const Text('글자 색상: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -503,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
-                                  ..._expandedColors.map((item) {
+                                  ..._defaultColors.map((item) {
                                     final Color color = item['color'];
                                     final isSelected = _textColor == color;
                                     return GestureDetector(
@@ -530,36 +520,43 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ? Icon(
                                                 Icons.check,
                                                 size: 20,
-                                                color: (color == Colors.white || color == const Color(0xFFFFFF00) || color == const Color(0xFFFFE082))
-                                                    ? Colors.black
-                                                    : Colors.white,
+                                                color: (color == Colors.white) ? Colors.black : Colors.white,
                                               )
                                             : null,
                                       ),
                                     );
                                   }),
-                                  const SizedBox(width: 4),
-                                  // Palette Dialog Button
+                                  const SizedBox(width: 6),
+                                  // Custom RGB Color Picker Button
                                   InkWell(
-                                    onTap: () => _showColorPickerDialog(context),
+                                    onTap: () => _showRGBColorPicker(context),
                                     borderRadius: BorderRadius.circular(20),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                                       decoration: BoxDecoration(
-                                        color: isDark ? Colors.amber.withAlpha(40) : Colors.pink.shade50,
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFFFF1744), Color(0xFFFFD700), Color(0xFF00E676), Color(0xFF29B6F6)],
+                                        ),
                                         borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60)),
+                                        boxShadow: const [
+                                          BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 1)),
+                                        ],
                                       ),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.palette, size: 16, color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60)),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '전체 16색상',
+                                          Container(
+                                            padding: const EdgeInsets.all(2),
+                                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                            child: const Icon(Icons.colorize, size: 14, color: Colors.black87),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          const Text(
+                                            '🎨 RGB 색상 고르기',
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.bold,
-                                              color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60),
+                                              color: Colors.white,
+                                              shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
                                             ),
                                           ),
                                         ],
@@ -672,117 +669,68 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showColorPickerDialog(BuildContext context) {
+  void _showRGBColorPicker(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.palette, color: Color(0xFFD81B60)),
-                  const SizedBox(width: 8),
-                  Text(
-                    '마음에 드는 글자 색상 선택',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Flexible(
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.9,
-                  ),
-                  itemCount: _expandedColors.length,
-                  itemBuilder: (context, index) {
-                    final item = _expandedColors[index];
-                    final Color color = item['color'];
-                    final String name = item['name'];
-                    final isSelected = _textColor == color;
+    Color tempColor = _textColor;
 
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _textColor = color);
-                        Navigator.pop(context);
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: color,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected ? (isDark ? Colors.amber : Colors.black) : Colors.grey.shade300,
-                                width: isSelected ? 4 : 1.5,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-                              ],
-                            ),
-                            child: isSelected
-                                ? Icon(
-                                    Icons.check,
-                                    size: 24,
-                                    color: (color == Colors.white || color == const Color(0xFFFFFF00) || color == const Color(0xFFFFE082))
-                                        ? Colors.black
-                                        : Colors.white,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              color: isSelected
-                                  ? (isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60))
-                                  : (isDark ? Colors.grey.shade300 : Colors.black87),
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              const Icon(Icons.colorize, color: Color(0xFFD81B60)),
+              const SizedBox(width: 8),
+              Text(
+                'RGB 나만의 색상 선택',
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
-              const SizedBox(height: 12),
             ],
           ),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: tempColor,
+              onColorChanged: (Color color) {
+                tempColor = color;
+              },
+              colorPickerWidth: 260,
+              pickerAreaHeightPercent: 0.6,
+              enableAlpha: false,
+              displayThumbColor: true,
+              paletteType: PaletteType.hsvWithHue,
+              labelTypes: const [ColorLabelType.rgb, ColorLabelType.hex],
+              pickerAreaBorderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                '취소',
+                style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade700, fontSize: 16),
+              ),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check, size: 18),
+              label: const Text('이 색상 적용', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD81B60),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                setState(() => _textColor = tempColor);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
     );

@@ -29,6 +29,8 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final List<Widget> pages = [
       HomeScreen(sharedTextNotifier: _sharedTextNotifier),
       HealthScreen(
@@ -44,35 +46,36 @@ class _MainTabScreenState extends State<MainTabScreen> {
         children: pages,
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          boxShadow: [
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+          boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 10),
           ],
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          selectedItemColor: const Color(0xFFD81B60),
-          unselectedItemColor: Colors.grey.shade600,
+          selectedItemColor: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60),
+          unselectedItemColor: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           selectedFontSize: 14,
           unselectedFontSize: 12,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
+          backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
           onTap: (index) {
             HapticFeedback.selectionClick();
             setState(() {
               _currentIndex = index;
             });
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.image, size: 28),
-              activeIcon: Icon(Icons.image, size: 30, color: Color(0xFFD81B60)),
+              icon: const Icon(Icons.image, size: 28),
+              activeIcon: Icon(Icons.image, size: 30, color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD81B60)),
               label: '카드 메이커',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.eco_outlined, size: 28),
-              activeIcon: Icon(Icons.eco, size: 30, color: Color(0xFF2E7D32)),
+              icon: const Icon(Icons.eco_outlined, size: 28),
+              activeIcon: Icon(Icons.eco, size: 30, color: isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32)),
               label: '매일 건강상식',
             ),
           ],

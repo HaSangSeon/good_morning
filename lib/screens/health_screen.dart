@@ -6,6 +6,8 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../services/ad_service.dart';
+import '../services/theme_service.dart';
+import '../widgets/help_dialog.dart';
 
 class HealthTip {
   final String category;
@@ -199,6 +201,27 @@ class _HealthScreenState extends State<HealthScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              isDark ? Icons.wb_sunny : Icons.nightlight_round,
+              color: isDark ? const Color(0xFFFFD700) : Colors.white,
+            ),
+            tooltip: isDark ? '라이트 모드로 전환' : '다크 모드로 전환',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ThemeService().toggleTheme();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.help_outline, color: Colors.white),
+            tooltip: '사용 가이드',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              HelpDialog.show(context);
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

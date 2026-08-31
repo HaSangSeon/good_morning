@@ -12,9 +12,18 @@ class AdService {
 
   String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/1033173712'; // Test ID
+      return 'ca-app-pub-3702899361747571/1772844688'; // Android Real ID (배포용)
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/4411468910'; // Test ID
+      return 'ca-app-pub-3940256099942544/4411468910';
+    }
+    return '';
+  }
+
+  String get bannerAdUnitId {
+    if (Platform.isAndroid) {
+      return 'ca-app-pub-3702899361747571/3890324259'; // Android Real ID (배포용)
+    } else if (Platform.isIOS) {
+      return 'ca-app-pub-3940256099942544/2934735716';
     }
     return '';
   }
@@ -45,10 +54,23 @@ class AdService {
     }
   }
 
-  void showInterstitialAd({required VoidCallback onAdDismissed}) {
+  int _shareCount = 0;
+
+  /// 공유 3회당 1회씩만 전면 광고 노출 (사용자 피로도 방지)
+  void showInterstitialAdOnShare({VoidCallback? onAdDismissed}) {
+    _shareCount++;
+    debugPrint('AdService: 현재 공유 횟수 = $_shareCount (3회당 1회 광고 노출)');
+    if (_shareCount % 3 == 0) {
+      showInterstitialAd(onAdDismissed: onAdDismissed);
+    } else {
+      onAdDismissed?.call();
+    }
+  }
+
+  void showInterstitialAd({VoidCallback? onAdDismissed}) {
     if (_interstitialAd == null) {
       debugPrint('Warning: attempt to show interstitial before loaded.');
-      onAdDismissed();
+      onAdDismissed?.call();
       return;
     }
 
@@ -60,13 +82,13 @@ class AdService {
         ad.dispose();
         _interstitialAd = null;
         loadInterstitialAd(); // Load the next ad
-        onAdDismissed();
+        onAdDismissed?.call();
       },
       onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
         debugPrint('$ad onAdFailedToShowFullScreenContent: $error');
         ad.dispose();
         _interstitialAd = null;
-        onAdDismissed();
+        onAdDismissed?.call();
       },
     );
 

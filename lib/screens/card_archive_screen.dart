@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -193,7 +194,11 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                             ),
                           ],
                           image: DecorationImage(
-                            image: AssetImage(card.backgroundPath),
+                            image: card.backgroundPath.startsWith('assets/')
+                                ? AssetImage(card.backgroundPath)
+                                : (File(card.backgroundPath).existsSync()
+                                    ? FileImage(File(card.backgroundPath))
+                                    : const AssetImage('assets/images/bg_season_spring.jpg')) as ImageProvider,
                             fit: BoxFit.cover,
                           ),
                         ),

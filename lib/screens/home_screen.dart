@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/ad_service.dart';
 import '../services/card_archive_service.dart';
 import '../services/theme_service.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _soundEnabled = true;
   bool _notificationEnabled = true;
+  String? _customImagePath;
 
   // Background Images with Categories & Titles
   final List<Map<String, String>> _bgList = [
@@ -45,6 +47,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     {
       'path': 'assets/images/bg_season_spring.jpg',
       'name': '🌸 벚꽃과 개나리 마을',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg_spring_tulips.jpg',
+      'name': '🌷 눈부신 튤립 꽃밭',
       'category': '🌸 봄',
     },
     {
@@ -70,6 +77,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       'category': '🌿 여름',
     },
     {
+      'path': 'assets/images/bg_summer_beach.jpg',
+      'name': '🏖️ 에메랄드빛 여름 바다',
+      'category': '🌿 여름',
+    },
+    {
       'path': 'assets/images/bg_sunflower.png',
       'name': '🌻 황금빛 해바라기 밭',
       'category': '🌿 여름',
@@ -89,6 +101,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     {
       'path': 'assets/images/bg_season_autumn.jpg',
       'name': '🍁 단풍과 은행나무 한옥길',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_ginkgo.jpg',
+      'name': '🍂 황금빛 은행나무 돌담길',
       'category': '🍁 가을',
     },
     {
@@ -131,6 +148,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // 🌅 일출/자연
     {
+      'path': 'assets/images/bg_sea_sunrise.jpg',
+      'name': '🌅 붉게 타오르는 바다 일출',
+      'category': '🌅 일출/자연',
+    },
+    {
       'path': 'assets/images/bg1.png',
       'name': '🌅 화사한 일출과 햇살',
       'category': '🌅 일출/자연',
@@ -153,6 +175,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // 🌸 꽃/정원
     {
+      'path': 'assets/images/bg_hydrangea.jpg',
+      'name': '🪻 이슬 머금은 수국 정원',
+      'category': '🌸 꽃/정원',
+    },
+    {
       'path': 'assets/images/bg4.png',
       'name': '🌹 정열의 붉은 장미',
       'category': '🌸 꽃/정원',
@@ -169,6 +196,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     },
 
     // 🎋 동양/전통
+    {
+      'path': 'assets/images/bg_hanok_lotus.jpg',
+      'name': '🪷 연못 정자와 단아한 연꽃',
+      'category': '🎋 동양/전통',
+    },
     {
       'path': 'assets/images/bg_bamboo.png',
       'name': '🎋 푸르른 대나무 숲',
@@ -197,6 +229,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // 🌙 밤/감성
     {
+      'path': 'assets/images/bg_aurora_night.jpg',
+      'name': '🌌 신비로운 오로라 호수',
+      'category': '🌙 밤/감성',
+    },
+    {
       'path': 'assets/images/bg6.png',
       'name': '🌙 은은한 밤하늘과 달빛',
       'category': '🌙 밤/감성',
@@ -213,6 +250,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     },
 
     // ☕ 일상/힐링
+    {
+      'path': 'assets/images/bg_window_plants.jpg',
+      'name': '🪴 햇살 드는 창가와 차 한잔',
+      'category': '☕ 일상/힐링',
+    },
     {
       'path': 'assets/images/bg_coffee_1786333143337.png',
       'name': '☕ 따뜻한 아침 커피 한잔',
@@ -371,12 +413,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final hasSavedBorder = prefs.containsKey('saved_card_border_color');
     final savedBorderColorVal = prefs.getInt('saved_card_border_color');
     final showWatermark = prefs.getBool('show_watermark') ?? true;
+    final savedCustomImagePath = prefs.getString('saved_card_custom_image_path');
 
     setState(() {
       _soundEnabled = enabled;
       _notificationEnabled = notiEnabled;
       _isDecorateExpanded = isExpanded;
       _showWatermark = showWatermark;
+
+      if (savedCustomImagePath != null && File(savedCustomImagePath).existsSync()) {
+        _customImagePath = savedCustomImagePath;
+      }
 
       if (widget.sharedTextNotifier == null ||
           widget.sharedTextNotifier!.value.isEmpty) {
@@ -415,6 +462,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       await prefs.setDouble('saved_card_font_size', _fontSize);
       await prefs.setInt('saved_card_text_color', _textColor.toARGB32());
       await prefs.setBool('show_watermark', _showWatermark);
+      if (_customImagePath != null && File(_customImagePath!).existsSync()) {
+        await prefs.setString('saved_card_custom_image_path', _customImagePath!);
+      } else {
+        await prefs.remove('saved_card_custom_image_path');
+      }
       if (_borderColor != null) {
         await prefs.setInt('saved_card_border_color', _borderColor!.toARGB32());
       } else {
@@ -520,7 +572,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  /// 텍스트 길이 및 줄 바꿈 수에 따라 카드에 딱 맞는 황금 비율 폰트 크기 자동 계산 (명언 17~18pt 대역 최적화)
+  /// 텍스트 길이 및 줄 바꿈 수에 따라 카드에 딱 맞는 황금 비율 폰트 크기 자동 계산
   double _calculateOptimalFontSize(String text) {
     final cleanText = text.trim();
     if (cleanText.isEmpty) return 24.0;
@@ -535,9 +587,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     } else if (len <= 90 && lines <= 5) {
       return 18.5; // 중간 길이 명언 (4~5줄)
     } else if (len <= 140 || lines <= 8) {
-      return 17.5; // 긴 명언/시 (6~8줄, 사용자 지정 17~18pt 대역)
+      return 16.0; // 긴 명언/시 (6~8줄)
     } else {
-      return 16.5; // 장문 좋은글 (9줄 이상)
+      return 14.0; // 장문 좋은글 (9줄 이상)
     }
   }
 
@@ -1118,7 +1170,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
     setState(() {
       _textController.text = card.message;
-      _bgIndex = backgroundIndex >= 0 ? backgroundIndex : 0;
+      if (card.backgroundPath.startsWith('assets/')) {
+        _customImagePath = null;
+        _bgIndex = backgroundIndex >= 0 ? backgroundIndex : 0;
+      } else {
+        _customImagePath = card.backgroundPath;
+      }
       _textColor = Color(card.textColorValue);
       _borderColor = card.borderColorValue == null
           ? null
@@ -1138,12 +1195,67 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  ImageProvider _getBackgroundImageProvider() {
+    if (_customImagePath != null && File(_customImagePath!).existsSync()) {
+      return FileImage(File(_customImagePath!));
+    }
+    return AssetImage(_bgList[_bgIndex]['path']!);
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 1800,
+        maxHeight: 1800,
+        imageQuality: 92,
+      );
+
+      if (pickedFile != null) {
+        HapticFeedback.mediumImpact();
+        setState(() {
+          _customImagePath = pickedFile.path;
+        });
+        await _saveCardPreferences();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: const [
+                  Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('내 사진이 카드 배경으로 적용되었습니다! 🌸'),
+                ],
+              ),
+              backgroundColor: const Color(0xFF2E7D32),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('사진을 불러오는 중 오류가 발생했습니다: $e'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _saveCurrentCard() async {
     await CardArchiveService().saveCard(
       SavedCard(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         message: _textController.text.trim(),
-        backgroundPath: _bgList[_bgIndex]['path']!,
+        backgroundPath: _customImagePath ?? _bgList[_bgIndex]['path']!,
         textColorValue: _textColor.toARGB32(),
         borderColorValue: _borderColor?.toARGB32(),
         fontSize: _fontSize,
@@ -1203,10 +1315,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     HapticFeedback.mediumImpact();
     await _saveCurrentCard();
     try {
-      // 1. 이미 화면에 선명하게 렌더링된 카드를 GPU 버퍼에서 초고속 3.2배수 레티나 캡처 (~0.02초)
+      final stopwatch = Stopwatch()..start();
       Uint8List? imageBytes = await _screenshotController.capture(
         pixelRatio: 3.2,
       );
+      final captureTime = stopwatch.elapsedMilliseconds;
 
       // 2. 만약 화면 캡처가 불가한 상황일 경우 초경량 800px 규격 폴백 렌더링
       if (imageBytes == null || imageBytes.isEmpty) {
@@ -1223,7 +1336,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     image: DecorationImage(
-                      image: AssetImage(_bgList[_bgIndex]['path']!),
+                      image: _getBackgroundImageProvider(),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -1281,6 +1394,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         final fileName = 'good_morning_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final imagePath = await File('${directory.path}/$fileName').create();
         await imagePath.writeAsBytes(imageBytes);
+        final fileSizeKb = (imageBytes.lengthInBytes / 1024).toStringAsFixed(1);
+        debugPrint('[Share Performance] Capture: ${captureTime}ms, File size: ${fileSizeKb} KB, Path: ${imagePath.path}');
 
         final result = await Share.shareXFiles(
           [XFile(imagePath.path, mimeType: 'image/jpeg')],
@@ -1622,7 +1737,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         ),
                                       ],
                                       image: DecorationImage(
-                                        image: AssetImage(_bgList[_bgIndex]['path']!),
+                                        image: _getBackgroundImageProvider(),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -1652,7 +1767,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                               _textController.text,
                                               textAlign: TextAlign.center,
                                               style: _getAppliedTextStyle().copyWith(
-                                                fontSize: (_fontSize * 0.95).clamp(15.0, 44.0),
+                                                fontSize: (_fontSize * 0.95).clamp(8.0, 44.0),
                                                 height: 1.35,
                                               ),
                                             ),
@@ -1879,7 +1994,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         color: Colors.deepOrange,
                                       ),
                                       onPressed: () {
-                                        if (_fontSize > 20) {
+                                        if (_fontSize > 10) {
                                           setState(() => _fontSize -= 2);
                                           _saveCardPreferences();
                                         }
@@ -2658,7 +2773,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ],
                     image: DecorationImage(
-                      image: AssetImage(_bgList[_bgIndex]['path']!),
+                      image: _getBackgroundImageProvider(),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -2688,7 +2803,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             _textController.text,
                             textAlign: TextAlign.center,
                             style: _getAppliedTextStyle().copyWith(
-                              fontSize: (_fontSize * 1.15).clamp(18.0, 48.0),
+                              fontSize: (_fontSize * 1.15).clamp(10.0, 48.0),
                             ),
                           ),
                         ),
@@ -3399,7 +3514,139 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // 2. 카테고리 필터 칩 바 (가로 스크롤)
+                      // 2. 내 앨범 사진 및 즉석 카메라 촬영 배너 (시니어 친화적 대형 버튼)
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? [const Color(0xFF2D1B36), const Color(0xFF1E2238)]
+                                : [const Color(0xFFFFF3E0), const Color(0xFFFFE0B2)],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark ? Colors.orange.withAlpha(60) : const Color(0xFFFFB74D),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.auto_awesome, color: Color(0xFFE65100), size: 18),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '나만의 사진으로 특별한 카드 만들기',
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? const Color(0xFFFFD180) : const Color(0xFFBF360C),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    icon: const Icon(Icons.photo_library_rounded, size: 20),
+                                    label: const Text(
+                                      '내 앨범 사진',
+                                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFE65100),
+                                      foregroundColor: Colors.white,
+                                      elevation: 2,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _pickImage(ImageSource.gallery);
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    icon: const Icon(Icons.camera_alt_rounded, size: 20),
+                                    label: const Text(
+                                      '직접 촬영',
+                                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2E7D32),
+                                      foregroundColor: Colors.white,
+                                      elevation: 2,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _pickImage(ImageSource.camera);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (_customImagePath != null && File(_customImagePath!).existsSync()) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.black38 : Colors.white.withAlpha(200),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.file(
+                                        File(_customImagePath!),
+                                        width: 32,
+                                        height: 32,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '현재 내 앨범 사진 적용 중',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton.icon(
+                                      icon: const Icon(Icons.refresh_rounded, size: 16),
+                                      label: const Text('기본 배경으로'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(0xFFD84315),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _customImagePath = null;
+                                        });
+                                        _saveCardPreferences();
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+
+                      // 3. 카테고리 필터 칩 바 (가로 스크롤)
                       Container(
                         color: isDark ? const Color(0xFF1E2234) : Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -3447,7 +3694,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       const SizedBox(height: 8),
 
-                      // 3. 갤러리 썸네일 그리드
+                      // 4. 갤러리 썸네일 그리드
                       Expanded(
                         child: GridView.builder(
                           controller: scrollController,
@@ -3464,12 +3711,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           itemBuilder: (context, index) {
                             final bg = filteredList[index];
                             final originalIndex = _bgList.indexOf(bg);
-                            final isSelected = _bgIndex == originalIndex;
+                            final isSelected = _customImagePath == null && _bgIndex == originalIndex;
 
                             return GestureDetector(
                               onTap: () {
                                 HapticFeedback.selectionClick();
                                 setState(() {
+                                  _customImagePath = null;
                                   _bgIndex = originalIndex;
                                 });
                                 _saveCardPreferences();

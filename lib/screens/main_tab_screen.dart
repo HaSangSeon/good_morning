@@ -23,17 +23,32 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
+  AnchoredAdaptiveBannerAdSize? _adSize;
+  bool _adLoadStarted = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadBannerAd();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_adLoadStarted) {
+      _adLoadStarted = true;
+      _loadBannerAd();
+    }
   }
 
-  void _loadBannerAd() {
+  Future<void> _loadBannerAd() async {
+    final width = MediaQuery.of(context).size.width.truncate();
+    final AnchoredAdaptiveBannerAdSize? size =
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+
+    if (size == null) {
+      debugPrint('Unable to get width of anchored banner.');
+      return;
+    }
+
+    _adSize = size;
     _bannerAd = BannerAd(
       adUnitId: AdService().bannerAdUnitId,
-      size: AdSize.banner,
+      size: size,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
@@ -49,7 +64,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
         },
       ),
     );
-    _bannerAd?.load();
+    await _bannerAd?.load();
   }
 
   @override
@@ -96,38 +111,55 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: pages),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 모든 탭 공통 하단 AdMob 배너 광고
-          if (_isBannerLoaded && _bannerAd != null)
-            SafeArea(
-              top: false,
-              bottom: false,
-              child: Container(
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E2C) : const Color(0xFFFFFDF9),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? Colors.black45 : const Color(0x148D6E63),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 모든 탭 공통 하단 AdMob 배너 광고 (여백 없이 밀착 & 정돈된 구분선)
+            if (_isBannerLoaded && _bannerAd != null)
+              Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                color: isDark ? const Color(0xFF1E1E2C) : const Color(0xFFFFFDF9),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                  border: Border(
+                    top: BorderSide(
+                      color: isDark
+                          ? Colors.white.withAlpha(25)
+                          : const Color(0xFFE8E0D5),
+                      width: 0.8,
+                    ),
+                    bottom: BorderSide(
+                      color: isDark
+                          ? Colors.white.withAlpha(15)
+                          : const Color(0xFFEFE8DE),
+                      width: 0.6,
+                    ),
+                  ),
+                ),
                 child: SizedBox(
                   width: _bannerAd!.size.width.toDouble(),
                   height: _bannerAd!.size.height.toDouble(),
-                  child: Center(child: AdWidget(ad: _bannerAd!)),
+                  child: Center(
+                    child: AdWidget(
+                      key: ValueKey(_bannerAd!),
+                      ad: _bannerAd!,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          Container(
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF232742) : const Color(0xFFFFFDF9),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark ? Colors.black45 : const Color(0x1A8D6E63),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
-            child: BottomNavigationBar(
+            BottomNavigationBar(
               currentIndex: _currentIndex,
+              elevation: 0,
               selectedItemColor: isDark
                   ? const Color(0xFFFFD700)
                   : const Color(0xFFE64A19),
@@ -138,7 +170,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
               unselectedFontSize: 11,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
               type: BottomNavigationBarType.fixed,
-              backgroundColor: isDark ? const Color(0xFF232742) : const Color(0xFFFFFDF9),
+              backgroundColor: isDark ? const Color(0xFF1E1E2C) : const Color(0xFFFFFDF9),
               onTap: (index) {
                 HapticFeedback.selectionClick();
                 setState(() {
@@ -192,8 +224,8 @@ class _MainTabScreenState extends State<MainTabScreen> {
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

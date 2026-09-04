@@ -28,12 +28,13 @@ class KakaoShareHelper {
   }) async {
     bool sharedDirectly = false;
 
-    if (Platform.isAndroid) {
+    // 이미지 카드의 경우: 카카오톡 이미지 직접 전송 채널 호출
+    if (Platform.isAndroid && filePath != null && filePath.isNotEmpty) {
       try {
         final bool isInstalled = await isKakaoInstalled();
         if (isInstalled) {
           sharedDirectly = await _kakaoChannel.invokeMethod('shareToKakao', {
-            if (filePath != null) 'filePath': filePath,
+            'filePath': filePath,
             if (text != null) 'text': text,
           }) ?? false;
         }

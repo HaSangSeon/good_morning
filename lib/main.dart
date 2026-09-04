@@ -60,6 +60,20 @@ class MyApp extends StatelessWidget {
           ),
           home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
+          builder: (context, child) {
+            final mediaQuery = MediaQuery.of(context);
+            // 중장년층 큰 글자 설정(최대 1.35배)은 쾌적하게 수용하고,
+            // 1.35배를 초과하는 극단적 시스템 확대(1.5~2.0배)로 인한 UI 깨짐/오버플로우는 방어
+            return MediaQuery(
+              data: mediaQuery.copyWith(
+                textScaler: mediaQuery.textScaler.clamp(
+                  minScaleFactor: 0.85,
+                  maxScaleFactor: 1.35,
+                ),
+              ),
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
         );
       },
     );

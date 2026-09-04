@@ -18,12 +18,12 @@ class MainTabScreen extends StatefulWidget {
 class _MainTabScreenState extends State<MainTabScreen> {
   int _currentIndex = 0;
   final ValueNotifier<String> _sharedTextNotifier = ValueNotifier<String>('');
+  final ValueNotifier<String> _sharedBgPathNotifier = ValueNotifier<String>('');
   final ValueNotifier<SavedCard?> _sharedCardNotifier =
       ValueNotifier<SavedCard?>(null);
 
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
-  AnchoredAdaptiveBannerAdSize? _adSize;
   bool _adLoadStarted = false;
 
   @override
@@ -45,7 +45,6 @@ class _MainTabScreenState extends State<MainTabScreen> {
       return;
     }
 
-    _adSize = size;
     _bannerAd = BannerAd(
       adUnitId: AdService().bannerAdUnitId,
       size: size,
@@ -70,12 +69,16 @@ class _MainTabScreenState extends State<MainTabScreen> {
   @override
   void dispose() {
     _sharedTextNotifier.dispose();
+    _sharedBgPathNotifier.dispose();
     _sharedCardNotifier.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
 
-  void _switchToCardMakerWithText(String text) {
+  void _switchToCardMakerWithText(String text, {String? bgPath}) {
+    if (bgPath != null && bgPath.isNotEmpty) {
+      _sharedBgPathNotifier.value = bgPath;
+    }
     _sharedTextNotifier.value = text;
     setState(() {
       _currentIndex = 0;
@@ -94,16 +97,17 @@ class _MainTabScreenState extends State<MainTabScreen> {
     final List<Widget> pages = [
       HomeScreen(
         sharedTextNotifier: _sharedTextNotifier,
+        sharedBgPathNotifier: _sharedBgPathNotifier,
         sharedCardNotifier: _sharedCardNotifier,
       ),
       WisdomScreen(
-        onShareAsCard: (cardText) {
-          _switchToCardMakerWithText(cardText);
+        onShareAsCard: (cardText, {bgPath}) {
+          _switchToCardMakerWithText(cardText, bgPath: bgPath);
         },
       ),
       HealthScreen(
-        onShareAsCard: (cardText) {
-          _switchToCardMakerWithText(cardText);
+        onShareAsCard: (cardText, {bgPath}) {
+          _switchToCardMakerWithText(cardText, bgPath: bgPath);
         },
       ),
       CardArchiveScreen(onSelectCard: _openSavedCard),
@@ -111,20 +115,22 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: pages),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E2C) : const Color(0xFFFFFDF9),
-          boxShadow: [
-            BoxShadow(
-              color: isDark ? Colors.black45 : const Color(0x148D6E63),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E2C) : const Color(0xFFFFFDF9),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black45 : const Color(0x148D6E63),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             // 모든 탭 공통 하단 AdMob 배너 광고 (여백 없이 밀착 & 정돈된 구분선)
             if (_isBannerLoaded && _bannerAd != null)
               Container(
@@ -226,6 +232,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

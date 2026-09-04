@@ -92,6 +92,7 @@ class AdService {
       },
     );
 
+    _interstitialAd!.setImmersiveMode(true);
     _interstitialAd!.show();
   }
 }

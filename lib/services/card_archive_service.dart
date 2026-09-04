@@ -66,13 +66,21 @@ class CardArchiveService {
         .toList();
   }
 
-  Future<void> saveCard(SavedCard card) async {
+  /// 카드를 보관함에 저장합니다.
+  /// - 이미 동일한 문구/배경의 카드가 존재하면 맨 앞으로 위치만 갱신하고 false 반환
+  /// - 새로 추가된 카드이면 맨 앞에 추가하고 true 반환
+  Future<bool> saveCard(SavedCard card) async {
     final cards = await loadCards();
-    cards.removeWhere(
+    final existingIndex = cards.indexWhere(
       (saved) =>
           saved.message == card.message &&
           saved.backgroundPath == card.backgroundPath,
     );
+    final isNew = existingIndex == -1;
+
+    if (!isNew) {
+      cards.removeAt(existingIndex);
+    }
     cards.insert(0, card);
     final updatedList = cards.take(_maxCards).toList();
     final prefs = await SharedPreferences.getInstance();
@@ -81,6 +89,7 @@ class CardArchiveService {
       updatedList.map((saved) => jsonEncode(saved.toJson())).toList(),
     );
     savedCardsNotifier.value = updatedList;
+    return isNew;
   }
 
   Future<void> deleteCard(String id) async {

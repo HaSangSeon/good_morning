@@ -15,4 +15,10 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <!-- Fix for AdMob full-screen ads close button being cut off by status bar/cutout on Android 14/15/16 -->
+    <style name="AdMobThemeFix" parent="@android:style/Theme.Translucent">
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
 </resources>

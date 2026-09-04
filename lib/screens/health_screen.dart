@@ -1,9 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:path_provider/path_provider.dart';
 import '../services/theme_service.dart';
 import '../widgets/help_dialog.dart';
 import '../widgets/share_preview_dialog.dart';
@@ -27,7 +24,7 @@ class HealthTip {
 }
 
 class HealthScreen extends StatefulWidget {
-  final Function(String cardText)? onShareAsCard;
+  final Function(String cardText, {String? bgPath})? onShareAsCard;
 
   const HealthScreen({super.key, this.onShareAsCard});
 
@@ -36,8 +33,34 @@ class HealthScreen extends StatefulWidget {
 }
 
 class _HealthScreenState extends State<HealthScreen> {
-  final ScreenshotController _screenshotController = ScreenshotController();
   String _selectedCategory = '전체';
+
+  String _getSuggestedBgPathForTip(HealthTip tip) {
+    final cat = tip.category;
+    final title = tip.title;
+    
+    // 식습관/수분/차 관련
+    if (cat.contains('식습관') || cat.contains('수분') || title.contains('차') || title.contains('식단') || title.contains('물')) {
+      return 'assets/images/bg_traditional_tea.jpg'; // 정갈한 전통 차 시간
+    }
+    // 관절/운동/스트레칭
+    if (cat.contains('관절') || cat.contains('운동') || title.contains('스트레칭') || title.contains('체조')) {
+      return 'assets/images/bg_meadow.jpg'; // 햇살 가득한 활력 넘치는 초원
+    }
+    // 혈관/혈당/산책
+    if (cat.contains('혈관') || cat.contains('혈당') || title.contains('산책') || title.contains('지압')) {
+      return 'assets/images/bg_green_forest.jpg'; // 싱그러운 초록 숲
+    }
+    // 두뇌/치매/마음
+    if (cat.contains('두뇌') || cat.contains('치매')) {
+      return 'assets/images/bg_bamboo.png'; // 맑고 푸르른 대나무 숲
+    }
+    // 생활/활력/햇볕
+    if (cat.contains('생활') || cat.contains('활력') || title.contains('햇볕') || title.contains('마사지')) {
+      return 'assets/images/bg1.png'; // 따스하고 화사한 일출과 햇살
+    }
+    return 'assets/images/bg_green_forest.jpg';
+  }
 
   final List<HealthTip> _healthTips = [
     // 1. 혈관/혈당
@@ -275,50 +298,8 @@ class _HealthScreenState extends State<HealthScreen> {
   Future<void> _shareTipDirectly(HealthTip tip) async {
     HapticFeedback.mediumImpact();
     try {
-      final imageBytes = await _screenshotController.captureFromWidget(
-        Container(
-          width: 400,
-          height: 400,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2E7D32), Color(0xFF81C784)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${tip.icon} 매일 건강 꿀팁',
-                style: GoogleFonts.jua(fontSize: 28, color: Colors.yellowAccent),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                tip.shareCardText,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.jua(fontSize: 22, color: Colors.white),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                '🌸 마음카드',
-                style: GoogleFonts.jua(fontSize: 20, color: Colors.white.withAlpha(220)),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      // iOS 및 안드로이드 공용 임시 파일 생성
-      final directory = await getTemporaryDirectory();
-      final imagePath = await File('${directory.path}/health_tip.png').create();
-      await imagePath.writeAsBytes(imageBytes);
-
       if (!mounted) return;
 
-      // 전송 전 완벽하고 고급스러운 카카오톡 전송 미리보기 팝업 노출
       await SharePreviewDialog.show(
         context: context,
         type: SharePreviewType.health,
@@ -326,13 +307,13 @@ class _HealthScreenState extends State<HealthScreen> {
         content: tip.shareCardText,
         emoji: tip.icon,
         fullShareText: '${tip.shareCardText}\n\n'
-            '━━━━━━━━━━━━━━━\n'
             '🌿 매일 아침 건강정보 & 마음카드 받기\n'
             '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
-        imageBytes: imageBytes,
-        imageFilePath: imagePath.path,
         onCustomizeCard: widget.onShareAsCard != null
-            ? () => widget.onShareAsCard!(tip.shareCardText)
+            ? () {
+                final bg = _getSuggestedBgPathForTip(tip);
+                widget.onShareAsCard!(tip.shareCardText, bgPath: bg);
+              }
             : null,
       );
     } catch (e) {
@@ -527,25 +508,30 @@ class _HealthScreenState extends State<HealthScreen> {
                                         child: InkWell(
                                           onTap: () {
                                             HapticFeedback.selectionClick();
-                                            widget.onShareAsCard!(tip.shareCardText);
+                                            final bg = _getSuggestedBgPathForTip(tip);
+                                            widget.onShareAsCard!(tip.shareCardText, bgPath: bg);
                                           },
                                           borderRadius: BorderRadius.circular(24),
                                           child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 12),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                const Icon(Icons.style, color: Color(0xFFD84315), size: 18),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  '카드로 꾸미기',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                    color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
+                                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.style, color: Color(0xFFD84315), size: 18),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '카드로 꾸미기',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 14,
+                                                      color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -566,21 +552,25 @@ class _HealthScreenState extends State<HealthScreen> {
                                         },
                                         borderRadius: BorderRadius.circular(24),
                                         child: const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 12),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(Icons.share_rounded, color: Colors.black87, size: 18),
-                                              SizedBox(width: 6),
-                                              Text(
-                                                '카톡 공유',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                  color: Colors.black87,
+                                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.share_rounded, color: Colors.black87, size: 18),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  '카톡 공유',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                    color: Colors.black87,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),

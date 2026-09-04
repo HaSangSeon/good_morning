@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
+import '../services/kakao_share_helper.dart';
 
 class HelpDialog extends StatelessWidget {
   const HelpDialog({super.key});
@@ -108,10 +108,10 @@ class HelpDialog extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: () {
                         HapticFeedback.mediumImpact();
-                        Share.share(
-                          '매일 아침 아름다운 감성 카드와 좋은 글을 선물하세요! 🌸\n\n'
-                          '💌 [마음카드] 앱 다운로드하기\n'
-                          '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
+                        KakaoShareHelper.share(
+                          text: '매일 아침 아름다운 감성 카드와 좋은 글을 선물하세요! 🌸\n\n'
+                              '💌 [마음카드] 앱 다운로드하기\n'
+                              '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
                           subject: '마음카드 - 아침인사 & 좋은글 앱',
                         );
                       },

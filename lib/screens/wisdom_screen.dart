@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/ad_service.dart';
 import '../services/theme_service.dart';
+import '../widgets/share_preview_dialog.dart';
 
 class WisdomItem {
   final String id;
@@ -1431,15 +1430,20 @@ class _WisdomScreenState extends State<WisdomScreen> {
                                         ],
                                       ),
                                       child: InkWell(
-                                        onTap: () async {
+                                        onTap: () {
                                           HapticFeedback.selectionClick();
-                                          final result = await Share.share(
-                                            item.shareText,
-                                            subject: item.title,
+                                          SharePreviewDialog.show(
+                                            context: context,
+                                            type: SharePreviewType.wisdom,
+                                            title: item.title,
+                                            content: item.content,
+                                            author: item.author,
+                                            emoji: item.emoji,
+                                            fullShareText: item.shareText,
+                                            onCustomizeCard: widget.onShareAsCard != null
+                                                ? () => widget.onShareAsCard!(item.content)
+                                                : null,
                                           );
-                                          if (result.status == ShareResultStatus.success) {
-                                            AdService().showInterstitialAdOnShare();
-                                          }
                                         },
                                         child: const Row(
                                           mainAxisAlignment: MainAxisAlignment.center,

@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -16,6 +15,7 @@ import '../services/card_archive_service.dart';
 import '../services/theme_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/help_dialog.dart';
+import '../widgets/share_preview_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   final ValueNotifier<String>? sharedTextNotifier;
@@ -363,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   bool _isDecorateExpanded = false;
   bool _showWatermark = true;
+  bool _isSharing = false;
 
   @override
   void initState() {
@@ -1162,6 +1163,239 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+
+  /// 1080x1080 고화질 풀블리드 공유 카드 전용 위젯 (모서리 번짐/잔상 및 저해상도 완전 해결)
+  Widget _buildHighResShareCard({required double cardSize}) {
+    final double scale = cardSize / 220.0;
+    final double fontSz = (_fontSize * 0.95 * scale).clamp(24.0, 180.0);
+
+    return Material(
+      color: Colors.black,
+      child: SizedBox(
+        width: cardSize,
+        height: cardSize,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. 여백 없는 1:1 풀블리드 배경 이미지
+            Image(
+              image: _getBackgroundImageProvider(),
+              fit: BoxFit.cover,
+              width: cardSize,
+              height: cardSize,
+            ),
+            // 2. 가독성을 위한 우아한 비네팅 그라데이션
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withAlpha(45),
+                      Colors.black.withAlpha(15),
+                      Colors.black.withAlpha(75),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // 3. 선택적 이너 프레임 테두리 (모서리 잔상 없는 깔끔한 내부 프레임)
+            if (_borderColor != null)
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24.0),
+                      border: Border.all(
+                        color: _borderColor!,
+                        width: 10.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            // 4. 중앙 정렬 문구 (스크롤 뷰 제거로 잘림 없이 100% 노출)
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 80.0, vertical: 80.0),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 900.0),
+                    child: Text(
+                      _textController.text,
+                      textAlign: TextAlign.center,
+                      style: _getAppliedTextStyle(customFontSize: fontSz).copyWith(
+                        height: 1.44,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // 5. 마음카드 워터마크 뱃지 (1080px 고화질 규격)
+            if (_showWatermark)
+              Positioned(
+                right: 32,
+                bottom: 32,
+                child: _buildWatermarkBadge(
+                  fontSize: 22,
+                  iconSize: 26,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareImage() async {
+    if (_isSharing) return;
+    setState(() {
+      _isSharing = true;
+    });
+    HapticFeedback.mediumImpact();
+    await _saveCurrentCard();
+
+    try {
+      // 1. 화면에서 사용자가 직접 꾸민 카드(폰트 크기, 스타일, 테두리 등) 100% 동일하게 초고화질(3.2x) 직접 캡처
+      Uint8List? imageBytes = await _screenshotController.capture(
+        pixelRatio: 3.2,
+      );
+
+      // 화면 캡처가 불가능한 특수 상황일 경우에만 폴백
+      if (imageBytes == null || imageBytes.isEmpty) {
+        const double cardSize = 1080.0;
+        imageBytes = await _screenshotController.captureFromWidget(
+          _buildHighResShareCard(cardSize: cardSize),
+          targetSize: const Size(cardSize, cardSize),
+          pixelRatio: 1.0,
+          delay: const Duration(milliseconds: 70),
+        );
+      }
+
+      if (imageBytes.isNotEmpty) {
+        final directory = await getTemporaryDirectory();
+        final fileName = 'good_morning_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final imageFile = File('${directory.path}/$fileName');
+        await imageFile.writeAsBytes(imageBytes);
+
+        if (!mounted) return;
+
+        // 전송 전 완벽하고 고급스러운 카카오톡 전송 미리보기 팝업 노출
+        await SharePreviewDialog.show(
+          context: context,
+          type: SharePreviewType.mindCard,
+          title: '따뜻한 아침인사 카드',
+          content: _textController.text.trim().isNotEmpty
+              ? _textController.text.trim()
+              : '소중한 분께 전하는 따뜻한 아침인사 카드입니다 🌸',
+          emoji: '🌸',
+          fullShareText: '소중한 분께 전하는 따뜻한 아침인사 카드입니다 🌸\n\n'
+              '━━━━━━━━━━━━━━━\n'
+              '💌 나만의 감성 아침카드 & 명언 만들기\n'
+              '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
+          imageBytes: imageBytes,
+          imageFilePath: imageFile.path,
+          onSaveCard: () async {
+            HapticFeedback.mediumImpact();
+            await _saveCurrentCard();
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Color(0xFFFFD700)),
+                      SizedBox(width: 10),
+                      Text(
+                        '💌 [내 카드함]에 소중히 보관되었습니다!',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFF1E2430),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+          },
+        );
+      } else {
+        debugPrint('Failed to capture high res card image.');
+      }
+    } catch (e) {
+      debugPrint('Error sharing image: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSharing = false;
+        });
+      }
+    }
+  }
+
+  TextStyle _getAppliedTextStyle({double? customFontSize}) {
+    final effectiveFontSize = customFontSize ?? _fontSize;
+    final shadowOffset = (effectiveFontSize * 0.05).clamp(1.5, 4.5);
+    final shadowBlur = (effectiveFontSize * 0.08).clamp(2.5, 7.0);
+
+    switch (_selectedFontFamily) {
+      case 'DoHyeon':
+        return GoogleFonts.doHyeon(
+          fontSize: effectiveFontSize,
+          color: _textColor,
+          shadows: [
+            Shadow(
+              offset: Offset(shadowOffset, shadowOffset),
+              blurRadius: shadowBlur,
+              color: Colors.black87,
+            ),
+            Shadow(
+              offset: Offset(-shadowOffset, -shadowOffset),
+              blurRadius: shadowBlur,
+              color: Colors.black87,
+            ),
+          ],
+        );
+      case 'NanumGothic':
+        return GoogleFonts.nanumGothic(
+          fontSize: effectiveFontSize,
+          fontWeight: FontWeight.bold,
+          color: _textColor,
+          shadows: [
+            Shadow(
+              offset: Offset(shadowOffset, shadowOffset),
+              blurRadius: shadowBlur,
+              color: Colors.black87,
+            ),
+          ],
+        );
+      case 'Jua':
+      default:
+        return GoogleFonts.jua(
+          fontSize: effectiveFontSize,
+          color: _textColor,
+          shadows: [
+            Shadow(
+              offset: Offset(shadowOffset, shadowOffset),
+              blurRadius: shadowBlur,
+              color: Colors.black87,
+            ),
+            Shadow(
+              offset: Offset(-shadowOffset, -shadowOffset),
+              blurRadius: shadowBlur,
+              color: Colors.black87,
+            ),
+          ],
+        );
+    }
+  }
+
   void _onSavedCardSelected() {
     final card = widget.sharedCardNotifier?.value;
     if (card == null) return;
@@ -1310,164 +1544,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
-
-  Future<void> _shareImage() async {
-    HapticFeedback.mediumImpact();
-    await _saveCurrentCard();
-    try {
-      final stopwatch = Stopwatch()..start();
-      Uint8List? imageBytes = await _screenshotController.capture(
-        pixelRatio: 3.2,
-      );
-      final captureTime = stopwatch.elapsedMilliseconds;
-
-      // 2. 만약 화면 캡처가 불가한 상황일 경우 초경량 800px 규격 폴백 렌더링
-      if (imageBytes == null || imageBytes.isEmpty) {
-        const cardSize = 800.0;
-        imageBytes = await _screenshotController.captureFromWidget(
-          MediaQuery(
-            data: const MediaQueryData(),
-            child: Material(
-              color: Colors.transparent,
-              child: SizedBox(
-                width: cardSize,
-                height: cardSize,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    image: DecorationImage(
-                      image: _getBackgroundImageProvider(),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          border: _borderColor != null
-                              ? Border.all(color: _borderColor!, width: 6.0)
-                              : null,
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withAlpha(30),
-                              Colors.transparent,
-                              Colors.black.withAlpha(50),
-                            ],
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.all(36),
-                        child: Text(
-                          _textController.text,
-                          textAlign: TextAlign.center,
-                          style: _getAppliedTextStyle().copyWith(
-                            fontSize: _fontSize * 1.85,
-                          ),
-                        ),
-                      ),
-                      if (_showWatermark)
-                        Positioned(
-                          right: 24,
-                          bottom: 24,
-                          child: _buildWatermarkBadge(
-                            fontSize: 22,
-                            iconSize: 26,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          pixelRatio: 1.0,
-          targetSize: const Size(cardSize, cardSize),
-        );
-      }
-
-      if (imageBytes.isNotEmpty) {
-        final directory = await getTemporaryDirectory();
-        final fileName = 'good_morning_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final imagePath = await File('${directory.path}/$fileName').create();
-        await imagePath.writeAsBytes(imageBytes);
-        final fileSizeKb = (imageBytes.lengthInBytes / 1024).toStringAsFixed(1);
-        debugPrint('[Share Performance] Capture: ${captureTime}ms, File size: ${fileSizeKb} KB, Path: ${imagePath.path}');
-
-        final result = await Share.shareXFiles(
-          [XFile(imagePath.path, mimeType: 'image/jpeg')],
-          text: '소중한 분께 전하는 따뜻한 아침인사 카드입니다 🌸\n\n'
-              '━━━━━━━━━━━━━━━\n'
-              '💌 나만의 감성 아침카드 & 명언 만들기\n'
-              '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
-        );
-
-        // 실제 공유 완료 시에만 3회당 1회 광고 노출 (취소하고 닫았을 때는 미노출)
-        if (result.status == ShareResultStatus.success) {
-          AdService().showInterstitialAdOnShare();
-        }
-      }
-    } catch (e) {
-      debugPrint('Error sharing image: $e');
-    }
-  }
-
-  TextStyle _getAppliedTextStyle() {
-    switch (_selectedFontFamily) {
-      case 'DoHyeon':
-        return GoogleFonts.doHyeon(
-          fontSize: _fontSize,
-          color: _textColor,
-          shadows: [
-            const Shadow(
-              offset: Offset(2, 2),
-              blurRadius: 4,
-              color: Colors.black87,
-            ),
-            const Shadow(
-              offset: Offset(-2, -2),
-              blurRadius: 4,
-              color: Colors.black87,
-            ),
-          ],
-        );
-      case 'NanumGothic':
-        return GoogleFonts.nanumGothic(
-          fontSize: _fontSize,
-          fontWeight: FontWeight.bold,
-          color: _textColor,
-          shadows: [
-            const Shadow(
-              offset: Offset(2, 2),
-              blurRadius: 4,
-              color: Colors.black87,
-            ),
-          ],
-        );
-      case 'Jua':
-      default:
-        return GoogleFonts.jua(
-          fontSize: _fontSize,
-          color: _textColor,
-          shadows: [
-            const Shadow(
-              offset: Offset(2, 2),
-              blurRadius: 4,
-              color: Colors.black87,
-            ),
-            const Shadow(
-              offset: Offset(-2, -2),
-              blurRadius: 4,
-              color: Colors.black87,
-            ),
-          ],
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -2560,17 +2636,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         canRequestFocus: false,
                         skipTraversal: true,
                         child: ElevatedButton.icon(
-                          onPressed: _shareImage,
-                          icon: const Icon(
-                            Icons.share,
-                            size: 26,
-                            color: Color(0xFF371D1D),
-                          ),
-                          label: const FittedBox(
+                          onPressed: _isSharing ? null : _shareImage,
+                          icon: _isSharing
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Color(0xFF371D1D),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.share,
+                                  size: 26,
+                                  color: Color(0xFF371D1D),
+                                ),
+                          label: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              '📲 카카오톡으로 바로 보내기',
-                              style: TextStyle(
+                              _isSharing
+                                  ? '카카오톡 카드 전송 준비 중...'
+                                  : '📲 카카오톡으로 바로 보내기',
+                              style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF371D1D),

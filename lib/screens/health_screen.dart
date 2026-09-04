@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import '../services/ad_service.dart';
 import '../services/theme_service.dart';
 import '../widgets/help_dialog.dart';
+import '../widgets/share_preview_dialog.dart';
 
 class HealthTip {
   final String category;
@@ -312,23 +311,30 @@ class _HealthScreenState extends State<HealthScreen> {
         ),
       );
 
-      // iOS에서 카카오톡 등 외부 앱이 접근 가능한 임시 디렉토리 사용
+      // iOS 및 안드로이드 공용 임시 파일 생성
       final directory = await getTemporaryDirectory();
       final imagePath = await File('${directory.path}/health_tip.png').create();
       await imagePath.writeAsBytes(imageBytes);
 
-      final result = await Share.shareXFiles(
-        [XFile(imagePath.path)],
-        text: '${tip.shareCardText}\n\n'
+      if (!mounted) return;
+
+      // 전송 전 완벽하고 고급스러운 카카오톡 전송 미리보기 팝업 노출
+      await SharePreviewDialog.show(
+        context: context,
+        type: SharePreviewType.health,
+        title: tip.title,
+        content: tip.shareCardText,
+        emoji: tip.icon,
+        fullShareText: '${tip.shareCardText}\n\n'
             '━━━━━━━━━━━━━━━\n'
             '🌿 매일 아침 건강정보 & 마음카드 받기\n'
             '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
+        imageBytes: imageBytes,
+        imageFilePath: imagePath.path,
+        onCustomizeCard: widget.onShareAsCard != null
+            ? () => widget.onShareAsCard!(tip.shareCardText)
+            : null,
       );
-
-      // 실제 공유 완료 시에만 3회당 1회 광고 노출 (취소하고 닫았을 때는 미노출)
-      if (result.status == ShareResultStatus.success) {
-        AdService().showInterstitialAdOnShare();
-      }
     } catch (e) {
       debugPrint('Error sharing health tip: $e');
     }

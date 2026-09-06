@@ -163,19 +163,37 @@ class NotificationService {
   static const String _prefMinuteKey = 'morning_notification_minute';
 
   static const int _notificationId = 1001;
+  static const int _multiDayCount = 14; // 향후 14일간 매일 다른 문구로 예약
   static const String _channelId = 'morning_greeting_channel';
   static const String _channelName = '아침 안부 & 덕담 알림';
   static const String _channelDescription = '매일 아침 따뜻한 안부 문구와 카드를 전달합니다.';
 
   bool _isInitialized = false;
 
+  /// 콜드 스타트(완전 종료 상태에서 알림 탭) 시 전달받은 페이로드 임시 저장
+  String? _initialPayload;
+  Function(String quoteText)? _onNotificationClick;
+
   /// 푸시 클릭 시 메인 화면에 텍스트를 자동 세팅하기 위한 콜백 핸들러
-  Function(String quoteText)? onNotificationClick;
+  set onNotificationClick(Function(String quoteText)? callback) {
+    _onNotificationClick = callback;
+    if (callback != null && _initialPayload != null) {
+      final payload = _initialPayload!;
+      _initialPayload = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        callback(payload);
+      });
+    }
+  }
+
+  Function(String quoteText)? get onNotificationClick => _onNotificationClick;
 
   /// 서비스 초기화
   Future<void> initialize({Function(String quoteText)? onSelectNotification}) async {
     if (_isInitialized) return;
-    onNotificationClick = onSelectNotification;
+    if (onSelectNotification != null) {
+      onNotificationClick = onSelectNotification;
+    }
 
     // 1. 타임존 초기화
     tz.initializeTimeZones();
@@ -210,16 +228,38 @@ class NotificationService {
       settings: initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null && response.payload!.isNotEmpty) {
-          onNotificationClick?.call(response.payload!);
+          _onNotificationClick?.call(response.payload!);
         }
       },
     );
 
+    // 4. 완전 종료(Cold Start) 상태에서 알림을 클릭하여 앱이 켜졌는지 확인
+    try {
+      final launchDetails =
+          await _notificationsPlugin.getNotificationAppLaunchDetails();
+      if (launchDetails != null &&
+          launchDetails.didNotificationLaunchApp &&
+          launchDetails.notificationResponse?.payload != null &&
+          launchDetails.notificationResponse!.payload!.isNotEmpty) {
+        _initialPayload = launchDetails.notificationResponse!.payload;
+        if (_onNotificationClick != null) {
+          final payload = _initialPayload!;
+          _initialPayload = null;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _onNotificationClick?.call(payload);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking notification launch details: $e');
+    }
+
     _isInitialized = true;
 
-    // 저장된 설정 불러와서 알림 재등록
+    // 5. 저장된 설정 불러와서 알림 재등록 (Android 13+ 권한 확인 & 14일치 롤링 스케줄링)
     final isEnabled = await isNotificationEnabled();
     if (isEnabled) {
+      await requestPermissions();
       final time = await getNotificationTime();
       await scheduleDailyMorningNotification(time.hour, time.minute);
     }
@@ -248,27 +288,12 @@ class NotificationService {
     return true;
   }
 
-  /// 매일 아침 안부 알림 스케줄링
+  /// 매일 아침 안부 알림 스케줄링 (향후 14일치 순환 예약으로 앱을 며칠 안 켜도 매일 다른 문구 발송)
   Future<void> scheduleDailyMorningNotification(int hour, int minute) async {
     // 기존 스케줄 취소
     await cancelMorningNotification();
 
     final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-
-    // 설정한 시간이 오늘 이미 지났다면 내일부터 울리도록 설정
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-
-    final todayQuote = NotificationQuoteData.getQuoteForDate(scheduledDate);
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       _channelId,
@@ -292,27 +317,56 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notificationsPlugin.zonedSchedule(
-      id: _notificationId,
-      title: todayQuote['title'],
-      body: todayQuote['body'],
-      scheduledDate: scheduledDate,
-      notificationDetails: notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // 매일 해당 시간에 반복
-      payload: todayQuote['body'],
+    // 오늘 시간 기준 첫 알림 날짜 계산
+    var baseDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
     );
 
-    debugPrint('Morning notification scheduled for $scheduledDate ($hour:$minute)');
+    // 설정한 시간이 오늘 이미 지났다면 내일부터 울리도록 설정
+    if (baseDate.isBefore(now)) {
+      baseDate = baseDate.add(const Duration(days: 1));
+    }
+
+    // 향후 14일간 매일 다른 문구로 개별 예약
+    for (int i = 0; i < _multiDayCount; i++) {
+      final scheduledDate = baseDate.add(Duration(days: i));
+      final quote = NotificationQuoteData.getQuoteForDate(scheduledDate);
+      final notificationId = _notificationId + i;
+
+      // 마지막 14번째 날짜는 사용자가 2주 이상 앱을 안 켜더라도 알림이 끊기지 않도록 time 반복 속성 부여
+      final isLastDay = (i == _multiDayCount - 1);
+
+      await _notificationsPlugin.zonedSchedule(
+        id: notificationId,
+        title: quote['title'],
+        body: quote['body'],
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: isLastDay ? DateTimeComponents.time : null,
+        payload: quote['body'],
+      );
+    }
+
+    debugPrint(
+        'Morning notifications scheduled for $_multiDayCount days starting from $baseDate ($hour:$minute)');
   }
 
-  /// 알림 즉시 취소
+  /// 예약된 모든 아침 알림 취소
   Future<void> cancelMorningNotification() async {
     await _notificationsPlugin.cancel(id: _notificationId);
+    for (int i = 0; i < _multiDayCount + 5; i++) {
+      await _notificationsPlugin.cancel(id: _notificationId + i);
+    }
   }
 
-  /// 즉시 테스트 알림 발송 (사용자가 바로 확인해 볼 수 있는 기능)
-  Future<void> showTestNotification() async {
+  /// 즉시 또는 지연(초) 테스트 알림 발송 (앱을 닫고 테스트할 수 있도록 delay 지원)
+  Future<void> showTestNotification({int delaySeconds = 10}) async {
     final quote = NotificationQuoteData.getTodayQuote();
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -334,13 +388,27 @@ class NotificationService {
       ),
     );
 
-    await _notificationsPlugin.show(
-      id: 9999, // Test Notification ID
-      title: quote['title'],
-      body: quote['body'],
-      notificationDetails: notificationDetails,
-      payload: quote['body'],
-    );
+    if (delaySeconds <= 0) {
+      await _notificationsPlugin.show(
+        id: 9999, // Test Notification ID
+        title: quote['title'],
+        body: quote['body'],
+        notificationDetails: notificationDetails,
+        payload: quote['body'],
+      );
+    } else {
+      final scheduledDate =
+          tz.TZDateTime.now(tz.local).add(Duration(seconds: delaySeconds));
+      await _notificationsPlugin.zonedSchedule(
+        id: 9999,
+        title: quote['title'],
+        body: quote['body'],
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: quote['body'],
+      );
+    }
   }
 
   /// 알림 활성화 여부 확인

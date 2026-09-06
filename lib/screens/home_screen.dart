@@ -17,6 +17,7 @@ import '../services/theme_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/help_dialog.dart';
 import '../widgets/share_preview_dialog.dart';
+import '../widgets/notification_settings_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   final ValueNotifier<String>? sharedTextNotifier;
@@ -116,15 +117,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     widget.sharedTextNotifier?.addListener(_onExternalTextChange);
     widget.sharedBgPathNotifier?.addListener(_onExternalBgChange);
     widget.sharedCardNotifier?.addListener(_onSavedCardSelected);
-    NotificationService.instance.onNotificationClick = (quoteText) {
-      if (mounted) {
-        setState(() {
-          _textController.text = quoteText;
-          _fontSize = _calculateOptimalFontSize(quoteText);
-        });
-        _saveCardPreferences();
-      }
-    };
     AdService().loadInterstitialAd();
     _loadUserPreferences();
   }
@@ -268,36 +260,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _toggleNotification() async {
+  Future<void> _openNotificationSettings() async {
     HapticFeedback.lightImpact();
-    final nextState = !_notificationEnabled;
-    setState(() {
-      _notificationEnabled = nextState;
-    });
-
-    await NotificationService.instance.saveSettings(
-      isEnabled: nextState,
-      time: const TimeOfDay(hour: 9, minute: 0),
-    );
-
+    await NotificationSettingsDialog.show(context);
+    final notiEnabled = await NotificationService.instance.isNotificationEnabled();
     if (mounted) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            nextState
-                ? '☀️ 매일 오전 9시 아침 안부 알림이 켜졌습니다 🔔'
-                : '🔕 아침 안부 알림이 꺼졌습니다',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          duration: const Duration(seconds: 1),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: nextState ? const Color(0xFFD35400) : const Color(0xFF455A64),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
+      setState(() {
+        _notificationEnabled = notiEnabled;
+      });
     }
   }
 
@@ -1188,8 +1158,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     : Colors.white60,
                 size: 19,
               ),
-              tooltip: _notificationEnabled ? '아침 9시 알림 끄기' : '아침 9시 알림 켜기',
-              onPressed: _toggleNotification,
+              tooltip: '아침 안부 알림 설정',
+              onPressed: _openNotificationSettings,
             ),
           ),
           // Theme Toggle Button (Light / Dark)

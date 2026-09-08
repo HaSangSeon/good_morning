@@ -23,12 +23,14 @@ class HomeScreen extends StatefulWidget {
   final ValueNotifier<String>? sharedTextNotifier;
   final ValueNotifier<String>? sharedBgPathNotifier;
   final ValueNotifier<SavedCard?>? sharedCardNotifier;
+  final ValueNotifier<ExternalCardRequest?>? sharedCardRequestNotifier;
 
   const HomeScreen({
     super.key,
     this.sharedTextNotifier,
     this.sharedBgPathNotifier,
     this.sharedCardNotifier,
+    this.sharedCardRequestNotifier,
   });
 
   @override
@@ -44,6 +46,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _soundEnabled = true;
   bool _notificationEnabled = true;
   String? _customImagePath;
+  bool _hasReceivedExternalRequest = false;
+  String? _lastSelectedBgCategoryTab;
 
   // Background Images with Categories & Titles from home_card_data.dart
   List<Map<String, String>> get _bgList => defaultBackgroundList;
@@ -57,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Color? _borderColor = const Color(
     0xFFFFD700,
   ); // Border color (null = no border)
-  final String _selectedFontFamily = 'Jua';
+  String _selectedFontFamily = 'Jua';
   int _todayQuoteIndex = 0;
 
   // 5 Main Fast Text Colors
@@ -69,8 +73,115 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     {'name': '에메랄드', 'color': Color(0xFF00E676)},
   ];
 
+  static final List<Map<String, dynamic>> _koreanFontOptions = [
+    {
+      'id': 'Jua',
+      'name': '주아체',
+      'font': GoogleFonts.jua(),
+    },
+    {
+      'id': 'DoHyeon',
+      'name': '도현체',
+      'font': GoogleFonts.doHyeon(),
+    },
+    {
+      'id': 'NanumMyeongjo',
+      'name': '나눔명조',
+      'font': GoogleFonts.nanumMyeongjo(fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'SongMyung',
+      'name': '송명체',
+      'font': GoogleFonts.songMyung(fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'GowunBatang',
+      'name': '고운바탕',
+      'font': GoogleFonts.gowunBatang(fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'YeonSung',
+      'name': '연성체',
+      'font': GoogleFonts.yeonSung(),
+    },
+    {
+      'id': 'GamjaFlower',
+      'name': '감자꽃',
+      'font': GoogleFonts.gamjaFlower(fontSize: 15),
+    },
+    {
+      'id': 'HiMelody',
+      'name': '하이멜로디',
+      'font': GoogleFonts.hiMelody(fontSize: 15),
+    },
+    {
+      'id': 'PoorStory',
+      'name': '푸어스토리',
+      'font': GoogleFonts.poorStory(fontSize: 15),
+    },
+    {
+      'id': 'Gaegu',
+      'name': '개구체',
+      'font': GoogleFonts.gaegu(fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'SingleDay',
+      'name': '싱글데이',
+      'font': GoogleFonts.singleDay(fontSize: 15),
+    },
+    {
+      'id': 'Dongle',
+      'name': '동글체',
+      'font': GoogleFonts.dongle(fontSize: 18, fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'CuteFont',
+      'name': '큐트폰트',
+      'font': GoogleFonts.cuteFont(fontSize: 17, fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'NanumPenScript',
+      'name': '나눔손글씨',
+      'font': GoogleFonts.nanumPenScript(fontSize: 16),
+    },
+    {
+      'id': 'NanumBrushScript',
+      'name': '붓글씨',
+      'font': GoogleFonts.nanumBrushScript(fontSize: 15),
+    },
+    {
+      'id': 'KirangHaerang',
+      'name': '기랑해랑',
+      'font': GoogleFonts.kirangHaerang(),
+    },
+    {
+      'id': 'BlackHanSans',
+      'name': '블랙한스',
+      'font': GoogleFonts.blackHanSans(),
+    },
+    {
+      'id': 'GowunDodum',
+      'name': '고운돋움',
+      'font': GoogleFonts.gowunDodum(),
+    },
+    {
+      'id': 'Hahmlet',
+      'name': '함렛체',
+      'font': GoogleFonts.hahmlet(fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'Sunflower',
+      'name': '해바라기',
+      'font': GoogleFonts.sunflower(fontWeight: FontWeight.bold),
+    },
+    {
+      'id': 'NanumGothic',
+      'name': '나눔고딕',
+      'font': GoogleFonts.nanumGothic(fontWeight: FontWeight.bold),
+    },
+  ];
+
   bool _isDecorateExpanded = false;
-  bool _showWatermark = true;
   bool _isSharing = false;
 
   // Scroll Controller & Scroll Down Hint Indicator
@@ -117,6 +228,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     widget.sharedTextNotifier?.addListener(_onExternalTextChange);
     widget.sharedBgPathNotifier?.addListener(_onExternalBgChange);
     widget.sharedCardNotifier?.addListener(_onSavedCardSelected);
+    widget.sharedCardRequestNotifier?.addListener(_onExternalCardRequest);
+    _checkInitialCardRequest();
     AdService().loadInterstitialAd();
     _loadUserPreferences();
   }
@@ -133,32 +246,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final savedTextColorVal = prefs.getInt('saved_card_text_color');
     final hasSavedBorder = prefs.containsKey('saved_card_border_color');
     final savedBorderColorVal = prefs.getInt('saved_card_border_color');
-    final showWatermark = prefs.getBool('show_watermark') ?? true;
     final savedCustomImagePath = prefs.getString('saved_card_custom_image_path');
+    final savedFontFamily = prefs.getString('saved_card_font_family');
 
     setState(() {
       _soundEnabled = enabled;
       _notificationEnabled = notiEnabled;
       _isDecorateExpanded = isExpanded;
-      _showWatermark = showWatermark;
 
-      if (savedCustomImagePath != null && File(savedCustomImagePath).existsSync()) {
-        _customImagePath = savedCustomImagePath;
-      }
+      if (!_hasReceivedExternalRequest) {
+        if (savedCustomImagePath != null && File(savedCustomImagePath).existsSync()) {
+          _customImagePath = savedCustomImagePath;
+        }
 
-      if (widget.sharedTextNotifier == null ||
-          widget.sharedTextNotifier!.value.isEmpty) {
-        if (savedText != null && savedText.isNotEmpty) {
-          _textController.text = savedText;
+        if (widget.sharedTextNotifier == null ||
+            widget.sharedTextNotifier!.value.isEmpty) {
+          if (savedText != null && savedText.isNotEmpty) {
+            _textController.text = savedText;
+          }
+        }
+        if (savedBgIndex != null &&
+            savedBgIndex >= 0 &&
+            savedBgIndex < _bgList.length) {
+          _bgIndex = savedBgIndex;
+        }
+        if (savedFontSize != null) {
+          _fontSize = savedFontSize;
         }
       }
-      if (savedBgIndex != null &&
-          savedBgIndex >= 0 &&
-          savedBgIndex < _bgList.length) {
-        _bgIndex = savedBgIndex;
-      }
-      if (savedFontSize != null) {
-        _fontSize = savedFontSize;
+      if (savedFontFamily != null && savedFontFamily.isNotEmpty) {
+        _selectedFontFamily = savedFontFamily;
       }
       if (savedTextColorVal != null) {
         _textColor = Color(savedTextColorVal);
@@ -182,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       await prefs.setInt('saved_card_bg_index', _bgIndex);
       await prefs.setDouble('saved_card_font_size', _fontSize);
       await prefs.setInt('saved_card_text_color', _textColor.toARGB32());
-      await prefs.setBool('show_watermark', _showWatermark);
+      await prefs.setString('saved_card_font_family', _selectedFontFamily);
       if (_customImagePath != null && File(_customImagePath!).existsSync()) {
         await prefs.setString('saved_card_custom_image_path', _customImagePath!);
       } else {
@@ -271,43 +388,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  /// 텍스트 길이 및 줄 바꿈 수에 따라 카드에 딱 맞는 황금 비율 폰트 크기 자동 계산
+  /// 텍스트 길이, 줄 수, 최장 줄 길이를 종합 고려하여 카드에 여백과 가독성이 가장 이상적인 황금비율 폰트 크기 계산
   double _calculateOptimalFontSize(String text) {
     final cleanText = text.trim();
-    if (cleanText.isEmpty) return 24.0;
+    if (cleanText.isEmpty) return 22.0;
 
-    final len = cleanText.length;
-    final lines = cleanText.split('\n').length;
+    final lines = cleanText.split('\n');
+    final totalChars = cleanText.replaceAll(RegExp(r'\s+'), '').length;
+    final lineCount = lines.length;
 
-    if (len <= 25 && lines <= 2) {
-      return 28.0; // 짧은 아침 인사 (1~2줄)
-    } else if (len <= 55 && lines <= 3) {
-      return 23.0; // 보통 길이 덕담 (2~3줄)
-    } else if (len <= 90 && lines <= 5) {
-      return 18.5; // 중간 길이 명언 (4~5줄)
-    } else if (len <= 140 || lines <= 8) {
-      return 16.0; // 긴 명언/시 (6~8줄)
-    } else {
-      return 14.0; // 장문 좋은글 (9줄 이상)
+    int maxLineLength = 0;
+    for (final l in lines) {
+      final len = l.trim().length;
+      if (len > maxLineLength) maxLineLength = len;
     }
+
+    // 글자 수, 줄 수, 최장 줄 길이에 따른 세심한 최적 폰트 스케일링
+    if (totalChars <= 22 && lineCount <= 2 && maxLineLength <= 13) {
+      return 23.0; // 짧은 아침 인사 (1~2줄)
+    } else if (totalChars <= 42 && lineCount <= 3 && maxLineLength <= 15) {
+      return 18.5; // 보통 덕담 (2~3줄)
+    } else if (totalChars <= 75 && lineCount <= 5 && maxLineLength <= 14) {
+      return 14.5; // 짧은 건강 꿀팁 및 명언 (4~5줄) -> 카드가 답답하지 않고 시원하게 여백 확보!
+    } else if (totalChars <= 110 || lineCount <= 7 || maxLineLength >= 15) {
+      return 13.0; // 건강 꿀팁(제목 포함 6~7줄) 및 명언 -> 가장 긴 제목 줄도 줄바꿈 없이 한 줄에 쏙 들어가도록!
+    } else if (totalChars <= 150 || lineCount <= 9) {
+      return 11.5; // 장문 시/명언 (8~9줄)
+    } else {
+      return 10.5; // 10줄 이상 장문
+    }
+  }
+
+  void _checkInitialCardRequest() {
+    if (widget.sharedCardRequestNotifier != null &&
+        widget.sharedCardRequestNotifier!.value != null) {
+      _onExternalCardRequest();
+    }
+  }
+
+  void _onExternalCardRequest() {
+    final req = widget.sharedCardRequestNotifier?.value;
+    if (req == null) return;
+    _hasReceivedExternalRequest = true;
+
+    final formattedText = formatTextWithNaturalBreaks(req.text);
+    final optimalFontSize = _calculateOptimalFontSize(formattedText);
+
+    setState(() {
+      _textController.text = formattedText;
+      _fontSize = optimalFontSize;
+
+      if (req.bgPath != null && req.bgPath!.isNotEmpty) {
+        final index = _bgList.indexWhere((bg) => bg['path'] == req.bgPath);
+        if (index >= 0) {
+          _customImagePath = null;
+          _bgIndex = index;
+        }
+      }
+      if (req.category != null) {
+        _lastSelectedBgCategoryTab = req.category;
+      }
+    });
+    _saveCardPreferences();
   }
 
   void _onExternalTextChange() {
     if (widget.sharedTextNotifier != null &&
         widget.sharedTextNotifier!.value.isNotEmpty) {
-      final newText = widget.sharedTextNotifier!.value;
+      final newText = formatTextWithNaturalBreaks(widget.sharedTextNotifier!.value);
       setState(() {
         _textController.text = newText;
         _fontSize = _calculateOptimalFontSize(newText);
-        if (widget.sharedBgPathNotifier != null &&
-            widget.sharedBgPathNotifier!.value.isNotEmpty) {
-          final bgPath = widget.sharedBgPathNotifier!.value;
-          final index = _bgList.indexWhere((bg) => bg['path'] == bgPath);
-          if (index >= 0) {
-            _customImagePath = null;
-            _bgIndex = index;
-          }
-        }
       });
       _saveCardPreferences();
     }
@@ -607,33 +758,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 _fontSize = _calculateOptimalFontSize(quote);
                               });
                               _saveCardPreferences();
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Row(
-                                    children: [
-                                      Icon(Icons.check_circle, color: Color(0xFFFFD700), size: 18),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        '✨ 추천 문구가 직접쓰기 란에 쏙 들어갔습니다!',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
-                                      ),
-                                    ],
-                                  ),
-                                  backgroundColor: const Color(0xFF2D1B36),
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              );
                             },
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.edit_note_rounded, color: Colors.white, size: 22),
-                                SizedBox(width: 6),
+                                Icon(Icons.style_rounded, color: Colors.white, size: 20),
+                                SizedBox(width: 8),
                                 Text(
-                                  '직접쓰기 란에 넣기',
+                                  '카드로 꾸미기',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -694,19 +826,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            // 3. 선택적 이너 프레임 테두리 (모서리 잔상 없는 깔끔한 내부 프레임)
+            // 3. 선택적 둥근 테두리 (모서리 바깥 여백까지 테두리 색상으로 완벽 채움)
             if (_borderColor != null)
               Positioned.fill(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24.0),
-                      border: Border.all(
-                        color: _borderColor!,
-                        width: 10.0,
-                      ),
-                    ),
+                child: CustomPaint(
+                  painter: CardBorderPainter(
+                    color: _borderColor!,
+                    borderWidth: 4.5 * scale,
+                    cornerRadius: 16.0 * scale,
                   ),
                 ),
               ),
@@ -728,17 +855,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            // 5. 마음카드 워터마크 뱃지 (1080px 고화질 규격)
-            if (_showWatermark)
-              Positioned(
-                right: 32,
-                bottom: 32,
-                child: _buildWatermarkBadge(
-                  fontSize: 22,
-                  iconSize: 26,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
+            // 5. 마음카드 워터마크 뱃지 (1080px 고화질 규격, 항시 노출)
+            Positioned(
+              right: 32,
+              bottom: 32,
+              child: _buildWatermarkBadge(
+                fontSize: 22,
+                iconSize: 26,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
+            ),
           ],
         ),
       ),
@@ -793,34 +919,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           imageFilePath: imageFile.path,
           onSaveCard: () async {
             HapticFeedback.mediumImpact();
-            final isNew = await _saveCurrentCard();
-            if (!mounted) return isNew;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(
-                      isNew ? Icons.check_circle : Icons.bookmark_added_rounded,
-                      color: const Color(0xFFFFD700),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      isNew
-                          ? '💌 [내 카드함]에 소중히 보관되었습니다!'
-                          : '📌 이미 보관함에 담겨있는 카드입니다',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                backgroundColor: const Color(0xFF1E2430),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-            return isNew;
+            return await _saveCurrentCard();
           },
         );
       } else {
@@ -842,54 +941,155 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final shadowOffset = (effectiveFontSize * 0.05).clamp(1.5, 4.5);
     final shadowBlur = (effectiveFontSize * 0.08).clamp(2.5, 7.0);
 
+    final shadows = [
+      Shadow(
+        offset: Offset(shadowOffset, shadowOffset),
+        blurRadius: shadowBlur,
+        color: Colors.black87,
+      ),
+      Shadow(
+        offset: Offset(-shadowOffset, -shadowOffset),
+        blurRadius: shadowBlur,
+        color: Colors.black87,
+      ),
+    ];
+
     switch (_selectedFontFamily) {
       case 'DoHyeon':
         return GoogleFonts.doHyeon(
           fontSize: effectiveFontSize,
           color: _textColor,
-          shadows: [
-            Shadow(
-              offset: Offset(shadowOffset, shadowOffset),
-              blurRadius: shadowBlur,
-              color: Colors.black87,
-            ),
-            Shadow(
-              offset: Offset(-shadowOffset, -shadowOffset),
-              blurRadius: shadowBlur,
-              color: Colors.black87,
-            ),
-          ],
+          shadows: shadows,
+        );
+      case 'NanumMyeongjo':
+        return GoogleFonts.nanumMyeongjo(
+          fontSize: effectiveFontSize,
+          fontWeight: FontWeight.w700,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'SongMyung':
+        return GoogleFonts.songMyung(
+          fontSize: (effectiveFontSize * 1.05).clamp(10.0, 75.0),
+          fontWeight: FontWeight.w700,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'GowunBatang':
+        return GoogleFonts.gowunBatang(
+          fontSize: effectiveFontSize,
+          fontWeight: FontWeight.bold,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'YeonSung':
+        return GoogleFonts.yeonSung(
+          fontSize: (effectiveFontSize * 1.05).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'GamjaFlower':
+        return GoogleFonts.gamjaFlower(
+          fontSize: (effectiveFontSize * 1.15).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'HiMelody':
+        return GoogleFonts.hiMelody(
+          fontSize: (effectiveFontSize * 1.2).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'PoorStory':
+        return GoogleFonts.poorStory(
+          fontSize: (effectiveFontSize * 1.15).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'Gaegu':
+        return GoogleFonts.gaegu(
+          fontSize: (effectiveFontSize * 1.1).clamp(10.0, 70.0),
+          fontWeight: FontWeight.bold,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'SingleDay':
+        return GoogleFonts.singleDay(
+          fontSize: (effectiveFontSize * 1.2).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'Dongle':
+        return GoogleFonts.dongle(
+          fontSize: (effectiveFontSize * 1.35).clamp(12.0, 85.0),
+          fontWeight: FontWeight.bold,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'CuteFont':
+        return GoogleFonts.cuteFont(
+          fontSize: (effectiveFontSize * 1.35).clamp(12.0, 85.0),
+          fontWeight: FontWeight.bold,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'NanumPenScript':
+        return GoogleFonts.nanumPenScript(
+          fontSize: (effectiveFontSize * 1.25).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'NanumBrushScript':
+        return GoogleFonts.nanumBrushScript(
+          fontSize: (effectiveFontSize * 1.2).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'KirangHaerang':
+        return GoogleFonts.kirangHaerang(
+          fontSize: (effectiveFontSize * 1.15).clamp(10.0, 75.0),
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'BlackHanSans':
+        return GoogleFonts.blackHanSans(
+          fontSize: effectiveFontSize,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'GowunDodum':
+        return GoogleFonts.gowunDodum(
+          fontSize: effectiveFontSize,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'Hahmlet':
+        return GoogleFonts.hahmlet(
+          fontSize: effectiveFontSize,
+          fontWeight: FontWeight.w700,
+          color: _textColor,
+          shadows: shadows,
+        );
+      case 'Sunflower':
+        return GoogleFonts.sunflower(
+          fontSize: (effectiveFontSize * 1.05).clamp(10.0, 70.0),
+          fontWeight: FontWeight.bold,
+          color: _textColor,
+          shadows: shadows,
         );
       case 'NanumGothic':
         return GoogleFonts.nanumGothic(
           fontSize: effectiveFontSize,
           fontWeight: FontWeight.bold,
           color: _textColor,
-          shadows: [
-            Shadow(
-              offset: Offset(shadowOffset, shadowOffset),
-              blurRadius: shadowBlur,
-              color: Colors.black87,
-            ),
-          ],
+          shadows: shadows,
         );
       case 'Jua':
       default:
         return GoogleFonts.jua(
           fontSize: effectiveFontSize,
           color: _textColor,
-          shadows: [
-            Shadow(
-              offset: Offset(shadowOffset, shadowOffset),
-              blurRadius: shadowBlur,
-              color: Colors.black87,
-            ),
-            Shadow(
-              offset: Offset(-shadowOffset, -shadowOffset),
-              blurRadius: shadowBlur,
-              color: Colors.black87,
-            ),
-          ],
+          shadows: shadows,
         );
     }
   }
@@ -941,6 +1141,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     widget.sharedTextNotifier?.removeListener(_onExternalTextChange);
     widget.sharedBgPathNotifier?.removeListener(_onExternalBgChange);
     widget.sharedCardNotifier?.removeListener(_onSavedCardSelected);
+    widget.sharedCardRequestNotifier?.removeListener(_onExternalCardRequest);
     super.dispose();
   }
 
@@ -1321,71 +1522,88 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             message: '터치하여 크게 보기',
                             child: ConstrainedBox(
                               constraints: BoxConstraints(maxHeight: previewMaxHeight),
-                              child: Screenshot(
-                                controller: _screenshotController,
-                                child: AspectRatio(
-                                  aspectRatio: 1.0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Color(0x38000000),
-                                          blurRadius: 16,
-                                          offset: Offset(0, 6),
-                                        ),
-                                      ],
-                                      image: DecorationImage(
-                                        image: _getBackgroundImageProvider(),
-                                        fit: BoxFit.cover,
-                                      ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x38000000),
+                                      blurRadius: 16,
+                                      offset: Offset(0, 6),
                                     ),
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          clipBehavior: Clip.antiAlias,
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(16),
-                                            border: _borderColor != null
-                                                ? Border.all(color: _borderColor!, width: 4.5)
-                                                : null,
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Colors.black.withAlpha(30),
-                                                Colors.transparent,
-                                                Colors.black.withAlpha(50),
-                                              ],
-                                            ),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: SingleChildScrollView(
-                                            child: Text(
-                                              _textController.text,
-                                              textAlign: TextAlign.center,
-                                              style: _getAppliedTextStyle().copyWith(
-                                                fontSize: (_fontSize * 0.95).clamp(8.0, 44.0),
-                                                height: 1.35,
-                                              ),
-                                            ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Screenshot(
+                                    controller: _screenshotController,
+                                    child: AspectRatio(
+                                      aspectRatio: 1.0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: _getBackgroundImageProvider(),
+                                            fit: BoxFit.cover,
                                           ),
                                         ),
-                                        if (_showWatermark)
-                                          Positioned(
-                                            right: 8,
-                                            bottom: 8,
-                                            child: _buildWatermarkBadge(
-                                              fontSize: 10,
-                                              iconSize: 12,
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2.5,
+                                        child: Stack(
+                                          children: [
+                                            Container(
+                                              clipBehavior: Clip.antiAlias,
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(16),
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    Colors.black.withAlpha(30),
+                                                    Colors.transparent,
+                                                    Colors.black.withAlpha(50),
+                                                  ],
+                                                ),
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: SingleChildScrollView(
+                                                child: Text(
+                                                  _textController.text,
+                                                  textAlign: TextAlign.center,
+                                                  softWrap: true,
+                                                  style: _getAppliedTextStyle().copyWith(
+                                                    fontSize: (_fontSize * 0.95).clamp(8.0, 44.0),
+                                                    height: 1.45,
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                      ],
+                                            // 둥근 테두리 및 4개 모서리 바깥 여백을 테두리 색상으로 완벽 밀착 채움
+                                            if (_borderColor != null)
+                                              Positioned.fill(
+                                                child: IgnorePointer(
+                                                  child: CustomPaint(
+                                                    painter: CardBorderPainter(
+                                                      color: _borderColor!,
+                                                      borderWidth: 4.5,
+                                                      cornerRadius: 16.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            Positioned(
+                                              right: 8,
+                                              bottom: 8,
+                                              child: _buildWatermarkBadge(
+                                                fontSize: 10,
+                                                iconSize: 12,
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 2.5,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1561,7 +1779,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                         ),
                         subtitle: Text(
-                          '크기 · 색상 · 테두리 · 이모티콘',
+                          '크기 · 글꼴 · 테두리 · 색상',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? const Color(0xFFE0E0E0) : Colors.black54,
@@ -1668,6 +1886,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     ),
                                   ],
                                 ),
+                              ),
+                              Divider(
+                                height: 14,
+                                color: isDark ? Colors.transparent : const Color(0x1F8D6E63),
+                              ),
+
+                              // Font Family Selector (Horizontal scroll - No Overflow!)
+                              Row(
+                                children: [
+                                  Text(
+                                    '글꼴: ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: _koreanFontOptions.map((fontItem) {
+                                          final String fontId = fontItem['id'] as String;
+                                          final String fontName = fontItem['name'] as String;
+                                          final TextStyle fontStyle = fontItem['font'] as TextStyle;
+                                          final bool isSelected = _selectedFontFamily == fontId;
+
+                                          return Padding(
+                                            padding: const EdgeInsets.only(right: 6.0),
+                                            child: ChoiceChip(
+                                              label: Text(
+                                                fontName,
+                                                style: fontStyle.copyWith(
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : (isDark ? Colors.white70 : Colors.black87),
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              selected: isSelected,
+                                              selectedColor: Colors.deepOrange,
+                                              backgroundColor: isDark
+                                                  ? const Color(0xFF2D2A3E)
+                                                  : const Color(0xFFFFEDE0),
+                                              onSelected: (selected) {
+                                                if (selected) {
+                                                  HapticFeedback.selectionClick();
+                                                  setState(() => _selectedFontFamily = fontId);
+                                                  _saveCardPreferences();
+                                                }
+                                              },
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                               Divider(
                                 height: 14,
@@ -1940,64 +2218,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                 ],
                               ),
-                              Divider(
-                                height: 14,
-                                color: isDark ? Colors.transparent : const Color(0x1F8D6E63),
-                              ),
 
-                              // Watermark Brand Badge Toggle
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF1F2333) : const Color(0xFFFFF7F0),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isDark ? Colors.white10 : const Color(0xFFFFE0B2),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.spa_rounded,
-                                      size: 18,
-                                      color: isDark ? const Color(0xFFFFD700) : const Color(0xFFE64A19),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '마음카드 워터마크 표시',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13.5,
-                                              color: isDark ? Colors.white : Colors.black87,
-                                            ),
-                                          ),
-                                          Text(
-                                            '카드 우측 하단에 감성적인 출처 배지 표시',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: isDark ? Colors.white70 : Colors.black54,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Switch.adaptive(
-                                      value: _showWatermark,
-                                      activeColor: const Color(0xFFE64A19),
-                                      onChanged: (val) {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _showWatermark = val);
-                                        _saveCardPreferences();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
                             ],
                           ),
                         ],
@@ -2367,293 +2588,392 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) {
-        final screenWidth = MediaQuery.sizeOf(context).width;
+      builder: (dialogContext) {
+        final screenWidth = MediaQuery.sizeOf(dialogContext).width;
         final cardSize = (screenWidth - 80).clamp(260.0, 360.0);
+        bool isSavingCard = false;
+        String? floatingMessage;
+        bool isFloatingSuccess = true;
+        Timer? toastTimer;
 
-        return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1B1E2E) : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(26),
-            side: BorderSide(
-              color: isDark ? Colors.white12 : const Color(0x1F8D6E63),
-            ),
-          ),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 1. Luxury Header Banner with Close Button
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 16, 12, 14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? [const Color(0xFF1B1B2F), const Color(0xFF2C1938), const Color(0xFF381A40)]
-                        : [const Color(0xFFC0392B), const Color(0xFFD35400), const Color(0xFFE67E22)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(isDark ? 60 : 35),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: isDark ? const Color(0xFF1B1E2E) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(26),
+                side: BorderSide(
+                  color: isDark ? Colors.white12 : const Color(0x1F8D6E63),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(35),
-                        shape: BoxShape.circle,
+              ),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 1. Luxury Header Banner with Close Button
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 12, 14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isDark
+                            ? [const Color(0xFF1B1B2F), const Color(0xFF2C1938), const Color(0xFF381A40)]
+                            : [const Color(0xFFC0392B), const Color(0xFFD35400), const Color(0xFFE67E22)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      child: const Icon(Icons.auto_awesome, color: Color(0xFFFFD700), size: 18),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(isDark ? 60 : 35),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(35),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.auto_awesome, color: Color(0xFFFFD700), size: 18),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '마음카드 완성본 감상',
+                                style: GoogleFonts.jua(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                '소중한 분께 전달할 아름다운 완성 카드입니다',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: Colors.white70,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(35),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                          ),
+                          tooltip: '닫기',
+                          onPressed: () {
+                            toastTimer?.cancel();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 2. High-Definition Art Frame Card Presentation
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                    child: Container(
+                      width: cardSize,
+                      height: cardSize,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(isDark ? 90 : 35),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        image: DecorationImage(
+                          image: _getBackgroundImageProvider(),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Stack(
                         children: [
-                          Text(
-                            '마음카드 완성본 감상',
-                            style: GoogleFonts.jua(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.3,
+                          Container(
+                            clipBehavior: Clip.antiAlias,
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: _borderColor != null
+                                  ? Border.all(color: _borderColor!, width: 5.5)
+                                  : null,
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withAlpha(30),
+                                  Colors.transparent,
+                                  Colors.black.withAlpha(50),
+                                ],
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: SingleChildScrollView(
+                              child: Text(
+                                _textController.text,
+                                textAlign: TextAlign.center,
+                                style: _getAppliedTextStyle().copyWith(
+                                  fontSize: (_fontSize * 1.15).clamp(10.0, 48.0),
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            '소중한 분께 전달할 아름다운 완성 카드입니다',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: Colors.white70,
-                              letterSpacing: -0.3,
+                          Positioned(
+                            right: 12,
+                            bottom: 12,
+                            child: _buildWatermarkBadge(
+                              fontSize: 12,
+                              iconSize: 14,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                            ),
+                          ),
+
+                          // 플로팅 안내 메시지 (레이아웃 변형 없이 카드 위에 깔끔하게 떴다가 사라짐)
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                child: floatingMessage != null
+                                    ? Center(
+                                        key: ValueKey(floatingMessage),
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xF2161922),
+                                            borderRadius: BorderRadius.circular(30),
+                                            border: Border.all(
+                                              color: isFloatingSuccess
+                                                  ? const Color(0x6669F0AE)
+                                                  : const Color(0x66FFB74D),
+                                              width: 1.2,
+                                            ),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Color(0x66000000),
+                                                blurRadius: 20,
+                                                offset: Offset(0, 8),
+                                              ),
+                                              BoxShadow(
+                                                color: Color(0x22000000),
+                                                blurRadius: 6,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                  color: isFloatingSuccess
+                                                      ? const Color(0x2569F0AE)
+                                                      : const Color(0x25FFB74D),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  isFloatingSuccess
+                                                      ? Icons.check_circle_rounded
+                                                      : Icons.bookmark_added_rounded,
+                                                  color: isFloatingSuccess
+                                                      ? const Color(0xFF69F0AE)
+                                                      : const Color(0xFFFFB74D),
+                                                  size: 19,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Flexible(
+                                                child: Text(
+                                                  floatingMessage!,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w700,
+                                                    letterSpacing: -0.3,
+                                                    height: 1.2,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(35),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-                      ),
-                      tooltip: '닫기',
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 2. High-Definition Art Frame Card Presentation
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                child: Container(
-                  width: cardSize,
-                  height: cardSize,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(isDark ? 90 : 35),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                    image: DecorationImage(
-                      image: _getBackgroundImageProvider(),
-                      fit: BoxFit.cover,
-                    ),
                   ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        clipBehavior: Clip.antiAlias,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          border: _borderColor != null
-                              ? Border.all(color: _borderColor!, width: 5.5)
-                              : null,
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withAlpha(30),
-                              Colors.transparent,
-                              Colors.black.withAlpha(50),
-                            ],
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: SingleChildScrollView(
-                          child: Text(
-                            _textController.text,
-                            textAlign: TextAlign.center,
-                            style: _getAppliedTextStyle().copyWith(
-                              fontSize: (_fontSize * 1.15).clamp(10.0, 48.0),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_showWatermark)
-                        Positioned(
-                          right: 12,
-                          bottom: 12,
-                          child: _buildWatermarkBadge(
-                            fontSize: 12,
-                            iconSize: 14,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
 
-              // 3. Luxury Bottom Action Buttons
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                child: Row(
-                  children: [
-                    // 1. 내 카드함 보관
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        height: 48,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          color: isDark ? const Color(0xFF2B3245) : const Color(0xFFFFF0E6),
-                          border: Border.all(
-                            color: isDark ? Colors.white12 : const Color(0xFFFFCCBC),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: InkWell(
-                          onTap: () async {
-                            HapticFeedback.mediumImpact();
-                            final isNew = await _saveCurrentCard();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
+                  // 3. Luxury Bottom Action Buttons
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                    child: Row(
+                      children: [
+                        // 1. 보관함 저장 버튼 (가로 사이즈 확장으로 여유로운 터치 영역 확보)
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            height: 48,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color: (isDark ? const Color(0xFF2B3245) : const Color(0xFFFFF0E6)),
+                              border: Border.all(
+                                color: (isDark ? Colors.white12 : const Color(0xFFFFCCBC)),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: InkWell(
+                              onTap: isSavingCard
+                                  ? null
+                                  : () async {
+                                      HapticFeedback.mediumImpact();
+                                      setDialogState(() {
+                                        isSavingCard = true;
+                                      });
+                                      final isNew = await _saveCurrentCard();
+                                      toastTimer?.cancel();
+                                      if (context.mounted) {
+                                        setDialogState(() {
+                                          isSavingCard = false;
+                                          floatingMessage = isNew
+                                              ? '💌 [내 카드함]에 소중히 보관되었습니다!'
+                                              : '📌 이미 보관함에 담겨있는 카드입니다';
+                                          isFloatingSuccess = isNew;
+                                        });
+                                        toastTimer = Timer(const Duration(milliseconds: 2000), () {
+                                          if (context.mounted) {
+                                            try {
+                                              setDialogState(() {
+                                                floatingMessage = null;
+                                              });
+                                            } catch (_) {}
+                                          }
+                                        });
+                                      }
+                                    },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        isNew ? Icons.check_circle : Icons.bookmark_added_rounded,
-                                        color: const Color(0xFFFFD700),
-                                      ),
-                                      const SizedBox(width: 10),
+                                      if (isSavingCard)
+                                        SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
+                                          ),
+                                        )
+                                      else
+                                        Icon(
+                                          Icons.bookmark_add_rounded,
+                                          color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFD84315),
+                                          size: 18,
+                                        ),
+                                      const SizedBox(width: 5),
                                       Text(
-                                        isNew
-                                            ? '💌 [내 카드함]에 소중히 보관되었습니다!'
-                                            : '📌 이미 보관함에 담겨있는 카드입니다',
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                        '보관함 저장',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  backgroundColor: const Color(0xFF1E2430),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  duration: const Duration(seconds: 2),
                                 ),
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.bookmark_add_rounded, color: Color(0xFFD84315), size: 18),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    '카드 보관',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
+                        const SizedBox(width: 10),
 
-                    // 2. 카카오톡 바로 전송
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        height: 48,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          color: const Color(0xFFFEE500),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x33FEE500),
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
+                        // 2. 카카오톡 바로 전송
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            height: 48,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color: const Color(0xFFFEE500),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x33FEE500),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            _shareImage();
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 6),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.share_rounded, color: Colors.black87, size: 18),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    '카카오톡 보내기',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
+                            child: InkWell(
+                              onTap: () {
+                                toastTimer?.cancel();
+                                Navigator.of(context).pop();
+                                _shareImage();
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 6),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.share_rounded, color: Colors.black87, size: 18),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        '카카오톡 보내기',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -3157,7 +3477,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ...{for (var item in _bgList) item['category']!},
     ];
 
-    String selectedCategoryTab = '전체';
+    String selectedCategoryTab = _lastSelectedBgCategoryTab ?? '전체';
+    if (!categories.contains(selectedCategoryTab)) {
+      selectedCategoryTab = '전체';
+    }
 
     showModalBottomSheet(
       context: context,
@@ -3400,6 +3723,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       setModalState(() {
                                         selectedCategoryTab = cat;
                                       });
+                                      _lastSelectedBgCategoryTab = cat;
                                     }
                                   },
                                 ),
@@ -3791,5 +4115,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       },
     );
+  }
+}
+
+/// 카카오톡 및 공유 카드 전송 시 둥근 테두리 바깥쪽 모서리를 테두리 색상으로 완벽하게 채워주는 커스텀 페인터
+class CardBorderPainter extends CustomPainter {
+  final Color color;
+  final double borderWidth;
+  final double cornerRadius;
+
+  const CardBorderPainter({
+    required this.color,
+    this.borderWidth = 4.5,
+    this.cornerRadius = 16.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // 1. 외곽 사각형 (전체 캔버스 끝단까지 90도 밀착)
+    final Rect outerRect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    // 2. 내부 둥근 모서리 사각형 (테두리 두께만큼 안쪽으로 인셋되고 cornerRadius만큼 라운딩)
+    final double innerW = (size.width - borderWidth * 2).clamp(0.0, double.infinity);
+    final double innerH = (size.height - borderWidth * 2).clamp(0.0, double.infinity);
+    final Rect innerRect = Rect.fromLTWH(
+      borderWidth,
+      borderWidth,
+      innerW,
+      innerH,
+    );
+    final RRect innerRRect = RRect.fromRectAndRadius(
+      innerRect,
+      Radius.circular(cornerRadius),
+    );
+
+    // 3. outerRect와 innerRRect 사이의 영역(4변 테두리 + 4개 모서리 바깥 여백)을 테두리 색상으로 빈틈없이 채움
+    final Path path = Path()
+      ..addRect(outerRect)
+      ..addRRect(innerRRect)
+      ..fillType = PathFillType.evenOdd;
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CardBorderPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.borderWidth != borderWidth ||
+        oldDelegate.cornerRadius != cornerRadius;
   }
 }

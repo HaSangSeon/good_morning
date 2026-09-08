@@ -5,8 +5,10 @@ import 'home_screen.dart';
 import 'wisdom_screen.dart';
 import 'health_screen.dart';
 import 'card_archive_screen.dart';
+import '../data/home_card_data.dart';
 import '../services/ad_service.dart';
 import '../services/card_archive_service.dart';
+import '../services/notification_service.dart';
 
 class MainTabScreen extends StatefulWidget {
   const MainTabScreen({super.key});
@@ -21,10 +23,22 @@ class _MainTabScreenState extends State<MainTabScreen> {
   final ValueNotifier<String> _sharedBgPathNotifier = ValueNotifier<String>('');
   final ValueNotifier<SavedCard?> _sharedCardNotifier =
       ValueNotifier<SavedCard?>(null);
+  final ValueNotifier<ExternalCardRequest?> _sharedCardRequestNotifier =
+      ValueNotifier<ExternalCardRequest?>(null);
 
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
   bool _adLoadStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.instance.onNotificationClick = (quoteText) {
+      if (quoteText.isNotEmpty) {
+        _switchToCardMakerWithText(quoteText, sourceName: '아침알림');
+      }
+    };
+  }
 
   @override
   void didChangeDependencies() {
@@ -68,17 +82,26 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
   @override
   void dispose() {
+    NotificationService.instance.onNotificationClick = null;
     _sharedTextNotifier.dispose();
     _sharedBgPathNotifier.dispose();
     _sharedCardNotifier.dispose();
+    _sharedCardRequestNotifier.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
 
-  void _switchToCardMakerWithText(String text, {String? bgPath}) {
-    if (bgPath != null && bgPath.isNotEmpty) {
-      _sharedBgPathNotifier.value = bgPath;
-    }
+  void _switchToCardMakerWithText(
+    String text, {
+    String? sourceName,
+  }) {
+    _sharedCardRequestNotifier.value = ExternalCardRequest(
+      text: text,
+      bgPath: null, // 기존 마음카드 배경 100% 보존 (배경 바꾸지 않음)
+      category: null,
+      sourceName: sourceName,
+      requestId: DateTime.now().microsecondsSinceEpoch,
+    );
     _sharedTextNotifier.value = text;
     setState(() {
       _currentIndex = 0;
@@ -99,15 +122,22 @@ class _MainTabScreenState extends State<MainTabScreen> {
         sharedTextNotifier: _sharedTextNotifier,
         sharedBgPathNotifier: _sharedBgPathNotifier,
         sharedCardNotifier: _sharedCardNotifier,
+        sharedCardRequestNotifier: _sharedCardRequestNotifier,
       ),
       WisdomScreen(
-        onShareAsCard: (cardText, {bgPath}) {
-          _switchToCardMakerWithText(cardText, bgPath: bgPath);
+        onShareAsCard: (cardText, {bgPath, category, sourceName}) {
+          _switchToCardMakerWithText(
+            cardText,
+            sourceName: sourceName ?? '명언',
+          );
         },
       ),
       HealthScreen(
-        onShareAsCard: (cardText, {bgPath}) {
-          _switchToCardMakerWithText(cardText, bgPath: bgPath);
+        onShareAsCard: (cardText, {bgPath, category, sourceName}) {
+          _switchToCardMakerWithText(
+            cardText,
+            sourceName: sourceName ?? '건강',
+          );
         },
       ),
       CardArchiveScreen(onSelectCard: _openSavedCard),

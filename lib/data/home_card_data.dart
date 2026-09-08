@@ -1,7 +1,80 @@
 // 홈 화면 전용 배경 리스트 및 기본 문구 프리셋 데이터
 
   const List<Map<String, String>> defaultBackgroundList = [
-    // 🌸 봄
+    // 📜 명언·지혜 (명언 카드에 최적화된 고즈넉하고 깊이 있는 감성 배경)
+    {
+      'path': 'assets/images/bg_traditional_tea.jpg',
+      'name': '🫖 정갈한 전통 차와 다도',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_temple.jpg',
+      'name': '⛩️ 고즈넉한 천년 사찰',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_bamboo.png',
+      'name': '🎋 곧고 푸른 대나무 숲',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_hanok_lotus.jpg',
+      'name': '🪷 정자와 단아한 연꽃',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_mountain_mist.jpg',
+      'name': '⛰️ 안개 낀 사색의 산길',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_lake.png',
+      'name': '🏞️ 잔잔한 물안개 호수',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_tea.png',
+      'name': '🍵 여유로운 따뜻한 차 한잔',
+      'category': '📜 명언·지혜',
+    },
+    {
+      'path': 'assets/images/bg_sea_sunrise.jpg',
+      'name': '🌅 희망을 품은 붉은 일출',
+      'category': '📜 명언·지혜',
+    },
+
+    // 🌿 건강·활력 (건강 꿀팁과 활기찬 하루를 위한 싱그러운 배경)
+    {
+      'path': 'assets/images/bg_green_forest.jpg',
+      'name': '🍃 피톤치드 싱그러운 숲',
+      'category': '🌿 건강·활력',
+    },
+    {
+      'path': 'assets/images/bg_meadow.jpg',
+      'name': '🌿 활력 넘치는 푸른 초원',
+      'category': '🌿 건강·활력',
+    },
+    {
+      'path': 'assets/images/bg_garden_path.jpg',
+      'name': '🌷 100세 건강 꽃길 산책로',
+      'category': '🌿 건강·활력',
+    },
+    {
+      'path': 'assets/images/bg_window_plants.jpg',
+      'name': '🪴 싱그러운 창가와 식물',
+      'category': '🌿 건강·활력',
+    },
+    {
+      'path': 'assets/images/bg_sunrise_mountain.jpg',
+      'name': '🏔️ 맑은 기운의 새벽 산',
+      'category': '🌿 건강·활력',
+    },
+    {
+      'path': 'assets/images/bg_season_summer.jpg',
+      'name': '🌊 청량한 청정 계곡과 산',
+      'category': '🌿 건강·활력',
+    },
+
     {
       'path': 'assets/images/bg_season_spring.jpg',
       'name': '🌸 벚꽃과 개나리 마을',
@@ -531,4 +604,86 @@
 
     return list;
   }
+
+class ExternalCardRequest {
+  final String text;
+  final String? bgPath;
+  final String? category;
+  final String? sourceName;
+  final int requestId;
+
+  const ExternalCardRequest({
+    required this.text,
+    this.bgPath,
+    this.category,
+    this.sourceName,
+    required this.requestId,
+  });
+}
+
+/// 한국어 텍스트가 카드 안에서 단어 중간에 어색하게 잘리지 않도록
+/// 어절(띄어쓰기) 단위로 자연스럽게 정돈해주는 지능형 줄바꿈 헬퍼
+String formatTextWithNaturalBreaks(String text, {int maxLineChars = 22}) {
+  final clean = text.trim();
+  if (clean.isEmpty) return clean;
+
+  final paragraphs = clean.split('\n');
+  final resultParagraphs = <String>[];
+
+  for (final para in paragraphs) {
+    final trimmedPara = para.trim();
+    if (trimmedPara.isEmpty) {
+      resultParagraphs.add('');
+      continue;
+    }
+
+    // 1. 대괄호 제목 형태(예: [식후 혈당 방어 산책법], 🚶‍♂️ [식후 혈당 방어 산책법])는
+    //    양옆 여백과 가독성을 위해 절대 줄바꿈하지 않고 한 줄로 온전히 보존
+    final bool hasBracketTitle = trimmedPara.contains('[') && trimmedPara.contains(']');
+    if (hasBracketTitle) {
+      resultParagraphs.add(trimmedPara);
+      continue;
+    }
+
+    // 2. 이모지 특수문자를 제외한 순수 텍스트 글자 수 측정
+    final rawText = trimmedPara.replaceAll(
+      RegExp(r'[\u{1F300}-\u{1F9FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}|\u{FE00}-\u{FE0F}]', unicode: true),
+      '',
+    ).trim();
+
+    // 3. 한 줄에 들어갈 수 있는 편안한 길이(22자 이내)라면 원래 작성된 줄바꿈 그대로 보존
+    if (rawText.length <= maxLineChars) {
+      resultParagraphs.add(trimmedPara);
+      continue;
+    }
+
+    // 4. 22자를 초과하는 긴 문장에 대해서만 띄어쓰기(어절) 단위로 자연스럽게 정밀 줄바꿈
+    final words = trimmedPara.split(RegExp(r'\s+'));
+    final lineBuffer = StringBuffer();
+    int currentLineLen = 0;
+
+    for (final word in words) {
+      if (word.isEmpty) continue;
+
+      if (currentLineLen == 0) {
+        lineBuffer.write(word);
+        currentLineLen = word.length;
+      } else if (currentLineLen + 1 + word.length <= maxLineChars) {
+        lineBuffer.write(' $word');
+        currentLineLen += 1 + word.length;
+      } else {
+        resultParagraphs.add(lineBuffer.toString());
+        lineBuffer.clear();
+        lineBuffer.write(word);
+        currentLineLen = word.length;
+      }
+    }
+
+    if (lineBuffer.isNotEmpty) {
+      resultParagraphs.add(lineBuffer.toString());
+    }
+  }
+
+  return resultParagraphs.join('\n');
+}
 

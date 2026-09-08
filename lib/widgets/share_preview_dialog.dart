@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -76,10 +77,18 @@ class SharePreviewDialog extends StatefulWidget {
 class _SharePreviewDialogState extends State<SharePreviewDialog> {
   bool _isSending = false;
   bool _isSavingCard = false;
-  bool? _saveResult; // null: 미저장, true: 신규 보관, false: 이미 보관됨
+  String? _floatingToastMessage;
+  bool _isToastSuccess = true;
+  Timer? _toastTimer;
+
+  @override
+  void dispose() {
+    _toastTimer?.cancel();
+    super.dispose();
+  }
 
   Future<void> _handleSaveCard() async {
-    if (_isSavingCard || _saveResult != null) return;
+    if (_isSavingCard) return;
     setState(() => _isSavingCard = true);
     HapticFeedback.mediumImpact();
 
@@ -88,17 +97,23 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
       isNew = await widget.onSaveCard!();
     }
 
+    _toastTimer?.cancel();
     if (mounted) {
       setState(() {
         _isSavingCard = false;
-        _saveResult = isNew ?? true;
+        _isToastSuccess = isNew ?? true;
+        _floatingToastMessage = (isNew == false)
+            ? '📌 이미 보관함에 담겨있는 카드입니다'
+            : '💌 [내 카드함]에 소중히 보관되었습니다!';
       });
-    }
 
-    // 보관 완료 시각적 확인 후 팝업 자동 종료
-    await Future.delayed(const Duration(milliseconds: 1000));
-    if (mounted) {
-      Navigator.of(context).pop();
+      _toastTimer = Timer(const Duration(milliseconds: 2200), () {
+        if (mounted) {
+          setState(() {
+            _floatingToastMessage = null;
+          });
+        }
+      });
     }
   }
 
@@ -330,10 +345,12 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
       clipBehavior: Clip.antiAlias,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 420),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            // 1. 프리미엄 헤더
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1. 프리미엄 헤더
             Container(
               padding: const EdgeInsets.fromLTRB(20, 18, 14, 18),
               decoration: BoxDecoration(gradient: headerGradient),
@@ -458,11 +475,12 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                                   ),
                                 ),
 
-                                // 카카오톡 사진 버블 (카드 본체 1:1 완본)
+                                // 카카오톡 피드 카드 버블 (실제 카카오톡 전송 피드와 100% 동일)
                                 Flexible(
                                   child: Container(
-                                    constraints: const BoxConstraints(maxWidth: 260),
+                                    constraints: const BoxConstraints(maxWidth: 255),
                                     decoration: BoxDecoration(
+                                      color: Colors.white,
                                       borderRadius: const BorderRadius.only(
                                         topLeft: Radius.circular(16),
                                         topRight: Radius.circular(4),
@@ -471,23 +489,108 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withAlpha(35),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 3),
+                                          color: Colors.black.withAlpha(25),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
                                         ),
                                       ],
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(16),
-                                        topRight: Radius.circular(4),
-                                        bottomLeft: Radius.circular(16),
-                                        bottomRight: Radius.circular(16),
-                                      ),
-                                      child: Image.memory(
-                                        widget.imageBytes!,
-                                        fit: BoxFit.contain,
-                                      ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        // 1. 카드 이미지 (상단 라운딩)
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(16),
+                                            topRight: Radius.circular(4),
+                                          ),
+                                          child: Image.memory(
+                                            widget.imageBytes!,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+
+                                        // 2. 카카오톡 피드 버튼 및 푸터 영역
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              // [나도 카드 만들기] 카카오 공식 스타일 버튼
+                                              Container(
+                                                width: double.infinity,
+                                                height: 36,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFF2F3F5),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: const Text(
+                                                  '나도 카드 만들기',
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFF191919),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 7),
+
+                                              // 카카오 앱 푸터: (APP) 마음카드 | 설정
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Container(
+                                                          padding: const EdgeInsets.symmetric(
+                                                            horizontal: 3,
+                                                            vertical: 1.5,
+                                                          ),
+                                                          decoration: BoxDecoration(
+                                                            color: const Color(0xFFB0B8C1),
+                                                            borderRadius: BorderRadius.circular(3),
+                                                          ),
+                                                          child: const Text(
+                                                            'APP',
+                                                            style: TextStyle(
+                                                              fontSize: 7.5,
+                                                              fontWeight: FontWeight.w800,
+                                                              color: Colors.white,
+                                                              letterSpacing: -0.2,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        const Text(
+                                                          '마음카드',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(0xFF888888),
+                                                            fontWeight: FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const Text(
+                                                      '설정',
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        color: Color(0xFF888888),
+                                                        fontWeight: FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -638,24 +741,15 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: (_isSavingCard || _saveResult != null) ? null : _handleSaveCard,
+                          onTap: _isSavingCard ? null : _handleSaveCard,
                           borderRadius: BorderRadius.circular(16),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
+                          child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: _saveResult == true
-                                  ? (isDark ? const Color(0xFF1B3B22) : const Color(0xFFE8F5E9))
-                                  : _saveResult == false
-                                      ? (isDark ? const Color(0xFF382914) : const Color(0xFFFFF3E0))
-                                      : (isDark ? const Color(0xFF2C271E) : const Color(0xFFFFF9E6)),
+                              color: (isDark ? const Color(0xFF2C271E) : const Color(0xFFFFF9E6)),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: _saveResult == true
-                                    ? (isDark ? const Color(0xFF2E7D32) : const Color(0xFF81C784))
-                                    : _saveResult == false
-                                        ? (isDark ? const Color(0xFF8D4F00) : const Color(0xFFFFB74D))
-                                        : (isDark ? const Color(0xFF5D4A22) : const Color(0xFFFFE082)),
+                                color: (isDark ? const Color(0xFF5D4A22) : const Color(0xFFFFE082)),
                                 width: 1,
                               ),
                             ),
@@ -676,33 +770,17 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                                     )
                                   else
                                     Icon(
-                                      _saveResult == true
-                                          ? Icons.check_circle_rounded
-                                          : _saveResult == false
-                                              ? Icons.bookmark_added_rounded
-                                              : Icons.bookmark_add_rounded,
+                                      Icons.bookmark_add_rounded,
                                       size: 19,
-                                      color: _saveResult == true
-                                          ? const Color(0xFF2E7D32)
-                                          : _saveResult == false
-                                              ? const Color(0xFFE65100)
-                                              : (isDark ? const Color(0xFFFFD54F) : const Color(0xFFB76E00)),
+                                      color: (isDark ? const Color(0xFFFFD54F) : const Color(0xFFB76E00)),
                                     ),
                                   const SizedBox(width: 7),
                                   Text(
-                                    _saveResult == true
-                                        ? '✅ 내 카드함에 보관되었습니다!'
-                                        : _saveResult == false
-                                            ? '📌 이미 보관함에 담겨있는 카드입니다'
-                                            : '내 카드함에 보관하기',
+                                    '내 카드함에 보관하기',
                                     style: TextStyle(
                                       fontSize: 14.5,
                                       fontWeight: FontWeight.w700,
-                                      color: _saveResult == true
-                                          ? const Color(0xFF1B5E20)
-                                          : _saveResult == false
-                                              ? (isDark ? const Color(0xFFFFB74D) : const Color(0xFFE65100))
-                                              : (isDark ? const Color(0xFFFFD54F) : const Color(0xFF8D4F00)),
+                                      color: (isDark ? const Color(0xFFFFD54F) : const Color(0xFF8D4F00)),
                                       letterSpacing: -0.2,
                                     ),
                                   ),
@@ -714,14 +792,91 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                       ),
                     ),
                   ],
-
-
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
+
+        // 최고급 플로팅 알림 토스트 (다이얼로그 레이아웃 변형 없이 전면에 우아하게 노출)
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: _floatingToastMessage != null
+                  ? Center(
+                      key: ValueKey(_floatingToastMessage),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                        decoration: BoxDecoration(
+                          color: const Color(0xF2161922),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: _isToastSuccess
+                                ? const Color(0x6669F0AE)
+                                : const Color(0x66FFB74D),
+                            width: 1.2,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x66000000),
+                              blurRadius: 20,
+                              offset: Offset(0, 8),
+                            ),
+                            BoxShadow(
+                              color: Color(0x22000000),
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: _isToastSuccess
+                                    ? const Color(0x2569F0AE)
+                                    : const Color(0x25FFB74D),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isToastSuccess
+                                    ? Icons.check_circle_rounded
+                                    : Icons.bookmark_added_rounded,
+                                color: _isToastSuccess
+                                    ? const Color(0xFF69F0AE)
+                                    : const Color(0xFFFFB74D),
+                                size: 19,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                _floatingToastMessage!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                  height: 1.2,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+);
   }
 }

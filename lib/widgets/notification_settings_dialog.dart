@@ -439,35 +439,41 @@ class _NotificationSettingsDialogState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isSelected) ...[
-                    const Icon(Icons.check_circle_rounded, size: 14, color: Colors.white),
-                    const SizedBox(width: 4),
-                  ],
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
-                      color: isSelected
-                          ? Colors.white
-                          : (isDark ? Colors.white : const Color(0xFF3E2723)),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSelected) ...[
+                      const Icon(Icons.check_circle_rounded, size: 14, color: Colors.white),
+                      const SizedBox(width: 4),
+                    ],
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark ? Colors.white : const Color(0xFF3E2723)),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 3),
-              Text(
-                subTitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected
-                      ? Colors.white.withAlpha(220)
-                      : (isDark ? Colors.white60 : const Color(0xFF8D6E63)),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  subTitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? Colors.white.withAlpha(220)
+                        : (isDark ? Colors.white60 : const Color(0xFF8D6E63)),
+                  ),
                 ),
               ),
             ],

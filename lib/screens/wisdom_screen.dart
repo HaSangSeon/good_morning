@@ -4,10 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/wisdom_data.dart';
 import '../services/theme_service.dart';
-import '../widgets/share_preview_dialog.dart';
 
 class WisdomScreen extends StatefulWidget {
-  final Function(String cardText, {String? bgPath})? onShareAsCard;
+  final Function(
+    String cardText, {
+    String? bgPath,
+    String? category,
+    String? sourceName,
+  })? onShareAsCard;
 
   const WisdomScreen({super.key, this.onShareAsCard});
 
@@ -29,22 +33,6 @@ class _WisdomScreenState extends State<WisdomScreen> {
     '🧘 마음비움·평화',
     '📜 명사 명언',
   ];
-
-  String _getSuggestedBgPathForItem(WisdomItem item) {
-    final cat = item.category;
-    if (cat.contains('아침') || cat.contains('희망')) {
-      return 'assets/images/bg1.png'; // 화사한 일출과 햇살
-    } else if (cat.contains('지혜') || cat.contains('명사')) {
-      return 'assets/images/bg_tea.png'; // 여유로운 따뜻한 차 한잔
-    } else if (cat.contains('위로') || cat.contains('응원')) {
-      return 'assets/images/bg_garden_path.jpg'; // 꽃길 따라 봄 산책
-    } else if (cat.contains('평화') || cat.contains('마음비움')) {
-      return 'assets/images/bg_bamboo.png'; // 푸르른 대나무 숲
-    } else if (cat.contains('인연') || cat.contains('우정')) {
-      return 'assets/images/bg_rose_1786333119291.png'; // 향기로운 장미 부케
-    }
-    return 'assets/images/bg_tea.png';
-  }
 
   @override
   void initState() {
@@ -419,127 +407,69 @@ class _WisdomScreenState extends State<WisdomScreen> {
                               ),
                             ),
 
-                            // Action Buttons (카드로 꾸미기 & 카카오톡 공유)
-                            Container(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                              child: Row(
-                                children: [
-                                  // 1. 카드로 꾸미기
-                                  if (widget.onShareAsCard != null)
-                                    Expanded(
-                                      flex: 1,
-                                      child: Container(
-                                        height: 44,
-                                        clipBehavior: Clip.antiAlias,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(22),
-                                          color: isDark ? const Color(0xFF2C2220) : const Color(0xFFFFEDE2),
-                                          border: Border.all(
-                                            color: isDark ? const Color(0xFF5D4037) : const Color(0xFFFFCCBC),
-                                            width: 1.2,
-                                          ),
-                                        ),
-                                        child: InkWell(
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            final bg = _getSuggestedBgPathForItem(item);
-                                            widget.onShareAsCard!(item.content, bgPath: bg);
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                                            child: FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.brush_rounded,
-                                                    size: 16,
-                                                    color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
-                                                  ),
-                                                  const SizedBox(width: 5),
-                                                  Text(
-                                                    '카드로 꾸미기',
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 13.5,
-                                                      color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                            // Action Button (카드로 꾸미기 단독)
+                            if (widget.onShareAsCard != null)
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                                width: double.infinity,
+                                child: Container(
+                                  height: 46,
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(23),
+                                    gradient: LinearGradient(
+                                      colors: isDark
+                                          ? [const Color(0xFFE64A19), const Color(0xFFD84315)]
+                                          : [const Color(0xFFFF5722), const Color(0xFFE64A19)],
                                     ),
-                                  if (widget.onShareAsCard != null) const SizedBox(width: 10),
-
-                                  // 2. 카카오톡 공유
-                                  Expanded(
-                                    flex: 1,
-                                    child: Container(
-                                      height: 44,
-                                      clipBehavior: Clip.antiAlias,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(22),
-                                        color: const Color(0xFFFEE500),
-                                        boxShadow: const [
-                                          BoxShadow(
-                                            color: Color(0x33FEE500),
-                                            blurRadius: 6,
-                                            offset: Offset(0, 2),
-                                          ),
-                                        ],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFFE64A19).withAlpha(isDark ? 80 : 70),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
                                       ),
-                                      child: InkWell(
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          SharePreviewDialog.show(
-                                            context: context,
-                                            type: SharePreviewType.wisdom,
-                                            title: item.title,
-                                            content: item.content,
-                                            author: item.author,
-                                            emoji: item.emoji,
-                                            fullShareText: item.shareText,
-                                            onCustomizeCard: widget.onShareAsCard != null
-                                                ? () {
-                                                    final bg = _getSuggestedBgPathForItem(item);
-                                                    widget.onShareAsCard!(item.content, bgPath: bg);
-                                                  }
-                                                : null,
-                                          );
-                                        },
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 6),
-                                          child: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(Icons.share_rounded, color: Colors.black87, size: 17),
-                                                SizedBox(width: 5),
-                                                Text(
-                                                  '카톡 공유',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13.5,
-                                                    color: Colors.black87,
-                                                  ),
+                                    ],
+                                  ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      widget.onShareAsCard!(
+                                        item.content,
+                                        sourceName: '명언',
+                                      );
+                                    },
+                                    child: const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.brush_rounded,
+                                                size: 18,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                '예쁜 카드로 꾸며서 공유하기',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15,
+                                                  color: Colors.white,
+                                                  letterSpacing: -0.2,
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       );

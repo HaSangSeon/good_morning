@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/theme_service.dart';
 import '../widgets/help_dialog.dart';
-import '../widgets/share_preview_dialog.dart';
 
 class HealthTip {
   final String category;
@@ -24,7 +23,12 @@ class HealthTip {
 }
 
 class HealthScreen extends StatefulWidget {
-  final Function(String cardText, {String? bgPath})? onShareAsCard;
+  final Function(
+    String cardText, {
+    String? bgPath,
+    String? category,
+    String? sourceName,
+  })? onShareAsCard;
 
   const HealthScreen({super.key, this.onShareAsCard});
 
@@ -34,6 +38,15 @@ class HealthScreen extends StatefulWidget {
 
 class _HealthScreenState extends State<HealthScreen> {
   String _selectedCategory = '전체';
+
+  final List<String> _categories = [
+    '전체',
+    '🩸 혈관·혈당',
+    '🦵 관절·운동',
+    '🧠 두뇌·치매',
+    '🥗 식습관·수분',
+    '☀️ 생활·활력',
+  ];
 
   String _getSuggestedBgPathForTip(HealthTip tip) {
     final cat = tip.category;
@@ -65,7 +78,7 @@ class _HealthScreenState extends State<HealthScreen> {
   final List<HealthTip> _healthTips = [
     // 1. 혈관/혈당
     HealthTip(
-      category: '혈관/혈당',
+      category: '🩸 혈관·혈당',
       title: '혈액순환 쑥쑥! 손발 따뜻해지는 3분 지압법',
       icon: '🖐️',
       summary: '합곡혈(엄지와 검지 사이)을 3분간 꾹 눌러주면 전신 혈액순환이 원활해집니다.',
@@ -77,7 +90,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🖐️ [혈액순환 3분 지압법]\n엄지와 검지 사이(합곡혈)를 3분간 눌러보세요! 손발이 따뜻해지고 전신 혈액순환에 최고입니다 🌿",
     ),
     HealthTip(
-      category: '혈관/혈당',
+      category: '🩸 혈관·혈당',
       title: '식후 혈당 폭발 막는 15분 산책법',
       icon: '🚶‍♂️',
       summary: '식사 후 30분 이내에 15분간 가볍게 걸으면 혈당 스파이크를 막을 수 있습니다.',
@@ -89,7 +102,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🚶‍♂️ [식후 혈당 방어 산책법]\n식사 후 30분 내 15분만 걸으세요! 혈당 스파이크를 막아 당뇨 예방에 큰 도움이 됩니다 🌾",
     ),
     HealthTip(
-      category: '혈관/혈당',
+      category: '🩸 혈관·혈당',
       title: '고혈압 잡는 제2의 심장! 발뒤꿈치 들기 운동',
       icon: '🦵',
       summary: '종아리 근육을 펌핑하면 하지에 쏠린 혈액이 심장으로 힘차게 올라갑니다.',
@@ -101,7 +114,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🦵 [혈압 잡는 발뒤꿈치 들기]\n하루 30번 뒤꿈치를 올려보세요! 종아리 펌프가 혈액순환을 도와 혈압을 안정시켜 줍니다 💖",
     ),
     HealthTip(
-      category: '혈관/혈당',
+      category: '🩸 혈관·혈당',
       title: '혈관 청소부! 양파와 마늘의 알리신 200% 흡수법',
       icon: '🧄',
       summary: '양파와 마늘은 썰어서 10분간 공기 중에 두면 유효성분 알리신이 극대화됩니다.',
@@ -115,7 +128,7 @@ class _HealthScreenState extends State<HealthScreen> {
 
     // 2. 관절/운동
     HealthTip(
-      category: '관절/운동',
+      category: '🦵 관절·운동',
       title: '무릎 관절을 지키는 1분 의자 스트레칭',
       icon: '🪑',
       summary: '의자에 앉아 다리를 펴고 10초 멈추는 동작으로 대퇴사두근을 강화하세요.',
@@ -127,7 +140,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🪑 [무릎관절 1분 스트레칭]\n의자에 앉아 다리를 펴고 10초 유지하세요! 무릎 통증 예방과 대퇴근 강화에 으뜸입니다 💪",
     ),
     HealthTip(
-      category: '관절/운동',
+      category: '🦵 관절·운동',
       title: '허리 통증 싹 없애는 맥켄지 허리 펴기 운동',
       icon: '🧘‍♂️',
       summary: '서서 양손으로 허리를 받치고 상체를 뒤로 젖히면 디스크 압력이 줄어듭니다.',
@@ -139,7 +152,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🧘‍♂️ [허리 튼튼 맥켄지 운동]\n양손을 허리에 대고 뒤로 5초간 젖혀보세요! 굽은 허리가 펴지고 디스크가 건강해집니다 🌳",
     ),
     HealthTip(
-      category: '관절/운동',
+      category: '🦵 관절·운동',
       title: '오십견 예방! 수건 하나로 어깨 회전근개 풀기',
       icon: '🧣',
       summary: '등 뒤로 수건을 잡고 위아래로 당겨주면 굳은 어깨 관절이 시원하게 풀립니다.',
@@ -153,7 +166,7 @@ class _HealthScreenState extends State<HealthScreen> {
 
     // 3. 두뇌/치매
     HealthTip(
-      category: '두뇌/치매',
+      category: '🧠 두뇌·치매',
       title: '치매 예방! 뇌를 젊게 만드는 하루 10분 손가락 운동',
       icon: '🧠',
       summary: '양손의 손가락 끝을 마주치거나 짝지어 움직이면 뇌세포가 활성화됩니다.',
@@ -165,7 +178,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🧠 [치매 예방 10분 손가락 운동]\n양 손가락 끝을 마주치고 톡톡 쳐보세요! 뇌 혈류량이 늘어나 기억력이 좋아집니다 ✨",
     ),
     HealthTip(
-      category: '두뇌/치매',
+      category: '🧠 두뇌·치매',
       title: '기억력 UP! 매일 밤 3줄 일기로 뇌세포 깨우기',
       icon: '📝',
       summary: '오늘 있었던 일 3가지를 회상하여 적으면 해마(기억 중추)가 자극됩니다.',
@@ -177,7 +190,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "📝 [뇌 젊어지는 3줄 일기]\n오늘 감사했던 일 3가지를 적어보세요! 해마가 활성화되어 기억력 감퇴를 막아줍니다 📖",
     ),
     HealthTip(
-      category: '두뇌/치매',
+      category: '🧠 두뇌·치매',
       title: '불면증 안녕! 숙면을 부르는 4-7-8 마법의 호흡법',
       icon: '🌙',
       summary: '4초 들이마시고, 7초 멈추고, 8초 내쉬면 부교감신경이 안정됩니다.',
@@ -191,7 +204,7 @@ class _HealthScreenState extends State<HealthScreen> {
 
     // 4. 식습관/수분
     HealthTip(
-      category: '식습관/수분',
+      category: '🥗 식습관·수분',
       title: '아침 공복 미온수 한 잔의 놀라운 기적',
       icon: '💧',
       summary: '기상 직후 체온과 비슷한 따뜻한 물은 밤새 끈적해진 혈액을 맑게 합니다.',
@@ -203,7 +216,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "💧 [아침 공복 따뜻한 물 한잔]\n기상 직후 미온수 한 잔은 혈액을 맑게 하고 장을 깨워주는 가장 훌륭한 보약입니다 🫖",
     ),
     HealthTip(
-      category: '식습관/수분',
+      category: '🥗 식습관·수분',
       title: '면역력 쑥쑥! 당뇨 예방에 좋은 3대 건강차',
       icon: '🍵',
       summary: '생강차, 여주차, 계피차는 체온을 높이고 혈당 조절에 탁월합니다.',
@@ -215,7 +228,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🍵 [면역력 쑥쑥 3대 건강차]\n생강차, 여주차, 계피차로 따뜻한 체온 유지하세요! 체온 1도 상승 시 면역력 5배 증가합니다 💖",
     ),
     HealthTip(
-      category: '식습관/수분',
+      category: '🥗 식습관·수분',
       title: '근감소증 철벽 방어! 밥상 위의 단백질 황금 비율',
       icon: '🍳',
       summary: '나이 들수록 매 끼니 손바닥 크기의 양질의 단백질 섭취가 필수입니다.',
@@ -227,7 +240,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "🍳 [근육 지키는 단백질 식단]\n매 끼니 손바닥 크기 단백질을 챙기세요! 튼튼한 근육이 건강 장수의 최고의 비결입니다 🐟",
     ),
     HealthTip(
-      category: '식습관/수분',
+      category: '🥗 식습관·수분',
       title: '소화불량과 변비 탈출! 아침 3분 장 마사지',
       icon: '🍏',
       summary: '배꼽 주위를 시계 방향으로 쓸어주면 둔해진 장 운동이 활발해집니다.',
@@ -241,7 +254,7 @@ class _HealthScreenState extends State<HealthScreen> {
 
     // 5. 생활/활력
     HealthTip(
-      category: '생활/활력',
+      category: '☀️ 생활·활력',
       title: '눈 피로 한 방에 날리는 20-20-20 수칙',
       icon: '👁️',
       summary: '스마트폰 화면을 보다가 20분마다 20피트(6m) 밖을 20초간 바라보세요.',
@@ -253,7 +266,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "👁️ [눈 건강 20-20-20 수칙]\n20분마다 먼 곳을 20초간 바라보세요! 안구건조증 예방과 시력 보호에 참 좋습니다 👀",
     ),
     HealthTip(
-      category: '생활/활력',
+      category: '☀️ 생활·활력',
       title: '노안 예방! 눈동자 8자 굴리기와 손바닥 온찜질',
       icon: '👓',
       summary: '손바닥 마찰열로 눈을 감싸고 눈동자를 굴려 안구 근육을 풀어줍니다.',
@@ -265,7 +278,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "👓 [노안 예방 손바닥 온찜질]\n손바닥을 비벼 따뜻하게 눈을 감싸보세요! 침침하던 눈이 맑고 시원해집니다 🌿",
     ),
     HealthTip(
-      category: '생활/활력',
+      category: '☀️ 생활·활력',
       title: '골다공증 예방! 하루 햇볕 20분 쬐기와 비타민D',
       icon: '☀️',
       summary: '오전 10시~오후 2시 사이 20분간 햇볕을 쬐면 뼈가 튼튼해집니다.',
@@ -277,7 +290,7 @@ class _HealthScreenState extends State<HealthScreen> {
       shareCardText: "☀️ [뼈 튼튼 하루 20분 햇볕 쬐기]\n따뜻한 햇살을 20분만 쬐어보세요! 천연 비타민D가 골다공증을 막고 기분을 상쾌하게 합니다 🌻",
     ),
     HealthTip(
-      category: '생활/활력',
+      category: '☀️ 생활·활력',
       title: '면역력 5배 쑥쑥! 림프 순환 1분 귀 마사지',
       icon: '👂',
       summary: '귀 전체를 조물조물 비벼주면 200여 개의 경혈이 자극되어 면역력이 솟아납니다.',
@@ -293,32 +306,6 @@ class _HealthScreenState extends State<HealthScreen> {
   List<HealthTip> get _filteredTips {
     if (_selectedCategory == '전체') return _healthTips;
     return _healthTips.where((tip) => tip.category == _selectedCategory).toList();
-  }
-
-  Future<void> _shareTipDirectly(HealthTip tip) async {
-    HapticFeedback.mediumImpact();
-    try {
-      if (!mounted) return;
-
-      await SharePreviewDialog.show(
-        context: context,
-        type: SharePreviewType.health,
-        title: tip.title,
-        content: tip.shareCardText,
-        emoji: tip.icon,
-        fullShareText: '${tip.shareCardText}\n\n'
-            '🌿 매일 아침 건강정보 & 마음카드 받기\n'
-            '👉 https://play.google.com/store/apps/details?id=com.sintong.good_morning',
-        onCustomizeCard: widget.onShareAsCard != null
-            ? () {
-                final bg = _getSuggestedBgPathForTip(tip);
-                widget.onShareAsCard!(tip.shareCardText, bgPath: bg);
-              }
-            : null,
-      );
-    } catch (e) {
-      debugPrint('Error sharing health tip: $e');
-    }
   }
 
   @override
@@ -338,13 +325,21 @@ class _HealthScreenState extends State<HealthScreen> {
             ),
           ),
         ),
-        title: Text(
-          '🌿 매일 건강상식 & 꿀팁',
-          style: GoogleFonts.jua(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.spa_rounded, color: Color(0xFFFFD700), size: 24),
+            const SizedBox(width: 8),
+            Text(
+              '매일 건강상식 & 꿀팁',
+              style: GoogleFonts.jua(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
         ),
         centerTitle: false,
         actions: [
@@ -373,12 +368,21 @@ class _HealthScreenState extends State<HealthScreen> {
         children: [
           // Category Filter Tabs
           Container(
-            color: isDark ? const Color(0xFF1E1E2C) : const Color(0xFFFFFDF9),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2234) : Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? Colors.white10 : const Color(0x14000000),
+                  width: 0.8,
+                ),
+              ),
+            ),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
               child: Row(
-                children: ['전체', '혈관/혈당', '관절/운동', '두뇌/치매', '식습관/수분', '생활/활력'].map((cat) {
+                children: _categories.map((cat) {
                   final isSelected = cat == _selectedCategory;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
@@ -387,20 +391,27 @@ class _HealthScreenState extends State<HealthScreen> {
                       label: Text(
                         cat,
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 14.5,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                           color: isSelected
                               ? Colors.white
-                              : (isDark ? Colors.grey.shade200 : const Color(0xFF4E342E)),
+                              : (isDark ? const Color(0xFFC5CCE0) : const Color(0xFF2E5A36)),
+                          letterSpacing: -0.2,
                         ),
                       ),
-                      selectedColor: const Color(0xFF2E7D32),
-                      backgroundColor: isDark ? const Color(0xFF262636) : const Color(0xFFEFEBE0),
+                      selectedColor: isDark ? const Color(0xFF2E7D32) : const Color(0xFF1B5E20),
+                      backgroundColor: isDark ? const Color(0xFF272D45) : const Color(0xFFF1F8F3),
                       side: BorderSide(
                         color: isSelected
                             ? Colors.transparent
-                            : (isDark ? Colors.white10 : const Color(0x1F8D6E63)),
+                            : (isDark ? Colors.white12 : const Color(0xFFC8E6C9)),
                       ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      showCheckmark: false,
+                      elevation: isSelected ? 2 : 0,
                       onSelected: (selected) {
                         if (selected) {
                           HapticFeedback.selectionClick();
@@ -421,7 +432,9 @@ class _HealthScreenState extends State<HealthScreen> {
               itemCount: _filteredTips.length,
               itemBuilder: (context, index) {
                 final tip = _filteredTips[index];
+                final cardKey = GlobalObjectKey(tip.title);
                 return Card(
+                  key: cardKey,
                   elevation: 2,
                   shadowColor: isDark ? Colors.black54 : const Color(0x338D6E63),
                   margin: const EdgeInsets.only(bottom: 14),
@@ -443,6 +456,21 @@ class _HealthScreenState extends State<HealthScreen> {
                       collapsedShape: const RoundedRectangleBorder(
                         side: BorderSide.none,
                       ),
+                      onExpansionChanged: (isExpanded) {
+                        if (isExpanded) {
+                          HapticFeedback.selectionClick();
+                          Future.delayed(const Duration(milliseconds: 260), () {
+                            if (cardKey.currentContext != null) {
+                              Scrollable.ensureVisible(
+                                cardKey.currentContext!,
+                                duration: const Duration(milliseconds: 320),
+                                curve: Curves.easeInOutCubic,
+                                alignment: 0.12,
+                              );
+                            }
+                          });
+                        }
+                      },
                       leading: CircleAvatar(
                         backgroundColor: isDark ? const Color(0xFF264028) : Colors.green.shade100,
                         radius: 24,
@@ -490,83 +518,60 @@ class _HealthScreenState extends State<HealthScreen> {
                                   ),
                                 ),
                               )),
-                              const SizedBox(height: 14),
-                              Row(
-                                children: [
-                                  if (widget.onShareAsCard != null)
-                                    Expanded(
-                                      child: Container(
-                                        clipBehavior: Clip.antiAlias,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(24),
-                                          color: isDark ? const Color(0xFF2C2220) : const Color(0xFFFFEDE2),
-                                          border: Border.all(
-                                            color: isDark ? const Color(0xFF5D4037) : const Color(0xFFFFCCBC),
-                                            width: 1.2,
-                                          ),
-                                        ),
-                                        child: InkWell(
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            final bg = _getSuggestedBgPathForTip(tip);
-                                            widget.onShareAsCard!(tip.shareCardText, bgPath: bg);
-                                          },
-                                          borderRadius: BorderRadius.circular(24),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-                                            child: FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(Icons.style, color: Color(0xFFD84315), size: 18),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    '카드로 꾸미기',
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 14,
-                                                      color: isDark ? const Color(0xFFFFAB91) : const Color(0xFFBF360C),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
+                              if (widget.onShareAsCard != null) ...[
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 46,
+                                  child: Container(
+                                    clipBehavior: Clip.antiAlias,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(23),
+                                      gradient: LinearGradient(
+                                        colors: isDark
+                                            ? [const Color(0xFFE64A19), const Color(0xFFD84315)]
+                                            : [const Color(0xFFFF5722), const Color(0xFFE64A19)],
                                       ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFFE64A19).withAlpha(isDark ? 80 : 70),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
                                     ),
-                                  if (widget.onShareAsCard != null) const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Container(
-                                      clipBehavior: Clip.antiAlias,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(24),
-                                        color: const Color(0xFFFEE500),
-                                      ),
-                                      child: InkWell(
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          _shareTipDirectly(tip);
-                                        },
-                                        borderRadius: BorderRadius.circular(24),
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                                    child: InkWell(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        final bg = _getSuggestedBgPathForTip(tip);
+                                        widget.onShareAsCard!(
+                                          tip.shareCardText,
+                                          sourceName: '건강',
+                                          bgPath: bg,
+                                        );
+                                      },
+                                      child: const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
                                           child: FittedBox(
                                             fit: BoxFit.scaleDown,
                                             child: Row(
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Icon(Icons.share_rounded, color: Colors.black87, size: 18),
-                                                SizedBox(width: 6),
+                                                Icon(
+                                                  Icons.brush_rounded,
+                                                  size: 18,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(width: 8),
                                                 Text(
-                                                  '카톡 공유',
+                                                  '예쁜 카드로 꾸며서 공유하기',
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                    color: Colors.black87,
+                                                    fontSize: 15,
+                                                    color: Colors.white,
+                                                    letterSpacing: -0.2,
                                                   ),
                                                 ),
                                               ],
@@ -576,8 +581,8 @@ class _HealthScreenState extends State<HealthScreen> {
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

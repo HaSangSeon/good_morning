@@ -16,6 +16,16 @@ class AdService {
     return '';
   }
 
+  // 공유시 전면광고 ID
+  String get interstitialAdUnitId {
+    if (Platform.isAndroid) {
+      return 'ca-app-pub-3702899361747571/1772844688'; // 공유시전면광고 Real ID
+    } else if (Platform.isIOS) {
+      return 'ca-app-pub-3940256099942544/4411468910';
+    }
+    return '';
+  }
+
   // Medium Rectangle 광고 ID (현재는 배너 광고 ID와 동일하게 사용하거나, 리얼 ID가 나오면 교체)
   String get mediumRectangleAdUnitId {
     if (Platform.isAndroid) {

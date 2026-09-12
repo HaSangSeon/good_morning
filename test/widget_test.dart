@@ -14,5 +14,11 @@ void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     expect(find.byType(MyApp), findsOneWidget);
+    
+    // Advance time to trigger the splash screen timer
+    await tester.pump(const Duration(seconds: 2));
+    
+    // Wait for the route transition animations to complete
+    await tester.pumpAndSettle();
   });
 }

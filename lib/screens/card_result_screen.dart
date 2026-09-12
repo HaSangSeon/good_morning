@@ -13,15 +13,69 @@ class CardResultScreen extends StatefulWidget {
   State<CardResultScreen> createState() => _CardResultScreenState();
 }
 
-class _CardResultScreenState extends State<CardResultScreen> {
+class _CardResultScreenState extends State<CardResultScreen> with WidgetsBindingObserver {
   BannerAd? _mediumRectangleAd;
+  InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;
   bool _isSharing = false;
+  bool _isSharingTriggered = false; // 카카오톡 공유 진입 여부 플래그
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadMediumRectangleAd();
+    _loadInterstitialAd(); // 백그라운드에서 전면 광고 사전 로드
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdService().interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          debugPrint('InterstitialAd loaded in CardResultScreen.');
+          _interstitialAd = ad;
+        },
+        onAdFailedToLoad: (error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+          // Silent Fail: 에러 팝업 띄우지 않음
+        },
+      ),
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 사용자가 카카오톡에서 돌아왔을 때 (AppLifecycleState.resumed)
+    if (state == AppLifecycleState.resumed) {
+      if (_isSharingTriggered) {
+        _isSharingTriggered = false; // 플래그 즉시 초기화 (오작동 방지)
+        _showInterstitialAd();
+      }
+    }
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd == null) return;
+
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        debugPrint('InterstitialAd dismissed.');
+        ad.dispose();
+        _interstitialAd = null;
+        _loadInterstitialAd(); // 다음 사용을 위해 재로드
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        debugPrint('InterstitialAd failed to show: $error');
+        ad.dispose();
+        _interstitialAd = null;
+        // Silent Fail
+      },
+    );
+
+    _interstitialAd!.show();
   }
 
   void _loadMediumRectangleAd() {
@@ -43,6 +97,8 @@ class _CardResultScreenState extends State<CardResultScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Observer 해제
+    _interstitialAd?.dispose(); // 메모리 정리 누락 방지
     _mediumRectangleAd?.dispose();
     super.dispose();
   }
@@ -51,6 +107,7 @@ class _CardResultScreenState extends State<CardResultScreen> {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     try {
+      _isSharingTriggered = true; // 공유 동작 시작 플래그 세팅
       await KakaoShareHelper.share(
         filePath: widget.imagePath,
         text: '[마음카드] 소중한 분이 보낸 안부 인사입니다.',

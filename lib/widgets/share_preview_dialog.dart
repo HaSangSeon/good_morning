@@ -93,8 +93,13 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
     HapticFeedback.mediumImpact();
 
     bool? isNew;
-    if (widget.onSaveCard != null) {
-      isNew = await widget.onSaveCard!();
+    try {
+      if (widget.onSaveCard != null) {
+        isNew = await widget.onSaveCard!();
+      }
+    } catch (e) {
+      debugPrint('SharePreviewDialog save error: $e');
+      isNew = false;
     }
 
     _toastTimer?.cancel();
@@ -289,6 +294,16 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
       }
     } catch (e) {
       debugPrint('SharePreviewDialog share error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('카카오톡 공유 중 오류가 발생했습니다. 다시 시도해 주세요.', style: TextStyle(fontSize: 16)),
+            backgroundColor: Color(0xFFE64A19),
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isSending = false);

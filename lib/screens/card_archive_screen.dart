@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/card_archive_service.dart';
-import '../services/theme_service.dart';
-import '../widgets/help_dialog.dart';
+import '../services/notification_service.dart';
+import '../widgets/keep_all_text.dart';
 
 class CardArchiveScreen extends StatefulWidget {
   const CardArchiveScreen({super.key, required this.onSelectCard});
@@ -21,6 +21,10 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
   final _archiveService = CardArchiveService();
   late final AnimationController _archiveAnimController;
 
+
+  bool _isNotificationEnabled = true;
+  bool _isNotifLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +32,138 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
       vsync: this,
       duration: const Duration(seconds: 5),
     )..repeat();
+    _loadNotificationState();
   }
+
+  Future<void> _loadNotificationState() async {
+    final isEnabled = await NotificationService.instance.isNotificationEnabled();
+    if (mounted) {
+      setState(() {
+        _isNotificationEnabled = isEnabled;
+        _isNotifLoading = false;
+      });
+    }
+  }
+
+  Future<void> _toggleNotification(bool value) async {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _isNotificationEnabled = value;
+    });
+    await NotificationService.instance.saveSettings(
+      isEnabled: value,
+      time: const TimeOfDay(hour: 7, minute: 15),
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, SavedCard card) async {
+    HapticFeedback.lightImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1C202E) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE64A19).withAlpha(25),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Color(0xFFE64A19),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '카드 삭제',
+                style: GoogleFonts.gowunBatang(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF2D1810),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            '보관함에서 이 카드를\n정말 삭제하시겠습니까?\n\n삭제된 카드는 복구할 수 없습니다.'.keepAll,
+            style: TextStyle(
+              fontSize: 16,
+              height: 1.5,
+              color: isDark ? Colors.white70 : const Color(0xFF444444),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(dialogContext).pop(false);
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(
+                '취소',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white60 : Colors.grey.shade600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                Navigator.of(dialogContext).pop(true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE64A19),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                '삭제하기',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      await _archiveService.deleteCard(card.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              '카드가 보관함에서 삭제되었습니다.',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            backgroundColor: const Color(0xFF424242),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
 
   @override
   void dispose() {
@@ -41,49 +176,75 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [const Color(0xFF311B92), const Color(0xFF8E24AA)]
-                  : [const Color(0xFFE64A19), const Color(0xFFFF7043)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+        backgroundColor: isDark ? const Color(0xFF141722) : const Color(0xFFFAF8F5),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF282D4B) : const Color(0xFFEDE8E1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: isDark ? Colors.white : const Color(0xFF2D1810),
+              ),
             ),
+            tooltip: '뒤로가기',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context);
+            },
           ),
         ),
-        title: Text(
-          '💌 내 카드함',
-          style: GoogleFonts.jua(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '내 카드함',
+              style: GoogleFonts.gowunBatang(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF2D1810),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ValueListenableBuilder<List<SavedCard>>(
+              valueListenable: _archiveService.savedCardsNotifier,
+              builder: (context, cards, _) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF282D4B) : const Color(0xFFE8DFD5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${cards.length}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? const Color(0xFFFFD700) : const Color(0xFF5D4037),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         centerTitle: false,
-        actions: [
-          // Theme Toggle Button (Light / Dark)
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.wb_sunny : Icons.nightlight_round,
-              color: isDark ? const Color(0xFFFFD700) : Colors.white,
-            ),
-            tooltip: isDark ? '라이트 모드로 전환' : '다크 모드로 전환',
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              ThemeService().toggleTheme();
-            },
+
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: isDark ? Colors.white10 : const Color(0xFFE8E2D8),
           ),
-          // Help Dialog Button
-          IconButton(
-            icon: const Icon(Icons.help_outline, color: Colors.white),
-            tooltip: '사용 가이드',
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              HelpDialog.show(context);
-            },
-          ),
-        ],
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -112,8 +273,68 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
               ),
             ),
 
-            // Main Archive List
-            ValueListenableBuilder<List<SavedCard>>(
+
+            Column(
+              children: [
+                if (!_isNotifLoading)
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF282D4B) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark ? Colors.black26 : const Color(0x0C000000),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '매일 아침 안부 알림 받기',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : const Color(0xFF1A1A1A),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '매일 오전 7시 15분에 오늘의 추천 카드를\n알려드려요',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  height: 1.35,
+                                  color: isDark ? Colors.white70 : const Color(0xFF777777),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Transform.scale(
+                          scale: 1.2,
+                          child: Switch(
+                            value: _isNotificationEnabled,
+                            onChanged: _toggleNotification,
+                            activeColor: const Color(0xFFE64A19),
+                            activeTrackColor: const Color(0xFFFFCCBC),
+                            inactiveThumbColor: Colors.grey.shade400,
+                            inactiveTrackColor: Colors.grey.shade200,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child: ValueListenableBuilder<List<SavedCard>>(
+
               valueListenable: _archiveService.savedCardsNotifier,
               builder: (context, cards, child) {
                 if (cards.isEmpty) {
@@ -248,10 +469,7 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                               right: 8,
                               top: 8,
                               child: GestureDetector(
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  _archiveService.deleteCard(card.id);
-                                },
+                                onTap: () => _confirmDelete(context, card),
                                 child: Container(
                                   padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
@@ -321,6 +539,9 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                   },
                 );
               },
+            ),
+            ),
+            ],
             ),
           ],
         ),

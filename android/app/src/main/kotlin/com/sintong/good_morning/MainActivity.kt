@@ -77,7 +77,7 @@ class MainActivity : FlutterActivity() {
                         val chooser = Intent.createChooser(intent, "카카오톡으로 공유하기")
                         startActivity(chooser)
                         result.success(true)
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         result.error("SHARE_ERROR", e.message, null)
                     }
                 }

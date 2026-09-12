@@ -288,12 +288,14 @@ class NotificationService {
     return true;
   }
 
-  /// 매일 아침 안부 알림 스케줄링 (향후 14일치 순환 예약으로 앱을 며칠 안 켜도 매일 다른 문구 발송)
+  /// 매일 아침 07:15 안부 알림 스케줄링 (요일별 맞춤 카피)
   Future<void> scheduleDailyMorningNotification(int hour, int minute) async {
+    // 무조건 오전 7시 15분으로 강제 고정 (시니어 골든 타임)
+    hour = 7;
+    minute = 15;
+    
     // 기존 스케줄 취소
     await cancelMorningNotification();
-
-    final now = tz.TZDateTime.now(tz.local);
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       _channelId,
@@ -317,44 +319,47 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // 오늘 시간 기준 첫 알림 날짜 계산
-    var baseDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
+    final now = tz.TZDateTime.now(tz.local);
+    
+    // 요일별 카피 정의
+    final Map<int, Map<String, String>> dowQuotes = {
+      1: {'title': '🌅 좋은 아침입니다!', 'body': '☀️ 활기찬 한 주가 시작되었습니다. 소중한 분들께 따뜻한 아침 인사를 건네보세요.'}, // 월
+      2: {'title': '🌸 좋은 아침입니다!', 'body': '🌸 오늘도 건강하고 행복한 하루! 오늘의 예쁜 아침 카드가 준비되었어요.'}, // 화
+      3: {'title': '🌸 좋은 아침입니다!', 'body': '🌸 오늘도 건강하고 행복한 하루! 오늘의 예쁜 아침 카드가 준비되었어요.'}, // 수
+      4: {'title': '🌸 좋은 아침입니다!', 'body': '🌸 오늘도 건강하고 행복한 하루! 오늘의 예쁜 아침 카드가 준비되었어요.'}, // 목
+      5: {'title': '🌿 좋은 아침입니다!', 'body': '🌿 한 주 동안 정말 수고 많으셨습니다. 감사한 마음을 카드로 전해보세요.'}, // 금
+      6: {'title': '☕ 좋은 아침입니다!', 'body': '☕ 여유롭고 편안한 주말 아침, 가족과 지인들에게 다정한 안부를 나눠보세요.'}, // 토
+      7: {'title': '☕ 좋은 아침입니다!', 'body': '☕ 여유롭고 편안한 주말 아침, 가족과 지인들에게 다정한 안부를 나눠보세요.'}, // 일
+    };
 
-    // 설정한 시간이 오늘 이미 지났다면 내일부터 울리도록 설정
-    if (baseDate.isBefore(now)) {
-      baseDate = baseDate.add(const Duration(days: 1));
-    }
-
-    // 향후 14일간 매일 다른 문구로 개별 예약
-    for (int i = 0; i < _multiDayCount; i++) {
-      final scheduledDate = baseDate.add(Duration(days: i));
-      final quote = NotificationQuoteData.getQuoteForDate(scheduledDate);
-      final notificationId = _notificationId + i;
-
-      // 마지막 14번째 날짜는 사용자가 2주 이상 앱을 안 켜더라도 알림이 끊기지 않도록 time 반복 속성 부여
-      final isLastDay = (i == _multiDayCount - 1);
-
+    for (int dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
+      // 해당 요일의 가장 가까운 날짜 계산
+      tz.TZDateTime scheduledDate = _nextInstanceOfDayOfWeek(hour, minute, dayOfWeek);
+      final quote = dowQuotes[dayOfWeek]!;
+      
       await _notificationsPlugin.zonedSchedule(
-        id: notificationId,
+        id: _notificationId + dayOfWeek,
         title: quote['title'],
         body: quote['body'],
         scheduledDate: scheduledDate,
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: isLastDay ? DateTimeComponents.time : null,
-        payload: quote['body'],
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        payload: 'morning_greeting',
       );
     }
 
-    debugPrint(
-        'Morning notifications scheduled for $_multiDayCount days starting from $baseDate ($hour:$minute)');
+    debugPrint('Morning notifications scheduled for 07:15 every day with DOW copies.');
+  }
+
+  tz.TZDateTime _nextInstanceOfDayOfWeek(int hour, int minute, int dayOfWeek) {
+    tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    
+    while (scheduledDate.weekday != dayOfWeek || scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+    return scheduledDate;
   }
 
   /// 예약된 모든 아침 알림 취소

@@ -3,301 +3,301 @@
   const List<Map<String, String>> defaultBackgroundList = [
     // 📜 명언·지혜 (명언 카드에 최적화된 고즈넉하고 깊이 있는 감성 배경)
     {
-      'path': 'assets/images/bg_traditional_tea.jpg',
+      'path': 'assets/images/bg_traditional_tea.webp',
       'name': '🫖 정갈한 전통 차와 다도',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_temple.jpg',
+      'path': 'assets/images/bg_temple.webp',
       'name': '⛩️ 고즈넉한 천년 사찰',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_bamboo.png',
+      'path': 'assets/images/bg_bamboo.webp',
       'name': '🎋 곧고 푸른 대나무 숲',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_hanok_lotus.jpg',
+      'path': 'assets/images/bg_hanok_lotus.webp',
       'name': '🪷 정자와 단아한 연꽃',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_mountain_mist.jpg',
+      'path': 'assets/images/bg_mountain_mist.webp',
       'name': '⛰️ 안개 낀 사색의 산길',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_lake.png',
+      'path': 'assets/images/bg_lake.webp',
       'name': '🏞️ 잔잔한 물안개 호수',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_tea.png',
+      'path': 'assets/images/bg_tea.webp',
       'name': '🍵 여유로운 따뜻한 차 한잔',
       'category': '📜 명언·지혜',
     },
     {
-      'path': 'assets/images/bg_sea_sunrise.jpg',
+      'path': 'assets/images/bg_sea_sunrise.webp',
       'name': '🌅 희망을 품은 붉은 일출',
       'category': '📜 명언·지혜',
     },
 
     // 🌿 건강·활력 (건강 꿀팁과 활기찬 하루를 위한 싱그러운 배경)
     {
-      'path': 'assets/images/bg_green_forest.jpg',
+      'path': 'assets/images/bg_green_forest.webp',
       'name': '🍃 피톤치드 싱그러운 숲',
       'category': '🌿 건강·활력',
     },
     {
-      'path': 'assets/images/bg_meadow.jpg',
+      'path': 'assets/images/bg_meadow.webp',
       'name': '🌿 활력 넘치는 푸른 초원',
       'category': '🌿 건강·활력',
     },
     {
-      'path': 'assets/images/bg_garden_path.jpg',
+      'path': 'assets/images/bg_garden_path.webp',
       'name': '🌷 100세 건강 꽃길 산책로',
       'category': '🌿 건강·활력',
     },
     {
-      'path': 'assets/images/bg_window_plants.jpg',
+      'path': 'assets/images/bg_window_plants.webp',
       'name': '🪴 싱그러운 창가와 식물',
       'category': '🌿 건강·활력',
     },
     {
-      'path': 'assets/images/bg_sunrise_mountain.jpg',
+      'path': 'assets/images/bg_sunrise_mountain.webp',
       'name': '🏔️ 맑은 기운의 새벽 산',
       'category': '🌿 건강·활력',
     },
     {
-      'path': 'assets/images/bg_season_summer.jpg',
+      'path': 'assets/images/bg_season_summer.webp',
       'name': '🌊 청량한 청정 계곡과 산',
       'category': '🌿 건강·활력',
     },
 
     {
-      'path': 'assets/images/bg_season_spring.jpg',
+      'path': 'assets/images/bg_season_spring.webp',
       'name': '🌸 벚꽃과 개나리 마을',
       'category': '🌸 봄',
     },
     {
-      'path': 'assets/images/bg_spring_tulips.jpg',
+      'path': 'assets/images/bg_spring_tulips.webp',
       'name': '🌷 눈부신 튤립 꽃밭',
       'category': '🌸 봄',
     },
     {
-      'path': 'assets/images/bg_cherry_blossom.png',
+      'path': 'assets/images/bg_cherry_blossom.webp',
       'name': '🌸 벚꽃 길과 봄날',
       'category': '🌸 봄',
     },
     {
-      'path': 'assets/images/bg2.png',
+      'path': 'assets/images/bg2.webp',
       'name': '🌺 화사한 봄꽃 정원',
       'category': '🌸 봄',
     },
     {
-      'path': 'assets/images/bg_garden_path.jpg',
+      'path': 'assets/images/bg_garden_path.webp',
       'name': '🌷 꽃길 따라 봄 산책',
       'category': '🌸 봄',
     },
 
     // 🌿 여름
     {
-      'path': 'assets/images/bg_season_summer.jpg',
+      'path': 'assets/images/bg_season_summer.webp',
       'name': '🌊 청량한 여름 계곡과 산',
       'category': '🌿 여름',
     },
     {
-      'path': 'assets/images/bg_summer_beach.jpg',
+      'path': 'assets/images/bg_summer_beach.webp',
       'name': '🏖️ 에메랄드빛 여름 바다',
       'category': '🌿 여름',
     },
     {
-      'path': 'assets/images/bg_sunflower.png',
+      'path': 'assets/images/bg_sunflower.webp',
       'name': '🌻 황금빛 해바라기 밭',
       'category': '🌿 여름',
     },
     {
-      'path': 'assets/images/bg_green_forest.jpg',
+      'path': 'assets/images/bg_green_forest.webp',
       'name': '🍃 싱그러운 초록 숲',
       'category': '🌿 여름',
     },
     {
-      'path': 'assets/images/bg_lake.png',
+      'path': 'assets/images/bg_lake.webp',
       'name': '🏞️ 시원한 물안개 호수',
       'category': '🌿 여름',
     },
 
     // 🍁 가을
     {
-      'path': 'assets/images/bg_season_autumn.jpg',
+      'path': 'assets/images/bg_season_autumn.webp',
       'name': '🍁 단풍과 은행나무 한옥길',
       'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_autumn_ginkgo.jpg',
+      'path': 'assets/images/bg_autumn_ginkgo.webp',
       'name': '🍂 황금빛 은행나무 돌담길',
       'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg3.png',
+      'path': 'assets/images/bg3.webp',
       'name': '🍂 단풍 가득한 가을 산길',
       'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_forest_1786333154906.png',
+      'path': 'assets/images/bg_forest_1786333154906.webp',
       'name': '🌲 깊어가는 가을 숲',
       'category': '🍁 가을',
     },
 
     // ❄️ 겨울
     {
-      'path': 'assets/images/bg_season_winter.jpg',
+      'path': 'assets/images/bg_season_winter.webp',
       'name': '❄️ 눈부신 설경 한옥 마을',
       'category': '❄️ 겨울',
     },
     {
-      'path': 'assets/images/bg_winter_camellia.jpg',
+      'path': 'assets/images/bg_winter_camellia.webp',
       'name': '🌺 설경 속 붉은 겨울 동백꽃',
       'category': '❄️ 겨울',
     },
     {
-      'path': 'assets/images/bg_winter_snow_forest.jpg',
+      'path': 'assets/images/bg_winter_snow_forest.webp',
       'name': '🌲 환상적인 눈꽃 숲길',
       'category': '❄️ 겨울',
     },
     {
-      'path': 'assets/images/bg_winter_tea_cozy.jpg',
+      'path': 'assets/images/bg_winter_tea_cozy.webp',
       'name': '🍵 눈 내리는 날 따뜻한 전통차',
       'category': '❄️ 겨울',
     },
     {
-      'path': 'assets/images/bg_mountain_mist.jpg',
+      'path': 'assets/images/bg_mountain_mist.webp',
       'name': '⛰️ 안개 낀 고요한 설산',
       'category': '❄️ 겨울',
     },
 
     // 🌅 일출/자연
     {
-      'path': 'assets/images/bg_sea_sunrise.jpg',
+      'path': 'assets/images/bg_sea_sunrise.webp',
       'name': '🌅 붉게 타오르는 바다 일출',
       'category': '🌅 일출/자연',
     },
     {
-      'path': 'assets/images/bg1.png',
+      'path': 'assets/images/bg1.webp',
       'name': '🌅 화사한 일출과 햇살',
       'category': '🌅 일출/자연',
     },
     {
-      'path': 'assets/images/bg_sunrise_1786333105571.png',
+      'path': 'assets/images/bg_sunrise_1786333105571.webp',
       'name': '🌄 은은한 아침 햇살',
       'category': '🌅 일출/자연',
     },
     {
-      'path': 'assets/images/bg_sunrise_mountain.jpg',
+      'path': 'assets/images/bg_sunrise_mountain.webp',
       'name': '🏔️ 산 너머 붉은 새벽',
       'category': '🌅 일출/자연',
     },
     {
-      'path': 'assets/images/bg_meadow.jpg',
+      'path': 'assets/images/bg_meadow.webp',
       'name': '🌿 햇살 가득한 초원',
       'category': '🌅 일출/자연',
     },
 
     // 🌸 꽃/정원
     {
-      'path': 'assets/images/bg_hydrangea.jpg',
+      'path': 'assets/images/bg_hydrangea.webp',
       'name': '🪻 이슬 머금은 수국 정원',
       'category': '🌸 꽃/정원',
     },
     {
-      'path': 'assets/images/bg4.png',
+      'path': 'assets/images/bg4.webp',
       'name': '🌹 정열의 붉은 장미',
       'category': '🌸 꽃/정원',
     },
     {
-      'path': 'assets/images/bg_rose_1786333119291.png',
+      'path': 'assets/images/bg_rose_1786333119291.webp',
       'name': '💐 향기로운 장미 부케',
       'category': '🌸 꽃/정원',
     },
     {
-      'path': 'assets/images/bg_wildflowers.jpg',
+      'path': 'assets/images/bg_wildflowers.webp',
       'name': '🌼 들꽃 피는 오후',
       'category': '🌸 꽃/정원',
     },
 
     // 🎋 동양/전통
     {
-      'path': 'assets/images/bg_hanok_lotus.jpg',
+      'path': 'assets/images/bg_hanok_lotus.webp',
       'name': '🪷 연못 정자와 단아한 연꽃',
       'category': '🎋 동양/전통',
     },
     {
-      'path': 'assets/images/bg_bamboo.png',
+      'path': 'assets/images/bg_bamboo.webp',
       'name': '🎋 푸르른 대나무 숲',
       'category': '🎋 동양/전통',
     },
     {
-      'path': 'assets/images/bg5.png',
+      'path': 'assets/images/bg5.webp',
       'name': '🪷 대나무와 단아한 연꽃',
       'category': '🎋 동양/전통',
     },
     {
-      'path': 'assets/images/bg_tea.png',
+      'path': 'assets/images/bg_tea.webp',
       'name': '🍵 여유로운 따뜻한 차 한잔',
       'category': '🎋 동양/전통',
     },
     {
-      'path': 'assets/images/bg_temple.jpg',
+      'path': 'assets/images/bg_temple.webp',
       'name': '⛩️ 고즈넉한 사찰 풍경',
       'category': '🎋 동양/전통',
     },
     {
-      'path': 'assets/images/bg_traditional_tea.jpg',
+      'path': 'assets/images/bg_traditional_tea.webp',
       'name': '🫖 정갈한 전통 차 시간',
       'category': '🎋 동양/전통',
     },
 
     // 🌙 밤/감성
     {
-      'path': 'assets/images/bg_aurora_night.jpg',
+      'path': 'assets/images/bg_aurora_night.webp',
       'name': '🌌 신비로운 오로라 호수',
       'category': '🌙 밤/감성',
     },
     {
-      'path': 'assets/images/bg6.png',
+      'path': 'assets/images/bg6.webp',
       'name': '🌙 은은한 밤하늘과 달빛',
       'category': '🌙 밤/감성',
     },
     {
-      'path': 'assets/images/bg_moonlight.jpg',
+      'path': 'assets/images/bg_moonlight.webp',
       'name': '🌕 달빛 비추는 밤',
       'category': '🌙 밤/감성',
     },
     {
-      'path': 'assets/images/bg_starlit_mountains.jpg',
+      'path': 'assets/images/bg_starlit_mountains.webp',
       'name': '✨ 별빛 아래 산책',
       'category': '🌙 밤/감성',
     },
 
     // ☕ 일상/힐링
     {
-      'path': 'assets/images/bg_window_plants.jpg',
+      'path': 'assets/images/bg_window_plants.webp',
       'name': '🪴 햇살 드는 창가와 차 한잔',
       'category': '☕ 일상/힐링',
     },
     {
-      'path': 'assets/images/bg_coffee_1786333143337.png',
+      'path': 'assets/images/bg_coffee_1786333143337.webp',
       'name': '☕ 따뜻한 아침 커피 한잔',
       'category': '☕ 일상/힐링',
     },
     {
-      'path': 'assets/images/bg_cozy_coffee.jpg',
+      'path': 'assets/images/bg_cozy_coffee.webp',
       'name': '☕ 포근한 커피 향기',
       'category': '☕ 일상/힐링',
     },
     {
-      'path': 'assets/images/bg_warm_home.jpg',
+      'path': 'assets/images/bg_warm_home.webp',
       'name': '🛋️ 편안한 집에서의 휴식',
       'category': '☕ 일상/힐링',
     },
@@ -623,7 +623,7 @@ class ExternalCardRequest {
 
 /// 한국어 텍스트가 카드 안에서 단어 중간에 어색하게 잘리지 않도록
 /// 어절(띄어쓰기) 단위로 자연스럽게 정돈해주는 지능형 줄바꿈 헬퍼
-String formatTextWithNaturalBreaks(String text, {int maxLineChars = 22}) {
+String formatTextWithNaturalBreaks(String text, {double fontSize = 30.0}) {
   final clean = text.trim();
   if (clean.isEmpty) return clean;
 
@@ -637,27 +637,49 @@ String formatTextWithNaturalBreaks(String text, {int maxLineChars = 22}) {
       continue;
     }
 
-    // 1. 대괄호 제목 형태(예: [식후 혈당 방어 산책법], 🚶‍♂️ [식후 혈당 방어 산책법])는
-    //    양옆 여백과 가독성을 위해 절대 줄바꿈하지 않고 한 줄로 온전히 보존
+    // 1. 대괄호 포함 제목 형태는 무조건 한 줄 유지 (줄바꿈 방지 공백 적용)
     final bool hasBracketTitle = trimmedPara.contains('[') && trimmedPara.contains(']');
     if (hasBracketTitle) {
-      resultParagraphs.add(trimmedPara);
+      resultParagraphs.add(trimmedPara.replaceAll(' ', '\u00A0'));
       continue;
     }
 
-    // 2. 이모지 특수문자를 제외한 순수 텍스트 글자 수 측정
-    final rawText = trimmedPara.replaceAll(
-      RegExp(r'[\u{1F300}-\u{1F9FF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}|\u{FE00}-\u{FE0F}]', unicode: true),
-      '',
-    ).trim();
-
-    // 3. 한 줄에 들어갈 수 있는 편안한 길이(22자 이내)라면 원래 작성된 줄바꿈 그대로 보존
-    if (rawText.length <= maxLineChars) {
-      resultParagraphs.add(trimmedPara);
-      continue;
+    // 2. 단문 (15자 ~ 25자) 중앙 균형 개행 처리 (Balance Wrap)
+    if (trimmedPara.length >= 15 && trimmedPara.length <= 25 && !para.contains('\n')) {
+      final words = trimmedPara.split(RegExp(r'\s+'));
+      if (words.length > 1) {
+        int bestSplitIdx = -1;
+        int minDiff = 999;
+        int currentLen = 0;
+        
+        for (int i = 0; i < words.length - 1; i++) {
+          currentLen += words[i].length + 1; // 공백 포함 길이
+          
+          bool hasPunctuation = words[i].endsWith(',') || words[i].endsWith('!');
+          int diff = (currentLen - (trimmedPara.length / 2)).abs().toInt();
+          
+          if (hasPunctuation) diff -= 10; // 쉼표나 느낌표가 있으면 강력한 개행 가산점 부여
+          
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestSplitIdx = i;
+          }
+        }
+        
+        if (bestSplitIdx != -1) {
+          final part1 = words.sublist(0, bestSplitIdx + 1).join('\u00A0');
+          final part2 = words.sublist(bestSplitIdx + 1).join('\u00A0');
+          resultParagraphs.add('$part1\n$part2');
+          continue;
+        }
+      }
     }
-
-    // 4. 22자를 초과하는 긴 문장에 대해서만 띄어쓰기(어절) 단위로 자연스럽게 정밀 줄바꿈
+    
+    // 3. 폰트 크기에 비례하여 한 줄에 들어갈 수 있는 최대 글자 수 동적 계산
+    // 폰트가 커지면 한 줄에 들어갈 글자 수가 줄어들어야 FittedBox에 의해 강제 축소되는 현상을 막을 수 있음
+    int maxLineChars = (600 / fontSize).floor(); 
+    // 예: 22sp -> 27자, 28sp -> 21자, 36sp -> 16자, 46sp -> 13자
+    
     final words = trimmedPara.split(RegExp(r'\s+'));
     final lineBuffer = StringBuffer();
     int currentLineLen = 0;
@@ -669,7 +691,7 @@ String formatTextWithNaturalBreaks(String text, {int maxLineChars = 22}) {
         lineBuffer.write(word);
         currentLineLen = word.length;
       } else if (currentLineLen + 1 + word.length <= maxLineChars) {
-        lineBuffer.write(' $word');
+        lineBuffer.write('\u00A0$word');
         currentLineLen += 1 + word.length;
       } else {
         resultParagraphs.add(lineBuffer.toString());

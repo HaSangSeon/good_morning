@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../services/ad_service.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -80,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         border: Border.all(color: const Color(0xFFFFEAD8), width: 1.5),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.orange.withOpacity(0.08),
+                            color: Colors.orange.withValues(alpha: 0.08),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),

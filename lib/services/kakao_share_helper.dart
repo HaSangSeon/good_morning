@@ -85,7 +85,7 @@ class KakaoShareHelper {
           if (isInstalled) {
             sharedDirectly = await _kakaoChannel.invokeMethod('shareToKakao', {
               'filePath': filePath,
-              if (text != null) 'text': text,
+              'text': text,
             }) ?? false;
           }
         } catch (e) {
@@ -97,12 +97,14 @@ class KakaoShareHelper {
     // 3. 카카오톡 미설치 기기이거나 모든 카카오 전송이 불가할 때: 표준 시스템 공유 시트 실행
     if (!sharedDirectly) {
       if (filePath != null && filePath.isNotEmpty) {
+        // ignore: deprecated_member_use
         await Share.shareXFiles(
           [XFile(filePath, mimeType: 'image/jpeg')],
           text: text,
           subject: subject,
         );
       } else if (text != null && text.isNotEmpty) {
+        // ignore: deprecated_member_use
         await Share.share(
           text,
           subject: subject,

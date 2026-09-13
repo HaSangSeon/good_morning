@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kakao_flutter_sdk_share/kakao_flutter_sdk_share.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'services/theme_service.dart';
 import 'services/card_archive_service.dart';
 import 'services/notification_service.dart';

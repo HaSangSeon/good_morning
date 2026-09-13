@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdService {
   static final AdService _instance = AdService._internal();
   factory AdService() => _instance;
   AdService._internal();
+
+  /// 📸 스토어 등록용 프로덕션 스크린샷 캡처를 위한 배너 광고 임시 숨김 플래그 (현재 정상 운영 모드)
+  static bool hideBannerAdsForScreenshots = false;
 
   String get bannerAdUnitId {
     if (Platform.isAndroid) {

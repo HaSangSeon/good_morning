@@ -14,17 +14,18 @@ class CardResultScreen extends StatefulWidget {
 }
 
 class _CardResultScreenState extends State<CardResultScreen> with WidgetsBindingObserver {
-  BannerAd? _mediumRectangleAd;
+  BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;
   bool _isSharing = false;
   bool _isSharingTriggered = false; // 카카오톡 공유 진입 여부 플래그
 
+  bool _isAdLoading = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadMediumRectangleAd();
     _loadInterstitialAd(); // 백그라운드에서 전면 광고 사전 로드
   }
 
@@ -78,18 +79,42 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
     _interstitialAd!.show();
   }
 
-  void _loadMediumRectangleAd() {
-    _mediumRectangleAd = BannerAd(
-      adUnitId: AdService().mediumRectangleAdUnitId,
-      size: AdSize.mediumRectangle, // 300x250
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_bannerAd == null && !_isAdLoading) {
+      _isAdLoading = true;
+      _loadAdaptiveBannerAd();
+    }
+  }
+
+  Future<void> _loadAdaptiveBannerAd() async {
+    final AnchoredAdaptiveBannerAdSize? size =
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+            MediaQuery.of(context).size.width.truncate());
+
+    if (size == null) {
+      _isAdLoading = false;
+      return;
+    }
+
+    _bannerAd = BannerAd(
+      adUnitId: AdService().bannerAdUnitId,
+      size: size,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (_) {
-          if (mounted) setState(() => _isAdLoaded = true);
+          if (mounted) {
+            setState(() {
+              _isAdLoaded = true;
+              _isAdLoading = false;
+            });
+          }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('MediumRectangleAd failed to load: $error');
+          debugPrint('BannerAd failed to load: $error');
           ad.dispose();
+          _isAdLoading = false;
         },
       ),
     )..load();
@@ -99,7 +124,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
   void dispose() {
     WidgetsBinding.instance.removeObserver(this); // Observer 해제
     _interstitialAd?.dispose(); // 메모리 정리 누락 방지
-    _mediumRectangleAd?.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -134,6 +159,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F5),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             // 1. 헤더 (닫기 버튼)
@@ -149,6 +175,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
               ),
             ),
             
+            // 2. 메인 콘텐츠 (확대된 카드 및 카카오톡 전송 버튼)
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -156,7 +183,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                   children: [
                     const SizedBox(height: 10),
                     
-                    // 2. 완성 축하 타이틀
+                    // 완성 축하 타이틀
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -177,7 +204,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                     ),
                     const SizedBox(height: 24),
                     
-                    // 3. 폴라로이드 액자 뷰 (카드 결과물)
+                    // 폴라로이드 액자 뷰 (카드 결과물)
                     Center(
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.65,
@@ -208,33 +235,44 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                     
                     const SizedBox(height: 32),
                     
-                    // 4. 카카오톡 전송 버튼
+                    // 친절한 안내 문구
+                    const Text(
+                      '가족이나 지인에게 따뜻한 안부 인사를 건네보세요!',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFF757575),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 카카오톡 전송 버튼 (시니어 맞춤 대형 사이즈)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: InkWell(
                         onTap: _isSharing ? null : _shareToKakao,
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(38),
                         child: Container(
-                          height: 60,
+                          height: 76, // 60 -> 76 대폭 확대
                           decoration: BoxDecoration(
                             color: const Color(0xFFFEE500),
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(38),
                             boxShadow: const [
                               BoxShadow(color: Color(0x33FEE500), blurRadius: 10, offset: Offset(0, 5)),
                             ],
                           ),
                           child: Center(
                             child: _isSharing
-                                ? const SizedBox(width: 28, height: 28, child: CircularProgressIndicator(color: Color(0xFF3E2723), strokeWidth: 3))
+                                ? const SizedBox(width: 32, height: 32, child: CircularProgressIndicator(color: Color(0xFF3E2723), strokeWidth: 3))
                                 : const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.send_rounded, size: 28, color: Color(0xFF3E2723)),
-                                      SizedBox(width: 10),
+                                      Icon(Icons.send_rounded, size: 36, color: Color(0xFF3E2723)), // 28 -> 36 확대
+                                      SizedBox(width: 12),
                                       Text(
                                         '카카오톡으로 전송',
                                         style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 26, // 20 -> 26 확대
                                           fontWeight: FontWeight.w900,
                                           color: Color(0xFF3E2723),
                                           letterSpacing: -0.5,
@@ -246,45 +284,29 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                         ),
                       ),
                     ),
-                    const SizedBox(height: 40),
-                    
-                    // 5. 하단 인라인 광고 영역 (Medium Rectangle 300x250)
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
-                        Container(
-                          width: double.infinity,
-                          color: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Column(
-                            children: [
-                              const Text(
-                                '광고',
-                                style: TextStyle(fontSize: 12, color: Color(0xFFBDBDBD)),
-                              ),
-                              const SizedBox(height: 8),
-                              if (_isAdLoaded && _mediumRectangleAd != null)
-                                SizedBox(
-                                  width: _mediumRectangleAd!.size.width.toDouble(),
-                                  height: _mediumRectangleAd!.size.height.toDouble(),
-                                  child: AdWidget(ad: _mediumRectangleAd!),
-                                )
-                              else
-                                const SizedBox(
-                                  width: 300,
-                                  height: 250,
-                                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
+
+            // 최하단 배너 광고 영역 (스토어 캡처 시 임시 숨김 지원)
+            if (!AdService.hideBannerAdsForScreenshots && _isAdLoaded && _bannerAd != null)
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 8,
+                  bottom: MediaQuery.of(context).padding.bottom,
+                ),
+                child: SizedBox(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  child: AdWidget(key: ObjectKey(_bannerAd!), ad: _bannerAd!),
+                ),
+              )
+            else
+              SizedBox(
+                height: MediaQuery.of(context).padding.bottom,
+              ),
           ],
         ),
       ),

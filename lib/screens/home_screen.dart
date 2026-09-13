@@ -10,7 +10,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../data/home_card_data.dart';
 import '../services/card_archive_service.dart';
 import '../services/notification_service.dart';
-import '../services/kakao_share_helper.dart';
 import '../services/ad_service.dart';
 import '../widgets/keep_all_text.dart';
 import 'card_archive_screen.dart';
@@ -29,8 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? _customImagePath;
   int _bgIndex = 0;
-  bool _isSharing = false;
-  int _fontScaleStep = 0; // 0: Auto, 1: 작게, 2: 보통, 3: 크게, 4: 아주 크게
+  int _fontScaleStep = 0; // 0: Auto, 1~10: 수동 단계
   
   bool _isBannerAdLoaded = false;
   BannerAd? _bannerAd;
@@ -72,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadAdaptiveBannerAd() async {
-    // 화면 가로 너비를 구해 좌우 꽉 차는 Adaptive Banner 사이즈 계산
+    // 화면 가로 너비를 구해 좌우 꽉 차는 얇은 Adaptive Banner 사이즈 계산 (여백 없는 슬림 배너)
     final AnchoredAdaptiveBannerAdSize? size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
         MediaQuery.of(context).size.width.truncate());
 
@@ -192,14 +190,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // 자동 글자 크기(단계) 계산 헬퍼
+  int _calculateAutoFontStep(String text) {
+    final rawText = text.trim();
+    if (rawText.isEmpty) return 8;
+    final lineCount = rawText.split('\n').length;
+    final len = rawText.length;
+    
+    if (lineCount >= 6 || len >= 60) return 1; // 20.0
+    if (lineCount == 5 || len >= 50) return 2; // 24.0
+    if (lineCount == 4 || len >= 40) return 4; // 32.0
+    if (lineCount == 3 || len >= 30) return 5; // 36.0
+    if (lineCount == 2 || len >= 20) return 7; // 44.0
+    if (len >= 10) return 8;                   // 48.0
+    return 10;                                 // 56.0
+  }
+
   // 텍스트 직접 수정 모달
   void _showTextEditorDialog() {
     int effectiveStep = _fontScaleStep;
     if (effectiveStep == 0) {
-      final len = _textController.text.trim().length;
-      if (len >= 46) effectiveStep = 1;
-      else if (len >= 26) effectiveStep = 2;
-      else effectiveStep = 4;
+      effectiveStep = _calculateAutoFontStep(_textController.text);
     }
 
     showModalBottomSheet(
@@ -215,7 +226,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 24,
+                  bottom: 24 + MediaQuery.of(context).padding.bottom,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -230,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextField(
                       controller: _textController,
                       maxLines: 4,
-                      autofocus: true,
+                      autofocus: false,
                       style: const TextStyle(fontSize: 20, height: 1.6, color: Color(0xFF3E2723), fontWeight: FontWeight.w500),
                       onChanged: (_) {
                         setState(() {});
@@ -258,6 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             InkWell(
                               borderRadius: BorderRadius.circular(10),
                               onTap: effectiveStep > 1 ? () {
+                                FocusScope.of(context).unfocus(); // 💡 글자 크기 조절 시 키보드 내리기
                                 HapticFeedback.lightImpact();
                                 setModalState(() => effectiveStep--);
                                 setState(() => _fontScaleStep = effectiveStep);
@@ -281,20 +298,21 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 80,
                               alignment: Alignment.center,
                               child: Text(
-                                effectiveStep == 1 ? '작게' : effectiveStep == 2 ? '보통' : effectiveStep == 3 ? '크게' : '아주 크게',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                                '$effectiveStep단계',
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
                               ),
                             ),
                             InkWell(
                               borderRadius: BorderRadius.circular(10),
-                              onTap: effectiveStep < 4 ? () {
+                              onTap: effectiveStep < 10 ? () {
+                                FocusScope.of(context).unfocus(); // 💡 글자 크기 조절 시 키보드 내리기
                                 HapticFeedback.lightImpact();
                                 setModalState(() => effectiveStep++);
                                 setState(() => _fontScaleStep = effectiveStep);
                                 _saveUserPreferences();
                               } : null,
                               child: Opacity(
-                                opacity: effectiveStep < 4 ? 1.0 : 0.35,
+                                opacity: effectiveStep < 10 ? 1.0 : 0.35,
                                 child: Container(
                                   width: 48,
                                   height: 48,
@@ -403,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             highlightColor: const Color(0xFFEAECEF),
-                            splashColor: const Color(0xFFEAECEF).withOpacity(0.5),
+                            splashColor: const Color(0xFFEAECEF).withValues(alpha: 0.5),
                             onTap: () {
                               Future.delayed(const Duration(milliseconds: 150), () {
                                 if (!mounted) return;
@@ -420,6 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   }
                                 });
                                 _saveUserPreferences();
+                                if (!context.mounted) return;
                                 Navigator.pop(context);
                               });
                             },
@@ -558,7 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: ListView(
                       controller: listScrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 24 + MediaQuery.of(context).padding.bottom),
                       children: listItems,
                     ),
                   ),
@@ -616,7 +635,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const Divider(thickness: 1, height: 1, color: Color(0xFFEEEEEE)),
               Expanded(
                 child: GridView.builder(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.only(
+                    left: 20, right: 20, top: 20, 
+                    bottom: 20 + MediaQuery.of(context).padding.bottom
+                  ),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
@@ -687,7 +709,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 32 + MediaQuery.of(context).padding.bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -829,26 +851,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // 1. 글자 수 기반 동적 폰트 크기(Dynamic Font Size) 로직 또는 수동 지정 로직
-    final rawTextLength = _textController.text.trim().length;
-    double dynamicFontSize = 30.0;
-    double dynamicHeight = 1.4;
-
-    if (_fontScaleStep != 0) {
-      // 수동 스텝 오버라이드 (폰트 크기가 확실히 체감되도록 격차를 크게 둡니다)
-      if (_fontScaleStep == 1) { dynamicFontSize = 22.0; dynamicHeight = 1.5; }
-      else if (_fontScaleStep == 2) { dynamicFontSize = 28.0; dynamicHeight = 1.45; }
-      else if (_fontScaleStep == 3) { dynamicFontSize = 36.0; dynamicHeight = 1.35; }
-      else if (_fontScaleStep == 4) { dynamicFontSize = 46.0; dynamicHeight = 1.25; }
-    } else {
-      // 자동 글자 수 기반 동적 크기
-      if (rawTextLength >= 46) {
-        dynamicFontSize = 22.0; // 장문도 조금 더 키움
-        dynamicHeight = 1.5;
-      } else if (rawTextLength >= 26) {
-        dynamicFontSize = 28.0;
-        dynamicHeight = 1.45;
-      }
+    final fontSizes = [20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 52.0, 56.0];
+    final lineHeights = [1.5, 1.48, 1.45, 1.42, 1.38, 1.35, 1.32, 1.28, 1.25, 1.2];
+    
+    int activeStep = _fontScaleStep;
+    if (activeStep == 0) {
+      activeStep = _calculateAutoFontStep(_textController.text);
     }
+    
+    int idx = (activeStep - 1).clamp(0, 9);
+    double dynamicFontSize = fontSizes[idx];
+    double dynamicHeight = lineHeights[idx];
 
     // 2. 자동 줄바꿈 포맷팅 적용 (폰트 크기를 전달하여 동적으로 개행 기준 글자수 계산)
     final displayFormattedText = formatTextWithNaturalBreaks(_textController.text, fontSize: dynamicFontSize);
@@ -857,8 +870,11 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFFAF8F5),
       body: SafeArea(
         bottom: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
+        child: Column(
+          children: [
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: ConstrainedBox(
@@ -870,7 +886,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
             // 1. 프리미엄 커스텀 앱바 (AppBar)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              padding: const EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -938,147 +954,147 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // 2. 메인 콘텐츠 (확대된 카드 뷰)
+            // 2. 메인 콘텐츠 (카드 뷰 + 수정 바 + 보조 버튼 그룹 일체형 통합)
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // 캔버스 (화면 캡처 영역)
-                    GestureDetector(
-                      onTap: _showTextEditorDialog,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: const [
-                            BoxShadow(color: Color(0x33000000), blurRadius: 20, offset: Offset(0, 10)),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Screenshot(
-                            controller: _screenshotController,
-                            child: AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Image(
-                                    image: _getBackgroundImageProvider(),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Positioned.fill(
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.black.withOpacity(0.35),
-                                            Colors.black.withOpacity(0.35),
-                                            Colors.black.withOpacity(0.35),
-                                          ],
-                                        ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 캔버스 (화면 캡처 영역)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: GestureDetector(
+                          onTap: _showTextEditorDialog,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: const [
+                                BoxShadow(color: Color(0x33000000), blurRadius: 20, offset: Offset(0, 10)),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Screenshot(
+                                controller: _screenshotController,
+                                child: AspectRatio(
+                                  aspectRatio: 1.0,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      Image(
+                                        image: _getBackgroundImageProvider(),
+                                        fit: BoxFit.cover,
                                       ),
-                                    ),
-                                  ),
-                                  // 3. 안전 영역 래핑 (Overflow 방지)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-                                    child: Center(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          displayFormattedText,
-                                          textAlign: TextAlign.center,
-                                          style: _getAppliedTextStyle(
-                                            fontSize: dynamicFontSize, 
-                                            height: dynamicHeight,
-                                            fontWeight: FontWeight.bold,
+                                      Positioned.fill(
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Colors.black.withValues(alpha: 0.35),
+                                                Colors.black.withValues(alpha: 0.35),
+                                                Colors.black.withValues(alpha: 0.35),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                      // 3. 안전 영역 래핑 (Overflow 방지)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                                        child: Center(
+                                          child: SingleChildScrollView(
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            child: Text(
+                                              displayFormattedText.keepAll,
+                                              textAlign: TextAlign.center,
+                                              style: _getAppliedTextStyle(
+                                                fontSize: dynamicFontSize, 
+                                                height: dynamicHeight,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // 컴팩트 수정 바
-                    InkWell(
-                      onTap: _showTextEditorDialog,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        width: double.infinity,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE0E0E0)),
-                          boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.edit_note, color: Color(0xFF757575), size: 24),
-                            SizedBox(width: 8),
-                            Text('여기를 눌러 문구를 직접 수정하세요', style: TextStyle(fontSize: 16, color: Color(0xFF757575), fontWeight: FontWeight.w500)),
-                          ],
+                      
+                      const SizedBox(height: 12),
+                      
+                      // 컴팩트 수정 바
+                      InkWell(
+                        onTap: _showTextEditorDialog,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          width: double.infinity,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFE0E0E0)),
+                            boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.edit_note, color: Color(0xFF757575), size: 24),
+                              SizedBox(width: 8),
+                              Text('여기를 눌러 문구와 글자 크기를 수정하세요', style: TextStyle(fontSize: 16, color: Color(0xFF757575), fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
 
-            // 3. 고대비 통일된 보조 버튼 그룹
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildPremiumButton(
-                          icon: Icons.auto_awesome,
-                          label: '추천 문구',
-                          gradient: const LinearGradient(colors: [Color(0xFF78716C), Color(0xFF57534E)]),
-                          onTap: _showPhraseSelectionDialog,
-                        ),
+                      const SizedBox(height: 12),
+
+                      // 통일된 보조 버튼 그룹 (추천 문구, 배경 사진, 글씨체)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPremiumButton(
+                              icon: Icons.auto_awesome,
+                              label: '추천 문구',
+                              gradient: const LinearGradient(colors: [Color(0xFF78716C), Color(0xFF57534E)]),
+                              onTap: _showPhraseSelectionDialog,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPremiumButton(
+                              icon: Icons.image,
+                              label: '배경 사진',
+                              gradient: const LinearGradient(colors: [Color(0xFF2F4F4F), Color(0xFF1A3636)]),
+                              onTap: _showBackgroundSelectionDialog,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildPremiumButton(
+                              icon: Icons.font_download,
+                              label: '글씨체',
+                              gradient: const LinearGradient(colors: [Color(0xFF374151), Color(0xFF1F2937)]),
+                              onTap: _showFontSelectionDialog,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildPremiumButton(
-                          icon: Icons.image,
-                          label: '배경 사진',
-                          gradient: const LinearGradient(colors: [Color(0xFF2F4F4F), Color(0xFF1A3636)]),
-                          onTap: _showBackgroundSelectionDialog,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildPremiumButton(
-                          icon: Icons.font_download,
-                          label: '글씨체',
-                          gradient: const LinearGradient(colors: [Color(0xFF374151), Color(0xFF1F2937)]),
-                          onTap: _showFontSelectionDialog,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
                     ],
@@ -1089,7 +1105,8 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
-      bottomNavigationBar: Column(
+      // 💡 하단 고정 영역 (스크롤 침범 원천 차단 및 소프트키 겹침 방지 구조)
+      Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
@@ -1132,22 +1149,30 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // 버튼과 광고 사이의 오클릭 방지 명확한 여백 확보
-          const SizedBox(height: 16),
-          // 배너 광고 영역 (Adaptive 사이즈로 좌우 100% 채움)
-          if (_isBannerAdLoaded && _bannerAd != null)
-            Container(
-              color: Colors.white,
-              width: double.infinity,
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
+          // 최하단 배너 광고 영역 (스토어 캡처 시 임시 숨김 지원)
+          if (!AdService.hideBannerAdsForScreenshots && _isBannerAdLoaded && _bannerAd != null)
+            Padding(
+              padding: EdgeInsets.only(
+                top: 8,
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
+              child: SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(key: ObjectKey(_bannerAd!), ad: _bannerAd!),
+              ),
             )
           else
-            const SizedBox.shrink(),
+            SizedBox(
+              height: MediaQuery.of(context).padding.bottom,
+            ),
         ],
       ),
-    );
-  }
+    ],
+  ),
+),
+);
+}
 
   // 통일된 56dp 이상 높이의 고대비 서브 버튼
   Widget _buildPremiumButton({required IconData icon, required String label, required Gradient gradient, required VoidCallback onTap}) {

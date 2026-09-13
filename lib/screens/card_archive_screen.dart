@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/card_archive_service.dart';
 import '../services/notification_service.dart';
+import '../services/ad_service.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../widgets/keep_all_text.dart';
 
 class CardArchiveScreen extends StatefulWidget {
@@ -25,6 +27,9 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
   bool _isNotificationEnabled = true;
   bool _isNotifLoading = true;
 
+  bool _isBannerAdLoaded = false;
+  BannerAd? _bannerAd;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +38,43 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
       duration: const Duration(seconds: 5),
     )..repeat();
     _loadNotificationState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_bannerAd == null) {
+      _loadBannerAd();
+    }
+  }
+
+  Future<void> _loadBannerAd() async {
+    final AnchoredAdaptiveBannerAdSize? size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+        MediaQuery.of(context).size.width.truncate());
+
+    if (size == null) {
+      debugPrint('Unable to get adaptive banner size.');
+      return;
+    }
+
+    _bannerAd = BannerAd(
+      adUnitId: AdService().bannerAdUnitId,
+      size: size,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          if (mounted) {
+            setState(() {
+              _isBannerAdLoaded = true;
+            });
+          }
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          debugPrint('BannerAd failed to load: $error');
+          ad.dispose();
+        },
+      ),
+    )..load();
   }
 
   Future<void> _loadNotificationState() async {
@@ -147,7 +189,7 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
 
     if (confirmed == true && mounted) {
       await _archiveService.deleteCard(card.id);
-      if (mounted) {
+      if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -160,7 +202,6 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
             duration: const Duration(seconds: 2),
           ),
         );
-      }
     }
   }
 
@@ -168,6 +209,7 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
   @override
   void dispose() {
     _archiveAnimController.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -246,7 +288,10 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
           ),
         ),
       ),
-      body: Container(
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -323,7 +368,7 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                           child: Switch(
                             value: _isNotificationEnabled,
                             onChanged: _toggleNotification,
-                            activeColor: const Color(0xFFE64A19),
+                            activeThumbColor: const Color(0xFFE64A19),
                             activeTrackColor: const Color(0xFFFFCCBC),
                             inactiveThumbColor: Colors.grey.shade400,
                             inactiveTrackColor: Colors.grey.shade200,
@@ -388,7 +433,7 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                   );
                 }
                 return GridView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.80,
@@ -540,11 +585,30 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                 );
               },
             ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+),
+if (!AdService.hideBannerAdsForScreenshots && _isBannerAdLoaded && _bannerAd != null)
+            Padding(
+              padding: EdgeInsets.only(
+                top: 8,
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
+              child: SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(key: ObjectKey(_bannerAd!), ad: _bannerAd!),
+              ),
+            )
+          else
+            SizedBox(
+              height: MediaQuery.of(context).padding.bottom,
             ),
-            ],
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

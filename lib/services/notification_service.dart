@@ -319,8 +319,8 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    final now = tz.TZDateTime.now(tz.local);
     
+
     // 요일별 카피 정의
     final Map<int, Map<String, String>> dowQuotes = {
       1: {'title': '🌅 좋은 아침입니다!', 'body': '☀️ 활기찬 한 주가 시작되었습니다. 소중한 분들께 따뜻한 아침 인사를 건네보세요.'}, // 월

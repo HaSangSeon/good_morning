@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gal/gal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/ad_service.dart';
 import '../services/kakao_share_helper.dart';
@@ -309,6 +310,43 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
         setState(() => _isSending = false);
       }
     }
+  }
+
+  Future<void> _handleSaveGallery() async {
+    if (_isSavingCard) return;
+    if (widget.imageBytes == null && widget.imageFilePath == null) return;
+    
+    setState(() => _isSavingCard = true);
+    HapticFeedback.mediumImpact();
+    try {
+      final bool hasAccess = await Gal.requestAccess(toAlbum: true);
+      if (hasAccess) {
+        if (widget.imageBytes != null) {
+          await Gal.putImageBytes(widget.imageBytes!);
+        } else if (widget.imageFilePath != null) {
+          await Gal.putImage(widget.imageFilePath!);
+        }
+        _showToast('기기 사진첩에 저장되었습니다.', true);
+      } else {
+        _showToast('사진첩 접근 권한이 필요합니다.', false);
+      }
+    } catch (e) {
+      debugPrint('Save gallery error: $e');
+      _showToast('사진첩 저장 중 오류가 발생했습니다.', false);
+    } finally {
+      if (mounted) setState(() => _isSavingCard = false);
+    }
+  }
+
+  void _showToast(String message, bool isSuccess) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(fontSize: 15, color: Colors.white)),
+        backgroundColor: isSuccess ? const Color(0xFF2E7D32) : const Color(0xFFE64A19),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -807,6 +845,67 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                       ),
                     ),
                   ],
+                  
+                  // [신규] 기기 사진첩에 저장하기 버튼
+                  const SizedBox(height: 10),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: double.infinity,
+                      minHeight: 46,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isSavingCard ? null : _handleSaveGallery,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: (isDark ? const Color(0xFF1E282C) : const Color(0xFFE8F4F8)),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: (isDark ? const Color(0xFF324C56) : const Color(0xFF9FD6E6)),
+                              width: 1,
+                            ),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (_isSavingCard)
+                                  SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: isDark ? const Color(0xFF81D4FA) : const Color(0xFF0288D1),
+                                    ),
+                                  )
+                                else
+                                  Icon(
+                                    Icons.photo_library_rounded,
+                                    size: 19,
+                                    color: (isDark ? const Color(0xFF81D4FA) : const Color(0xFF0288D1)),
+                                  ),
+                                const SizedBox(width: 7),
+                                Text(
+                                  '내 폰 사진첩에 저장하기',
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: (isDark ? const Color(0xFF81D4FA) : const Color(0xFF01579B)),
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

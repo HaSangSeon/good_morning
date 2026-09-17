@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:gal/gal.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_service.dart';
 import '../services/kakao_share_helper.dart';
@@ -18,6 +20,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
   InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;
   bool _isSharing = false;
+  bool _isSavingGallery = false;
   bool _isSharingTriggered = false; // 카카오톡 공유 진입 여부 플래그
 
   bool _isAdLoading = false;
@@ -154,6 +157,54 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
     }
   }
 
+  Future<void> _saveToGallery() async {
+    if (_isSavingGallery) return;
+    setState(() => _isSavingGallery = true);
+    HapticFeedback.mediumImpact();
+    
+    try {
+      final bool hasAccess = await Gal.requestAccess(toAlbum: true);
+      if (hasAccess) {
+        await Gal.putImage(widget.imagePath);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('기기 사진첩에 저장되었습니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
+              backgroundColor: Color(0xFF2E7D32),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('사진첩 접근 권한이 필요합니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
+              backgroundColor: Color(0xFFE64A19),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Gallery save error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('사진첩 저장 중 오류가 발생했습니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
+            backgroundColor: Color(0xFFE64A19),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSavingGallery = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -253,7 +304,10 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                         onTap: _isSharing ? null : _shareToKakao,
                         borderRadius: BorderRadius.circular(38),
                         child: Container(
-                          height: 76, // 60 -> 76 대폭 확대
+                          width: double.infinity,
+                          height: 76,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFEE500),
                             borderRadius: BorderRadius.circular(38),
@@ -261,18 +315,19 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                               BoxShadow(color: Color(0x33FEE500), blurRadius: 10, offset: Offset(0, 5)),
                             ],
                           ),
-                          child: Center(
-                            child: _isSharing
-                                ? const SizedBox(width: 32, height: 32, child: CircularProgressIndicator(color: Color(0xFF3E2723), strokeWidth: 3))
-                                : const Row(
+                          child: _isSharing
+                              ? const SizedBox(width: 32, height: 32, child: CircularProgressIndicator(color: Color(0xFF3E2723), strokeWidth: 3))
+                              : const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.send_rounded, size: 36, color: Color(0xFF3E2723)), // 28 -> 36 확대
+                                      Icon(Icons.send_rounded, size: 36, color: Color(0xFF3E2723)),
                                       SizedBox(width: 12),
                                       Text(
                                         '카카오톡으로 전송',
                                         style: TextStyle(
-                                          fontSize: 26, // 20 -> 26 확대
+                                          fontSize: 26,
                                           fontWeight: FontWeight.w900,
                                           color: Color(0xFF3E2723),
                                           letterSpacing: -0.5,
@@ -280,7 +335,52 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                                       ),
                                     ],
                                   ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // 기기 사진첩에 저장 버튼 (시니어 맞춤 대형 사이즈, 보조 버튼 스타일)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: InkWell(
+                        onTap: _isSavingGallery ? null : _saveToGallery,
+                        borderRadius: BorderRadius.circular(38),
+                        child: Container(
+                          width: double.infinity,
+                          height: 76,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(38),
+                            border: Border.all(color: const Color(0xFFDCDCDC), width: 2),
+                            boxShadow: const [
+                              BoxShadow(color: Color(0x0D000000), blurRadius: 10, offset: Offset(0, 5)),
+                            ],
                           ),
+                          child: _isSavingGallery
+                              ? const SizedBox(width: 32, height: 32, child: CircularProgressIndicator(color: Color(0xFF424242), strokeWidth: 3))
+                              : const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.photo_library_rounded, size: 32, color: Color(0xFF555555)),
+                                      SizedBox(width: 12),
+                                      Text(
+                                        '내 폰 사진첩에 저장',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF555555),
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                         ),
                       ),
                     ),

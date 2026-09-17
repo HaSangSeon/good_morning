@@ -34,11 +34,14 @@ class _HomeScreenState extends State<HomeScreen> {
   BannerAd? _bannerAd;
   bool _isAdLoading = false;
 
-  // 시니어 가독성 높은 폰트 3종
+  // 시니어 가독성 높은 폰트 6종
   final List<Map<String, dynamic>> _seniorFonts = [
     {'id': 'Jua', 'name': '두꺼운 고딕체', 'font': GoogleFonts.jua()},
     {'id': 'GowunBatang', 'name': '깔끔한 명조체', 'font': GoogleFonts.gowunBatang(fontWeight: FontWeight.bold)},
     {'id': 'DoHyeon', 'name': '굵직한 제목체', 'font': GoogleFonts.doHyeon()},
+    {'id': 'NanumBrush', 'name': '정성스런 붓글씨', 'font': GoogleFonts.nanumBrushScript()},
+    {'id': 'GamjaFlower', 'name': '다정한 손글씨', 'font': GoogleFonts.gamjaFlower()},
+    {'id': 'BlackHanSans', 'name': '시원시원 큰글씨', 'font': GoogleFonts.blackHanSans()},
   ];
   String _selectedFontFamily = 'Jua';
 
@@ -238,8 +241,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('문구 직접 수정하기', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        IconButton(icon: const Icon(Icons.close, size: 32), onPressed: () => Navigator.pop(context)),
+                        const Text('✍️ 문구 직접 수정하기', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF222222))),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, size: 28, color: Colors.black87),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -254,12 +267,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       decoration: InputDecoration(
                         hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
-                        hintStyle: const TextStyle(fontSize: 18, color: Color(0xFFBCAAA4)),
+                        hintStyle: const TextStyle(fontSize: 18, color: Color(0xFF999999)),
                         filled: true,
-                        fillColor: const Color(0xFFF9F9F9),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE0E0E0))),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE0E0E0))),
-                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF8D6E63), width: 2)),
+                        fillColor: const Color(0xFFF7F8FA),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFEAEAEA))),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFEAEAEA))),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 1.5)),
                         contentPadding: const EdgeInsets.all(20),
                       ),
                     ),
@@ -287,10 +300,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   height: 48,
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF0F2F5),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: const Color(0xFFE0E4EA)),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: const Color(0xFFEAEAEA)),
                                   ),
-                                  child: const Center(child: Text('-', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2A2D34)))),
+                                  child: const Center(child: Icon(Icons.remove_rounded, color: Color(0xFF2A2D34), size: 28)),
                                 ),
                               ),
                             ),
@@ -299,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               alignment: Alignment.center,
                               child: Text(
                                 '$effectiveStep단계',
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
                               ),
                             ),
                             InkWell(
@@ -318,10 +331,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   height: 48,
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF0F2F5),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: const Color(0xFFE0E4EA)),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: const Color(0xFFEAEAEA)),
                                   ),
-                                  child: const Center(child: Text('+', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2A2D34)))),
+                                  child: const Center(child: Icon(Icons.add_rounded, color: Color(0xFF2A2D34), size: 28)),
                                 ),
                               ),
                             ),
@@ -412,14 +425,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF7F8FA),
-                          border: Border.all(color: const Color(0xFFE8EAEF), width: 1),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                          border: Border.all(color: const Color(0xFFEAEAEA), width: 1),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(color: Color(0x08000000), blurRadius: 8, offset: Offset(0, 2))
+                          ],
                         ),
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             highlightColor: const Color(0xFFEAECEF),
                             splashColor: const Color(0xFFEAECEF).withValues(alpha: 0.5),
                             onTap: () {
@@ -443,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
@@ -451,14 +467,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: KeepAllText(
                                       text, 
                                       style: const TextStyle(
-                                        fontSize: 17, 
-                                        color: Color(0xFF222222), 
+                                        fontSize: 20, 
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF333333), 
                                         height: 1.45,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  const Icon(Icons.chevron_right, color: Color(0xFFBDBDBD), size: 24),
+                                  const Icon(Icons.chevron_right_rounded, color: Color(0xFFBDBDBD), size: 28),
                                 ],
                               ),
                             ),
@@ -495,12 +512,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('추천 문구 고르기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A))),
-                        IconButton(
-                          icon: const Icon(Icons.close, size: 28),
-                          constraints: const BoxConstraints(minWidth: 48, minHeight: 48), // 터치 영역 48x48
-                          padding: EdgeInsets.zero,
-                          onPressed: () => Navigator.pop(context),
+                        const Text('💬 추천 문구 고르기', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF222222))),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, size: 28, color: Colors.black87),
+                          ),
                         ),
                       ],
                     ),
@@ -606,27 +628,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('배경 고르기', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 32),
-                      onPressed: () => Navigator.pop(context),
+                    const Text('🎨 사진 배경 고르기', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF222222))),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, size: 28, color: Colors.black87),
+                      ),
                     ),
                   ],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: OutlinedButton.icon(
+                child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
                     _pickCustomImage();
                   },
-                  icon: const Icon(Icons.photo_library, size: 28, color: Color(0xFF424242)),
-                  label: const Text('내 앨범에서 사진 고르기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF424242))),
-                  style: OutlinedButton.styleFrom(
+                  icon: const Icon(Icons.photo_library_rounded, size: 28, color: Colors.white),
+                  label: const Text('내 앨범에서 사진 고르기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 56),
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFFBDBDBD), width: 2),
+                    backgroundColor: const Color(0xFF333333),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
@@ -705,55 +734,96 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showFontSelectionDialog() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 32 + MediaQuery.of(context).padding.bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('글씨체 고르기', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  IconButton(icon: const Icon(Icons.close, size: 32), onPressed: () => Navigator.pop(context)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ..._seniorFonts.map((fontConfig) {
-                final isSelected = _selectedFontFamily == fontConfig['id'];
-                return Column(
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(24, 20, 24, 20 + MediaQuery.of(context).padding.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        setState(() {
-                          _selectedFontFamily = fontConfig['id'];
-                        });
-                        _saveUserPreferences();
-                        Navigator.pop(context);
-                      },
+                    const Text('✍️ 예쁜 글씨체 고르기', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF222222))),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
                       child: Container(
-                        height: 64,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              fontConfig['name'],
-                              style: (fontConfig['font'] as TextStyle).copyWith(fontSize: 24, color: isSelected ? Colors.blueAccent : Colors.black87),
-                            ),
-                            if (isSelected) const Icon(Icons.check_circle, color: Colors.blueAccent, size: 32),
-                          ],
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          shape: BoxShape.circle,
                         ),
+                        child: const Icon(Icons.close, size: 28, color: Colors.black87),
                       ),
                     ),
-                    const Divider(thickness: 1, height: 1, color: Color(0xFFF5F5F5)),
                   ],
-                );
-              }),
-            ],
+                ),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: _seniorFonts.map((fontConfig) {
+                        final isSelected = _selectedFontFamily == fontConfig['id'];
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  setState(() {
+                                    _selectedFontFamily = fontConfig['id'];
+                                  });
+                                  _saveUserPreferences();
+                                  Navigator.pop(context);
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  height: 64,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFFF0F5FF) : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFF3B82F6).withOpacity(0.3) : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          fontConfig['name'],
+                                          style: (fontConfig['font'] as TextStyle).copyWith(
+                                            fontSize: 24,
+                                            color: isSelected ? const Color(0xFF2563EB) : Colors.black87,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (isSelected) const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 32),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -890,13 +960,24 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '마음카드 만들기',
-                    style: GoogleFonts.gowunBatang(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2D1810),
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        '💌',
+                        style: TextStyle(fontSize: 26),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '마음카드',
+                        style: GoogleFonts.gowunBatang(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -1.0,
+                          color: const Color(0xFF2D1810),
+                        ),
+                      ),
+                    ],
                   ),
                   InkWell(
                     borderRadius: BorderRadius.circular(20),
@@ -1044,13 +1125,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             border: Border.all(color: const Color(0xFFE0E0E0)),
                             boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
                           ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.edit_note, color: Color(0xFF757575), size: 24),
-                              SizedBox(width: 8),
-                              Text('여기를 눌러 문구와 글자 크기를 수정하세요', style: TextStyle(fontSize: 16, color: Color(0xFF757575), fontWeight: FontWeight.w500)),
-                            ],
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.0),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.edit_note, color: Color(0xFF757575), size: 24),
+                                  SizedBox(width: 8),
+                                  Text('여기를 눌러 문구와 글자 크기를 수정하세요', style: TextStyle(fontSize: 16, color: Color(0xFF757575), fontWeight: FontWeight.w500)),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -1123,7 +1210,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: _isCompleting ? null : _completeCard,
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    height: 70, // 유지: 카카오 버튼 높이 70
+                    width: double.infinity,
+                    height: 70,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEE500),
                       borderRadius: BorderRadius.circular(20),
@@ -1131,7 +1221,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         BoxShadow(color: Color(0x33FEE500), blurRadius: 12, offset: Offset(0, 5)),
                       ],
                     ),
-                    child: const Center(
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -1192,16 +1283,22 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 24, color: Colors.white),
-            const SizedBox(width: 10),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.3),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 24, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.3),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

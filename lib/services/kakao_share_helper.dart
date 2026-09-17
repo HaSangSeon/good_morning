@@ -53,9 +53,8 @@ class KakaoShareHelper {
               content: Content(
                 imageUrl: Uri.parse(imageUrl),
                 link: Link(
-                  androidExecutionParams: {'route': '/home'},
-                  webUrl: Uri.parse(playStoreUrl),
-                  mobileWebUrl: Uri.parse(playStoreUrl),
+                  webUrl: Uri.parse(imageUrl),
+                  mobileWebUrl: Uri.parse(imageUrl),
                 ),
               ),
               buttons: [

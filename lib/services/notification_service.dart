@@ -323,13 +323,13 @@ class NotificationService {
 
     // 요일별 카피 정의
     final Map<int, Map<String, String>> dowQuotes = {
-      1: {'title': '🌅 좋은 아침입니다!', 'body': '☀️ 활기찬 한 주가 시작되었습니다. 소중한 분들께 따뜻한 아침 인사를 건네보세요.'}, // 월
-      2: {'title': '🌸 좋은 아침입니다!', 'body': '🌸 오늘도 건강하고 행복한 하루! 오늘의 예쁜 아침 카드가 준비되었어요.'}, // 화
-      3: {'title': '🌸 좋은 아침입니다!', 'body': '🌸 오늘도 건강하고 행복한 하루! 오늘의 예쁜 아침 카드가 준비되었어요.'}, // 수
-      4: {'title': '🌸 좋은 아침입니다!', 'body': '🌸 오늘도 건강하고 행복한 하루! 오늘의 예쁜 아침 카드가 준비되었어요.'}, // 목
-      5: {'title': '🌿 좋은 아침입니다!', 'body': '🌿 한 주 동안 정말 수고 많으셨습니다. 감사한 마음을 카드로 전해보세요.'}, // 금
-      6: {'title': '☕ 좋은 아침입니다!', 'body': '☕ 여유롭고 편안한 주말 아침, 가족과 지인들에게 다정한 안부를 나눠보세요.'}, // 토
-      7: {'title': '☕ 좋은 아침입니다!', 'body': '☕ 여유롭고 편안한 주말 아침, 가족과 지인들에게 다정한 안부를 나눠보세요.'}, // 일
+      1: {'title': '🌅 기분 좋은 월요일 아침!', 'body': '☀️ 새로운 한 주가 밝았습니다. 소중한 지인분들께 따뜻한 첫인사를 건네보세요.'}, // 월
+      2: {'title': '🌸 상쾌한 화요일 아침!', 'body': '😊 오늘도 환하게 웃는 하루 되세요! 예쁜 아침 카드가 준비되어 있습니다.'}, // 화
+      3: {'title': '🍀 활기찬 수요일 아침!', 'body': '🍀 한 주의 절반을 향해 달리는 오늘, 가족들에게 힘찬 응원을 보내볼까요?'}, // 수
+      4: {'title': '🌷 여유로운 목요일 아침!', 'body': '☕ 따뜻한 차 한 잔과 함께 기분 좋게 하루를 시작하세요. 오늘의 카드를 확인해보세요.'}, // 목
+      5: {'title': '🌿 행복한 금요일 아침!', 'body': '🎉 주말이 코앞으로 다가왔습니다. 한 주간 고마웠던 분들께 감사를 전해보세요.'}, // 금
+      6: {'title': '🎈 즐거운 토요일 아침!', 'body': '🎈 편안하고 여유로운 주말입니다. 보고 싶은 분들께 다정한 안부를 나눠보세요.'}, // 토
+      7: {'title': '💖 포근한 일요일 아침!', 'body': '🛌 몸과 마음을 푹 쉬는 일요일, 사랑하는 사람들에게 따뜻한 마음카드를 띄워보세요.'}, // 일
     };
 
     for (int dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
@@ -343,7 +343,7 @@ class NotificationService {
         body: quote['body'],
         scheduledDate: scheduledDate,
         notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
         payload: 'morning_greeting',
       );
@@ -410,7 +410,7 @@ class NotificationService {
         body: quote['body'],
         scheduledDate: scheduledDate,
         notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: quote['body'],
       );
     }

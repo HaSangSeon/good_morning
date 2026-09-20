@@ -1,7 +1,256 @@
 // 홈 화면 전용 배경 리스트 및 기본 문구 프리셋 데이터
 
   const List<Map<String, String>> defaultBackgroundList = [
-    // 📜 명언·지혜 (명언 카드에 최적화된 고즈넉하고 깊이 있는 감성 배경)
+    // 🌸 봄
+    {
+      'path': 'assets/images/bg_spring_forsythia.webp',
+      'name': '🌸 개나리와 벚꽃 돌담길',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg_spring_magnolia.webp',
+      'name': '🌸 한옥 처마와 순백 목련',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg_season_spring.webp',
+      'name': '🌸 벚꽃과 개나리 마을',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg_spring_tulips.webp',
+      'name': '🌷 눈부신 튤립 꽃밭',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg_cherry_blossom.webp',
+      'name': '🌸 벚꽃 길과 봄날',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg2.webp',
+      'name': '🌺 화사한 봄꽃 정원',
+      'category': '🌸 봄',
+    },
+    {
+      'path': 'assets/images/bg_garden_path.webp',
+      'name': '🌷 꽃길 따라 봄 산책',
+      'category': '🌸 봄',
+    },
+
+    // 🌿 여름
+    {
+      'path': 'assets/images/bg_summer_valley.webp',
+      'name': '🌊 시원한 청정 계곡',
+      'category': '🌿 여름',
+    },
+    {
+      'path': 'assets/images/bg_summer_greentea.webp',
+      'name': '🌿 푸른 보성 녹차밭',
+      'category': '🌿 여름',
+    },
+    {
+      'path': 'assets/images/bg_season_summer.webp',
+      'name': '🌊 청량한 여름 계곡과 산',
+      'category': '🌿 여름',
+    },
+    {
+      'path': 'assets/images/bg_summer_beach.webp',
+      'name': '🏖️ 에메랄드빛 여름 바다',
+      'category': '🌿 여름',
+    },
+    {
+      'path': 'assets/images/bg_sunflower.webp',
+      'name': '🌻 황금빛 해바라기 밭',
+      'category': '🌿 여름',
+    },
+    {
+      'path': 'assets/images/bg_green_forest.webp',
+      'name': '🍃 싱그러운 초록 숲',
+      'category': '🌿 여름',
+    },
+    {
+      'path': 'assets/images/bg_lake.webp',
+      'name': '🏞️ 시원한 물안개 호수',
+      'category': '🌿 여름',
+    },
+
+    // 🍁 가을
+    {
+      'path': 'assets/images/bg_autumn_persimmon.webp',
+      'name': '🍁 탐스러운 감나무와 한옥',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_cosmos.webp',
+      'name': '🌸 들녘의 화사한 코스모스',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_season_autumn.webp',
+      'name': '🍁 단풍과 은행나무 한옥길',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_ginkgo.webp',
+      'name': '🍂 황금빛 은행나무 돌담길',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg3.webp',
+      'name': '🍂 단풍 가득한 가을 산길',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_forest_1786333154906.webp',
+      'name': '🌲 깊어가는 가을 숲',
+      'category': '🍁 가을',
+    },
+
+    // ❄️ 겨울
+    {
+      'path': 'assets/images/bg_winter_snow_hanok.webp',
+      'name': '❄️ 눈 덮인 포근한 한옥마을',
+      'category': '❄️ 겨울',
+    },
+    {
+      'path': 'assets/images/bg_winter_camellia_snow.webp',
+      'name': '🌺 설경 속 붉은 동백꽃',
+      'category': '❄️ 겨울',
+    },
+    {
+      'path': 'assets/images/bg_season_winter.webp',
+      'name': '❄️ 눈부신 설경 한옥 마을',
+      'category': '❄️ 겨울',
+    },
+    {
+      'path': 'assets/images/bg_winter_camellia.webp',
+      'name': '🌺 설경 속 겨울 동백꽃',
+      'category': '❄️ 겨울',
+    },
+    {
+      'path': 'assets/images/bg_winter_snow_forest.webp',
+      'name': '🌲 환상적인 눈꽃 숲길',
+      'category': '❄️ 겨울',
+    },
+    {
+      'path': 'assets/images/bg_winter_tea_cozy.webp',
+      'name': '🍵 눈 내리는 날 따뜻한 전통차',
+      'category': '❄️ 겨울',
+    },
+    {
+      'path': 'assets/images/bg_mountain_mist.webp',
+      'name': '⛰️ 안개 낀 고요한 설산',
+      'category': '❄️ 겨울',
+    },
+
+    // 🌅 일출/자연
+    {
+      'path': 'assets/images/bg_sunrise_pine.webp',
+      'name': '🌅 운해 위 솔바람 일출',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_sunrise_ocean.webp',
+      'name': '🌅 희망찬 바다의 여명',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_sea_sunrise.webp',
+      'name': '🌅 붉게 타오르는 바다 일출',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg1.webp',
+      'name': '🌅 화사한 일출과 햇살',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_sunrise_1786333105571.webp',
+      'name': '🌄 은은한 아침 햇살',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_sunrise_mountain.webp',
+      'name': '🏔️ 산 너머 붉은 새벽',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_meadow.webp',
+      'name': '🌿 햇살 가득한 초원',
+      'category': '🌅 일출/자연',
+    },
+
+    // 🌸 꽃/정원
+    {
+      'path': 'assets/images/bg_flower_lotus.webp',
+      'name': '🪷 아침 이슬 연꽃 연못',
+      'category': '🌸 꽃/정원',
+    },
+    {
+      'path': 'assets/images/bg_flower_sunflower.webp',
+      'name': '🌻 복을 부르는 황금 해바라기',
+      'category': '🌸 꽃/정원',
+    },
+    {
+      'path': 'assets/images/bg_hydrangea.webp',
+      'name': '🪻 이슬 머금은 수국 정원',
+      'category': '🌸 꽃/정원',
+    },
+    {
+      'path': 'assets/images/bg4.webp',
+      'name': '🌹 정열의 붉은 장미',
+      'category': '🌸 꽃/정원',
+    },
+    {
+      'path': 'assets/images/bg_rose_1786333119291.webp',
+      'name': '💐 향기로운 장미 부케',
+      'category': '🌸 꽃/정원',
+    },
+    {
+      'path': 'assets/images/bg_wildflowers.webp',
+      'name': '🌼 들꽃 피는 오후',
+      'category': '🌸 꽃/정원',
+    },
+
+    // 🎋 동양/전통
+    {
+      'path': 'assets/images/bg_trad_tea_maru.webp',
+      'name': '🫖 대청마루와 따스한 다도',
+      'category': '🎋 동양/전통',
+    },
+    {
+      'path': 'assets/images/bg_hanok_lotus.webp',
+      'name': '🪷 연못 정자와 단아한 연꽃',
+      'category': '🎋 동양/전통',
+    },
+    {
+      'path': 'assets/images/bg_bamboo.webp',
+      'name': '🎋 푸르른 대나무 숲',
+      'category': '🎋 동양/전통',
+    },
+    {
+      'path': 'assets/images/bg5.webp',
+      'name': '🪷 대나무와 단아한 연꽃',
+      'category': '🎋 동양/전통',
+    },
+    {
+      'path': 'assets/images/bg_tea.webp',
+      'name': '🍵 여유로운 따뜻한 차 한잔',
+      'category': '🎋 동양/전통',
+    },
+    {
+      'path': 'assets/images/bg_temple.webp',
+      'name': '⛩️ 고즈넉한 사찰 풍경',
+      'category': '🎋 동양/전통',
+    },
+    {
+      'path': 'assets/images/bg_traditional_tea.webp',
+      'name': '🫖 정갈한 전통 차 시간',
+      'category': '🎋 동양/전통',
+    },
+
+    // 📜 명언·지혜
     {
       'path': 'assets/images/bg_traditional_tea.webp',
       'name': '🫖 정갈한 전통 차와 다도',
@@ -43,7 +292,7 @@
       'category': '📜 명언·지혜',
     },
 
-    // 🌿 건강·활력 (건강 꿀팁과 활기찬 하루를 위한 싱그러운 배경)
+    // 🌿 건강·활력
     {
       'path': 'assets/images/bg_green_forest.webp',
       'name': '🍃 피톤치드 싱그러운 숲',
@@ -75,187 +324,26 @@
       'category': '🌿 건강·활력',
     },
 
+    // ☕ 일상/힐링
     {
-      'path': 'assets/images/bg_season_spring.webp',
-      'name': '🌸 벚꽃과 개나리 마을',
-      'category': '🌸 봄',
+      'path': 'assets/images/bg_window_plants.webp',
+      'name': '🪴 햇살 드는 창가와 차 한잔',
+      'category': '☕ 일상/힐링',
     },
     {
-      'path': 'assets/images/bg_spring_tulips.webp',
-      'name': '🌷 눈부신 튤립 꽃밭',
-      'category': '🌸 봄',
+      'path': 'assets/images/bg_coffee_1786333143337.webp',
+      'name': '☕ 따뜻한 아침 커피 한잔',
+      'category': '☕ 일상/힐링',
     },
     {
-      'path': 'assets/images/bg_cherry_blossom.webp',
-      'name': '🌸 벚꽃 길과 봄날',
-      'category': '🌸 봄',
+      'path': 'assets/images/bg_cozy_coffee.webp',
+      'name': '☕ 포근한 커피 향기',
+      'category': '☕ 일상/힐링',
     },
     {
-      'path': 'assets/images/bg2.webp',
-      'name': '🌺 화사한 봄꽃 정원',
-      'category': '🌸 봄',
-    },
-    {
-      'path': 'assets/images/bg_garden_path.webp',
-      'name': '🌷 꽃길 따라 봄 산책',
-      'category': '🌸 봄',
-    },
-
-    // 🌿 여름
-    {
-      'path': 'assets/images/bg_season_summer.webp',
-      'name': '🌊 청량한 여름 계곡과 산',
-      'category': '🌿 여름',
-    },
-    {
-      'path': 'assets/images/bg_summer_beach.webp',
-      'name': '🏖️ 에메랄드빛 여름 바다',
-      'category': '🌿 여름',
-    },
-    {
-      'path': 'assets/images/bg_sunflower.webp',
-      'name': '🌻 황금빛 해바라기 밭',
-      'category': '🌿 여름',
-    },
-    {
-      'path': 'assets/images/bg_green_forest.webp',
-      'name': '🍃 싱그러운 초록 숲',
-      'category': '🌿 여름',
-    },
-    {
-      'path': 'assets/images/bg_lake.webp',
-      'name': '🏞️ 시원한 물안개 호수',
-      'category': '🌿 여름',
-    },
-
-    // 🍁 가을
-    {
-      'path': 'assets/images/bg_season_autumn.webp',
-      'name': '🍁 단풍과 은행나무 한옥길',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg_autumn_ginkgo.webp',
-      'name': '🍂 황금빛 은행나무 돌담길',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg3.webp',
-      'name': '🍂 단풍 가득한 가을 산길',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg_forest_1786333154906.webp',
-      'name': '🌲 깊어가는 가을 숲',
-      'category': '🍁 가을',
-    },
-
-    // ❄️ 겨울
-    {
-      'path': 'assets/images/bg_season_winter.webp',
-      'name': '❄️ 눈부신 설경 한옥 마을',
-      'category': '❄️ 겨울',
-    },
-    {
-      'path': 'assets/images/bg_winter_camellia.webp',
-      'name': '🌺 설경 속 붉은 겨울 동백꽃',
-      'category': '❄️ 겨울',
-    },
-    {
-      'path': 'assets/images/bg_winter_snow_forest.webp',
-      'name': '🌲 환상적인 눈꽃 숲길',
-      'category': '❄️ 겨울',
-    },
-    {
-      'path': 'assets/images/bg_winter_tea_cozy.webp',
-      'name': '🍵 눈 내리는 날 따뜻한 전통차',
-      'category': '❄️ 겨울',
-    },
-    {
-      'path': 'assets/images/bg_mountain_mist.webp',
-      'name': '⛰️ 안개 낀 고요한 설산',
-      'category': '❄️ 겨울',
-    },
-
-    // 🌅 일출/자연
-    {
-      'path': 'assets/images/bg_sea_sunrise.webp',
-      'name': '🌅 붉게 타오르는 바다 일출',
-      'category': '🌅 일출/자연',
-    },
-    {
-      'path': 'assets/images/bg1.webp',
-      'name': '🌅 화사한 일출과 햇살',
-      'category': '🌅 일출/자연',
-    },
-    {
-      'path': 'assets/images/bg_sunrise_1786333105571.webp',
-      'name': '🌄 은은한 아침 햇살',
-      'category': '🌅 일출/자연',
-    },
-    {
-      'path': 'assets/images/bg_sunrise_mountain.webp',
-      'name': '🏔️ 산 너머 붉은 새벽',
-      'category': '🌅 일출/자연',
-    },
-    {
-      'path': 'assets/images/bg_meadow.webp',
-      'name': '🌿 햇살 가득한 초원',
-      'category': '🌅 일출/자연',
-    },
-
-    // 🌸 꽃/정원
-    {
-      'path': 'assets/images/bg_hydrangea.webp',
-      'name': '🪻 이슬 머금은 수국 정원',
-      'category': '🌸 꽃/정원',
-    },
-    {
-      'path': 'assets/images/bg4.webp',
-      'name': '🌹 정열의 붉은 장미',
-      'category': '🌸 꽃/정원',
-    },
-    {
-      'path': 'assets/images/bg_rose_1786333119291.webp',
-      'name': '💐 향기로운 장미 부케',
-      'category': '🌸 꽃/정원',
-    },
-    {
-      'path': 'assets/images/bg_wildflowers.webp',
-      'name': '🌼 들꽃 피는 오후',
-      'category': '🌸 꽃/정원',
-    },
-
-    // 🎋 동양/전통
-    {
-      'path': 'assets/images/bg_hanok_lotus.webp',
-      'name': '🪷 연못 정자와 단아한 연꽃',
-      'category': '🎋 동양/전통',
-    },
-    {
-      'path': 'assets/images/bg_bamboo.webp',
-      'name': '🎋 푸르른 대나무 숲',
-      'category': '🎋 동양/전통',
-    },
-    {
-      'path': 'assets/images/bg5.webp',
-      'name': '🪷 대나무와 단아한 연꽃',
-      'category': '🎋 동양/전통',
-    },
-    {
-      'path': 'assets/images/bg_tea.webp',
-      'name': '🍵 여유로운 따뜻한 차 한잔',
-      'category': '🎋 동양/전통',
-    },
-    {
-      'path': 'assets/images/bg_temple.webp',
-      'name': '⛩️ 고즈넉한 사찰 풍경',
-      'category': '🎋 동양/전통',
-    },
-    {
-      'path': 'assets/images/bg_traditional_tea.webp',
-      'name': '🫖 정갈한 전통 차 시간',
-      'category': '🎋 동양/전통',
+      'path': 'assets/images/bg_warm_home.webp',
+      'name': '🛋️ 편안한 집에서의 휴식',
+      'category': '☕ 일상/힐링',
     },
 
     // 🌙 밤/감성
@@ -278,28 +366,6 @@
       'path': 'assets/images/bg_starlit_mountains.webp',
       'name': '✨ 별빛 아래 산책',
       'category': '🌙 밤/감성',
-    },
-
-    // ☕ 일상/힐링
-    {
-      'path': 'assets/images/bg_window_plants.webp',
-      'name': '🪴 햇살 드는 창가와 차 한잔',
-      'category': '☕ 일상/힐링',
-    },
-    {
-      'path': 'assets/images/bg_coffee_1786333143337.webp',
-      'name': '☕ 따뜻한 아침 커피 한잔',
-      'category': '☕ 일상/힐링',
-    },
-    {
-      'path': 'assets/images/bg_cozy_coffee.webp',
-      'name': '☕ 포근한 커피 향기',
-      'category': '☕ 일상/힐링',
-    },
-    {
-      'path': 'assets/images/bg_warm_home.webp',
-      'name': '🛋️ 편안한 집에서의 휴식',
-      'category': '☕ 일상/힐링',
     },
   ];
 

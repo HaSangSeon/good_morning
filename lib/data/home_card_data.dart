@@ -1,6 +1,58 @@
 // 홈 화면 전용 배경 리스트 및 기본 문구 프리셋 데이터
 
   const List<Map<String, String>> defaultBackgroundList = [
+    // 🌕 명절 (추석·설날)
+    {
+      'path': 'assets/images/bg_chuseok_moon.jpg',
+      'name': '🌕 보름달과 감나무',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_hanok.jpg',
+      'name': '🏮 달빛 고요한 밤 한옥',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_field.jpg',
+      'name': '🌾 황금빛 코스모스 들녘',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_tea.jpg',
+      'name': '🍵 맛있는 송편과 전통차',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_lanterns.jpg',
+      'name': '✨ 청사초롱 빛나는 명절밤',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_pine.jpg',
+      'name': '🌲 소나무와 둥근 보름달',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_ganggang.jpg',
+      'name': '🎑 달빛 아래 강강술래',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_dancheong.jpg',
+      'name': '🍁 고즈넉한 단청과 단풍',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_cosmos.jpg',
+      'name': '🌸 보름달빛 아래 코스모스',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_village.jpg',
+      'name': '🛖 정겨운 초가집 마을',
+      'category': '🌕 명절 (추석·설날)',
+    },
+
     // 🌸 봄
     {
       'path': 'assets/images/bg_spring_forsythia.webp',
@@ -371,6 +423,19 @@
 
 
   const Map<String, List<String>> defaultPresetCategories = {
+    '🌕 명절 (추석·설날)': [
+      "둥근 보름달처럼 마음까지 넉넉하고 풍요로운 행복한 한가위 보내시길 바랍니다 🌕",
+      "결실의 계절 가을, 항상 보내주신 따뜻한 사랑과 격려에 깊은 감사를 드립니다 🌾",
+      "고향의 정겨운 내음과 함께 풍요롭고 따뜻한 한가위 명절 보내시길 바랍니다 🍂",
+      "밤하늘 환하게 비추는 보름달처럼, 당신의 가정에 밝은 웃음꽃이 피어나길 기원합니다 🌕",
+      "오랜만에 만난 가족 친지들과 오순도순 정을 나누는 행복한 추석 보내시길 바랍니다 👨‍👩‍👧‍👦",
+      "풍성한 가을 수확처럼 올 한 해도 당신의 삶에 좋은 열매가 가득 맺히기를 축복합니다 🌾",
+      "몸은 멀리 떨어져 있어도 마음만은 늘 곁에 있습니다. 정겨운 한가위 명절 되세요 🍁",
+      "다사다난했던 한 해가 저물고 희망찬 새해가 밝았습니다. 새해 복 많이 받으세요 🌅",
+      "따뜻한 떡국 한 그릇에 지혜를 더해가는 새해입니다. 가정에 평안이 깃들기를 기도합니다 🍲",
+      "명절을 맞이하여 소중한 당신께 안부를 전합니다. 항상 건강하시고 행복하세요 💌",
+      "맛있는 명절 음식 가족들과 나누며 건강하고 웃음 넘치는 시간 보내세요 👨‍👩‍👧‍👦",
+    ],
     '🌅 아침 인사 & 덕담': [
       "좋은 아침입니다! 오늘도 희망차고 활기찬 하루 되세요 ☀️",
       "오늘 하루도 감사와 기쁨이 넘치시길 기도합니다 🌸",

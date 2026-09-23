@@ -8,7 +8,7 @@ void main() {
       final formatted = formatTextWithNaturalBreaks(sample);
       final lines = formatted.split('\n');
 
-      expect(lines[0], equals('🚶‍♂️ [식후 혈당 방어 산책법]'.replaceAll(' ', '\u00A0')));
+      expect(lines[0], equals('🚶‍♂️ [식후 혈당 방어 산책법]'));
       expect(lines.length, equals(7));
     });
 
@@ -17,7 +17,7 @@ void main() {
       final formatted = formatTextWithNaturalBreaks(sample);
       final lines = formatted.split('\n');
 
-      expect(lines[0], equals('[식후혈당방어\u00A0산책법]'));
+      expect(lines[0], equals('[식후혈당방어 산책법]'));
     });
 
     test('all 34 health titles are preserved on a single line', () {
@@ -64,7 +64,7 @@ void main() {
 
       for (final title in titles) {
         final formatted = formatTextWithNaturalBreaks(title);
-        expect(formatted, equals(title.replaceAll(' ', '\u00A0')), reason: 'Title "$title" should not be broken!');
+        expect(formatted, equals(title), reason: 'Title "$title" should not be broken!');
       }
     });
   });

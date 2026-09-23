@@ -120,7 +120,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _applyTimeBasedDefault() {
-    final hour = DateTime.now().hour;
+    final now = DateTime.now();
+    
+    // 이번 주(2026년 9월 27일 일요일 자정)까지는 무조건 추석 명절 테마 기본 세팅 적용
+    if (now.isBefore(DateTime(2026, 9, 28))) {
+      _textController.text = "둥근 보름달처럼 마음까지 넉넉하고 풍요로운 행복한 한가위 보내시길 바랍니다 🌕";
+      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('chuseok_moon') || bg['path']!.contains('chuseok'));
+      _bgIndex = idx != -1 ? idx : 0;
+      return;
+    }
+
+    final hour = now.hour;
     if (hour >= 5 && hour < 12) {
       // 아침 (05:00 ~ 11:59)
       _textController.text = "좋은 아침입니다! 오늘도 희망차고 활기찬 하루 되세요 ☀️";
@@ -481,6 +491,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 시니어 가독성을 위한 필터용 짧은 라벨 매핑
     final categoryMap = {
       '전체': '전체',
+      '🌕 명절 인사': '🌕 명절 (추석·설날)',
       '🌅 아침 인사': '🌅 아침 인사 & 덕담',
       '💖 건강 & 무병장수': '💖 건강 & 무병장수',
       '🌙 저녁 & 안부': '🌙 저녁 & 안부 인사',

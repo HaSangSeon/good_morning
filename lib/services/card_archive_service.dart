@@ -34,7 +34,9 @@ class SavedCard {
   factory SavedCard.fromJson(Map<String, dynamic> json) => SavedCard(
     id: json['id'] as String,
     message: json['message'] as String,
-    backgroundPath: (json['backgroundPath'] as String).replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
+    backgroundPath: (json['backgroundPath'] as String).startsWith('assets/') 
+        ? (json['backgroundPath'] as String).replaceAll('.jpg', '.webp').replaceAll('.png', '.webp') 
+        : (json['backgroundPath'] as String),
     textColorValue: json['textColorValue'] as int,
     borderColorValue: json['borderColorValue'] as int?,
     fontSize: (json['fontSize'] as num).toDouble(),

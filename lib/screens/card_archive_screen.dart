@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/home_card_data.dart';
 
 import '../services/card_archive_service.dart';
 import '../services/notification_service.dart';
@@ -461,10 +462,12 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                           ],
                           image: DecorationImage(
                             image: card.backgroundPath.startsWith('assets/')
-                                ? AssetImage(card.backgroundPath)
+                                ? (defaultBackgroundList.any((bg) => bg['path'] == card.backgroundPath)
+                                    ? AssetImage(card.backgroundPath)
+                                    : const AssetImage('assets/images/bg_season_spring.webp'))
                                 : (File(card.backgroundPath).existsSync()
                                     ? FileImage(File(card.backgroundPath))
-                                    : const AssetImage('assets/images/bg_season_spring.jpg')) as ImageProvider,
+                                    : const AssetImage('assets/images/bg_season_spring.webp')) as ImageProvider,
                             fit: BoxFit.cover,
                           ),
                         ),

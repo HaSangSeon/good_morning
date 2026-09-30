@@ -1,57 +1,83 @@
 // 홈 화면 전용 배경 리스트 및 기본 문구 프리셋 데이터
 
   const List<Map<String, String>> defaultBackgroundList = [
-    // 🌕 명절 (추석·설날)
+    // 🍁 가을
     {
-      'path': 'assets/images/bg_chuseok_moon.jpg',
-      'name': '🌕 보름달과 감나무',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_persimmon.webp',
+      'name': '🍁 탐스러운 감나무와 한옥',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_hanok.jpg',
-      'name': '🏮 달빛 고요한 밤 한옥',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_cosmos.webp',
+      'name': '🌸 들녘의 화사한 코스모스',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_field.jpg',
-      'name': '🌾 황금빛 코스모스 들녘',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_season_autumn.webp',
+      'name': '🍁 단풍과 은행나무 한옥길',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_tea.jpg',
-      'name': '🍵 맛있는 송편과 전통차',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_ginkgo.webp',
+      'name': '🍂 황금빛 은행나무 돌담길',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_lanterns.jpg',
-      'name': '✨ 청사초롱 빛나는 명절밤',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg3.webp',
+      'name': '🍂 단풍 가득한 가을 산길',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_pine.jpg',
-      'name': '🌲 소나무와 둥근 보름달',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_forest_1786333154906.webp',
+      'name': '🌲 깊어가는 가을 숲',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_ganggang.jpg',
-      'name': '🎑 달빛 아래 강강술래',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_lycoris.webp',
+      'name': '🌺 붉게 물든 상사화 꽃무릇',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_dancheong.jpg',
-      'name': '🍁 고즈넉한 단청과 단풍',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_reed.webp',
+      'name': '🌾 황금빛 노을과 억새밭',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_cosmos.jpg',
-      'name': '🌸 보름달빛 아래 코스모스',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_maple_mountain.webp',
+      'name': '🍁 단풍잎 떨어지는 산책길',
+      'category': '🍁 가을',
     },
     {
-      'path': 'assets/images/bg_chuseok_village.jpg',
-      'name': '🛖 정겨운 초가집 마을',
-      'category': '🌕 명절 (추석·설날)',
+      'path': 'assets/images/bg_autumn_chrysanthemum.webp',
+      'name': '🌼 이슬 맺힌 화사한 국화',
+      'category': '🍁 가을',
     },
+    {
+      'path': 'assets/images/bg_autumn_morning_fog.webp',
+      'name': '🌫️ 안개 낀 호수와 정자',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_harvest.webp',
+      'name': '🌾 풍요로운 황금 들녘과 감나무',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_hanok_tea.webp',
+      'name': '🍵 단풍 든 마당과 따뜻한 대추차',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_mountain_peak.webp',
+      'name': '⛰️ 오색 단풍으로 물든 산 정상',
+      'category': '🍁 가을',
+    },
+    {
+      'path': 'assets/images/bg_autumn_pine_sun.webp',
+      'name': '🌲 햇살 머금은 기품 있는 소나무',
+      'category': '🍁 가을',
+    },
+
 
     // 🌸 봄
     {
@@ -90,6 +116,7 @@
       'category': '🌸 봄',
     },
 
+
     // 🌿 여름
     {
       'path': 'assets/images/bg_summer_valley.webp',
@@ -127,37 +154,6 @@
       'category': '🌿 여름',
     },
 
-    // 🍁 가을
-    {
-      'path': 'assets/images/bg_autumn_persimmon.webp',
-      'name': '🍁 탐스러운 감나무와 한옥',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg_autumn_cosmos.webp',
-      'name': '🌸 들녘의 화사한 코스모스',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg_season_autumn.webp',
-      'name': '🍁 단풍과 은행나무 한옥길',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg_autumn_ginkgo.webp',
-      'name': '🍂 황금빛 은행나무 돌담길',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg3.webp',
-      'name': '🍂 단풍 가득한 가을 산길',
-      'category': '🍁 가을',
-    },
-    {
-      'path': 'assets/images/bg_forest_1786333154906.webp',
-      'name': '🌲 깊어가는 가을 숲',
-      'category': '🍁 가을',
-    },
 
     // ❄️ 겨울
     {
@@ -196,6 +192,7 @@
       'category': '❄️ 겨울',
     },
 
+
     // 🌅 일출/자연
     {
       'path': 'assets/images/bg_sunrise_pine.webp',
@@ -233,6 +230,7 @@
       'category': '🌅 일출/자연',
     },
 
+
     // 🌸 꽃/정원
     {
       'path': 'assets/images/bg_flower_lotus.webp',
@@ -264,6 +262,7 @@
       'name': '🌼 들꽃 피는 오후',
       'category': '🌸 꽃/정원',
     },
+
 
     // 🎋 동양/전통
     {
@@ -301,6 +300,7 @@
       'name': '🫖 정갈한 전통 차 시간',
       'category': '🎋 동양/전통',
     },
+
 
     // 📜 명언·지혜
     {
@@ -344,6 +344,7 @@
       'category': '📜 명언·지혜',
     },
 
+
     // 🌿 건강·활력
     {
       'path': 'assets/images/bg_green_forest.webp',
@@ -376,6 +377,7 @@
       'category': '🌿 건강·활력',
     },
 
+
     // ☕ 일상/힐링
     {
       'path': 'assets/images/bg_window_plants.webp',
@@ -398,6 +400,7 @@
       'category': '☕ 일상/힐링',
     },
 
+
     // 🌙 밤/감성
     {
       'path': 'assets/images/bg_aurora_night.webp',
@@ -419,23 +422,127 @@
       'name': '✨ 별빛 아래 산책',
       'category': '🌙 밤/감성',
     },
-  ];
+  
+    // 🌕 명절 (추석·설날)
+    {
+      'path': 'assets/images/bg_chuseok_moon.webp',
+      'name': '🌕 보름달과 감나무',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_hanok.webp',
+      'name': '🏮 달빛 고요한 밤 한옥',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_field.webp',
+      'name': '🌾 황금빛 코스모스 들녘',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_tea.webp',
+      'name': '🍵 맛있는 송편과 전통차',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_lanterns.webp',
+      'name': '✨ 청사초롱 빛나는 명절밤',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_pine.webp',
+      'name': '🌲 소나무와 둥근 보름달',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_ganggang.webp',
+      'name': '🎑 달빛 아래 강강술래',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_dancheong.webp',
+      'name': '🍁 고즈넉한 단청과 단풍',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_cosmos.webp',
+      'name': '🌸 보름달빛 아래 코스모스',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    {
+      'path': 'assets/images/bg_chuseok_village.webp',
+      'name': '🛖 정겨운 초가집 마을',
+      'category': '🌕 명절 (추석·설날)',
+    },
+    
+    // 💍 결혼 & 축하
+    {
+      'path': 'assets/images/bg_wedding_bouquet.webp',
+      'name': '💐 아름답고 화사한 웨딩 부케',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_rings.webp',
+      'name': '💍 영원한 사랑의 언약',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_1.webp',
+      'name': '💍 영원한 언약, 웨딩 링과 레이스',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_2.webp',
+      'name': '💐 로맨틱한 테이블 세팅과 부케',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_3.webp',
+      'name': '🥂 달콤한 축배, 샴페인과 케이크',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_4.webp',
+      'name': '✨ 빛나는 웨딩 테이블의 축복',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_5.webp',
+      'name': '🕊️ 따뜻하고 성스러운 식장 풍경',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_6.webp',
+      'name': '👫 평생을 약속하며 맞잡은 두 손',
+      'category': '💍 결혼 & 축하',
+    },
+    {
+      'path': 'assets/images/bg_wedding_new_7.webp',
+      'name': '🌸 사랑이 깃든 눈부신 꽃장식',
+      'category': '💍 결혼 & 축하',
+    },
+
+    // 🕊️ 조의 & 위로
+    {
+      'path': 'assets/images/bg_condolence_chrysanthemum.webp',
+      'name': '🥀 차분하고 경건한 하얀 국화',
+      'category': '🕊️ 조의 & 위로',
+    },
+    {
+      'path': 'assets/images/bg_condolence_white_lily.webp',
+      'name': '🤍 순결하고 고귀한 하얀 백합',
+      'category': '🕊️ 조의 & 위로',
+    },
+    {
+      'path': 'assets/images/bg_wedding_arch.webp',
+      'name': '🌹 화려한 숲속의 웨딩 아치',
+      'category': '💍 결혼 & 축하',
+    },
+
+];
 
 
   const Map<String, List<String>> defaultPresetCategories = {
-    '🌕 명절 (추석·설날)': [
-      "둥근 보름달처럼 마음까지 넉넉하고 풍요로운 행복한 한가위 보내시길 바랍니다 🌕",
-      "결실의 계절 가을, 항상 보내주신 따뜻한 사랑과 격려에 깊은 감사를 드립니다 🌾",
-      "고향의 정겨운 내음과 함께 풍요롭고 따뜻한 한가위 명절 보내시길 바랍니다 🍂",
-      "밤하늘 환하게 비추는 보름달처럼, 당신의 가정에 밝은 웃음꽃이 피어나길 기원합니다 🌕",
-      "오랜만에 만난 가족 친지들과 오순도순 정을 나누는 행복한 추석 보내시길 바랍니다 👨‍👩‍👧‍👦",
-      "풍성한 가을 수확처럼 올 한 해도 당신의 삶에 좋은 열매가 가득 맺히기를 축복합니다 🌾",
-      "몸은 멀리 떨어져 있어도 마음만은 늘 곁에 있습니다. 정겨운 한가위 명절 되세요 🍁",
-      "다사다난했던 한 해가 저물고 희망찬 새해가 밝았습니다. 새해 복 많이 받으세요 🌅",
-      "따뜻한 떡국 한 그릇에 지혜를 더해가는 새해입니다. 가정에 평안이 깃들기를 기도합니다 🍲",
-      "명절을 맞이하여 소중한 당신께 안부를 전합니다. 항상 건강하시고 행복하세요 💌",
-      "맛있는 명절 음식 가족들과 나누며 건강하고 웃음 넘치는 시간 보내세요 👨‍👩‍👧‍👦",
-    ],
     '🌅 아침 인사 & 덕담': [
       "좋은 아침입니다! 오늘도 희망차고 활기찬 하루 되세요 ☀️",
       "오늘 하루도 감사와 기쁨이 넘치시길 기도합니다 🌸",
@@ -455,6 +562,22 @@
       "매일 아침 눈을 뜰 때마다 새로운 희망이 가득하시길 소망합니다 🕊️",
       "맑게 갠 하늘처럼 당신의 마음도 하루 종일 화창하기를 🌤️",
       "아침 이슬처럼 영롱하고 아름다운 하루가 되시길 축복합니다 💧",
+    ],
+    '🌙 저녁 & 안부 인사': [
+      "오늘 하루도 정말 수고 많으셨습니다. 편안한 밤 되세요 🌙",
+      "별빛처럼 고운 밤, 행복하고 예쁜 꿈 꾸시고 주무세요 ⭐",
+      "오늘의 지친 마음 내려놓고 따뜻하고 평안한 밤 맞이하세요 🛌",
+      "내일도 기분 좋은 상쾌한 아침으로 만나요 ✨",
+      "수고한 나 자신에게도 감사한 밤, 굿나잇 🌟",
+      "포근한 이불 속에서 모든 근심 잊고 꿀잠 주무세요 😴",
+      "오늘 밤도 당신의 꿈자리가 꽃향기로 가득하길 바랍니다 🌸",
+      "오늘 하루도 애쓰셨습니다. 근심 걱정 다 내려놓고 푹 쉬세요 🛋️",
+      "고요한 저녁 시간, 따뜻한 차 한 잔과 함께 평온을 누리세요 🫖",
+      "수많은 별빛처럼 아름답고 포근한 밤 보내시길 진심으로 바랍니다 ✨",
+      "고단했던 하루의 피로를 모두 씻어내고 달콤한 꿈나라로 떠나세요 🌙",
+      "내일은 더 기분 좋은 일들이 기다리고 있을 거예요. 편안한 밤 되세요 🌠",
+      "사랑하는 가족들과 함께 오붓하고 정겨운 저녁 시간 보내세요 👨‍👩‍👧‍👦",
+      "오늘 당신이 흘린 땀방울이 내일의 찬란한 열매가 될 것입니다. 굿나잇 🍎",
     ],
     '💖 건강 & 무병장수': [
       "첫째도 건강! 둘째도 건강! 오늘 하루도 무병장수하세요 💪",
@@ -514,22 +637,6 @@
       "마음의 창을 활짝 열고 세상을 바라보면 아름답지 않은 것이 없습니다 🖼️",
       "나이 듦은 늙어가는 것이 아니라 아름답게 익어가는 것입니다 🍎",
     ],
-    '🌙 저녁 & 안부 인사': [
-      "오늘 하루도 정말 수고 많으셨습니다. 편안한 밤 되세요 🌙",
-      "별빛처럼 고운 밤, 행복하고 예쁜 꿈 꾸시고 주무세요 ⭐",
-      "오늘의 지친 마음 내려놓고 따뜻하고 평안한 밤 맞이하세요 🛌",
-      "내일도 기분 좋은 상쾌한 아침으로 만나요 ✨",
-      "수고한 나 자신에게도 감사한 밤, 굿나잇 🌟",
-      "포근한 이불 속에서 모든 근심 잊고 꿀잠 주무세요 😴",
-      "오늘 밤도 당신의 꿈자리가 꽃향기로 가득하길 바랍니다 🌸",
-      "오늘 하루도 애쓰셨습니다. 근심 걱정 다 내려놓고 푹 쉬세요 🛋️",
-      "고요한 저녁 시간, 따뜻한 차 한 잔과 함께 평온을 누리세요 🫖",
-      "수많은 별빛처럼 아름답고 포근한 밤 보내시길 진심으로 바랍니다 ✨",
-      "고단했던 하루의 피로를 모두 씻어내고 달콤한 꿈나라로 떠나세요 🌙",
-      "내일은 더 기분 좋은 일들이 기다리고 있을 거예요. 편안한 밤 되세요 🌠",
-      "사랑하는 가족들과 함께 오붓하고 정겨운 저녁 시간 보내세요 👨‍👩‍👧‍👦",
-      "오늘 당신이 흘린 땀방울이 내일의 찬란한 열매가 될 것입니다. 굿나잇 🍎",
-    ],
     '🎂 축하 & 감사': [
       "당신의 기쁜 날을 진심으로 함께 축하드립니다 🎉",
       "베풀어주신 따뜻한 은혜와 사랑에 깊이 감사드립니다 💐",
@@ -543,6 +650,43 @@
       "늘 고마운 마음 잊지 않고 있습니다. 언제나 행복하시길 기원합니다 💖",
       "이 좋은 날, 세상에서 가장 행복하고 빛나는 사람이 당신이기를 바랍니다 👑",
       "보내주신 큰 은혜에 보답하는 마음으로 항상 건강하시기를 축복합니다 🕊️",
+    ],
+    '🌕 명절 (추석·설날)': [
+      "둥근 보름달처럼 마음까지 넉넉하고 풍요로운 행복한 한가위 보내시길 바랍니다 🌕",
+      "결실의 계절 가을, 항상 보내주신 따뜻한 사랑과 격려에 깊은 감사를 드립니다 🌾",
+      "고향의 정겨운 내음과 함께 풍요롭고 따뜻한 한가위 명절 보내시길 바랍니다 🍂",
+      "밤하늘 환하게 비추는 보름달처럼, 당신의 가정에 밝은 웃음꽃이 피어나길 기원합니다 🌕",
+      "오랜만에 만난 가족 친지들과 오순도순 정을 나누는 행복한 추석 보내시길 바랍니다 👨‍👩‍👧‍👦",
+      "풍성한 가을 수확처럼 올 한 해도 당신의 삶에 좋은 열매가 가득 맺히기를 축복합니다 🌾",
+      "몸은 멀리 떨어져 있어도 마음만은 늘 곁에 있습니다. 정겨운 한가위 명절 되세요 🍁",
+      "다사다난했던 한 해가 저물고 희망찬 새해가 밝았습니다. 새해 복 많이 받으세요 🌅",
+      "따뜻한 떡국 한 그릇에 지혜를 더해가는 새해입니다. 가정에 평안이 깃들기를 기도합니다 🍲",
+      "명절을 맞이하여 소중한 당신께 안부를 전합니다. 항상 건강하시고 행복하세요 💌",
+      "맛있는 명절 음식 가족들과 나누며 건강하고 웃음 넘치는 시간 보내세요 👨‍👩‍👧‍👦",
+    ],
+    '💍 결혼 & 축하': [
+      "두 분의 아름다운 인연을 진심으로 축하하며, 언제나 사랑과 신뢰가 가득한 가정이 되기를 기원합니다 💍",
+      "새롭게 출발하는 두 분의 앞날에 축복이 가득하기를 바라며, 예쁜 가정 꾸리시길 바랍니다 🌸",
+      "뜻깊고 기쁜 날, 두 사람의 맺어짐을 진심으로 축하하며 앞날에 늘 행복만 가득하기를 기원합니다 🎉",
+      "평생을 함께할 동반자를 만나 새로운 시작을 하는 두 분의 결혼을 축하드립니다 💐",
+      "화촉을 밝히는 오늘, 두 사람의 앞날에 눈부신 사랑과 영원한 기쁨이 함께하기를 축원합니다 ✨",
+      "세상에서 가장 아름다운 두 분의 결혼을 축하하며, 오래도록 건강하고 화목한 가정 이루시기를 바랍니다 🏡",
+      "소중한 인연으로 맺어진 두 분의 앞날에 사랑과 웃음꽃이 만발하기를 기원합니다 🌹",
+      "두 분의 첫 출발을 진심으로 축하하며, 서로에게 든든한 버팀목이 되어주는 아름다운 부부가 되기를 바랍니다 👫",
+      "세상에서 가장 빛나는 오늘, 서로를 향한 사랑과 존중으로 영원히 행복하시기를 기원합니다 💖",
+      "새로운 시작을 알리는 뜻깊은 날, 언제나 처음과 같은 마음으로 다복한 가정 이루시기를 기원합니다 🎁",
+    ],
+    '🕊️ 조의 & 위로': [
+      "삼가 고인의 명복을 빌며, 유가족분들께 깊은 애도와 위로의 말씀을 전합니다 🕊️",
+      "어떠한 위로의 말씀으로도 상심이 크실 줄 아오나, 진심으로 애도의 뜻을 전합니다 🥀",
+      "큰 슬픔을 겪으신 유가족분들께 깊은 위로를 전하며, 고인의 평안한 안식을 기원합니다 🙏",
+      "뜻밖의 비보에 애통한 마음을 금할 길이 없습니다. 삼가 고인의 명복을 빕니다.",
+      "고인의 각별하셨던 정을 떠올리며, 유가족분들의 깊은 슬픔을 함께 나눕니다.",
+      "평소 고인의 은덕을 기리며, 유가족분들께 진심 어린 위로의 말씀을 올립니다 🕯️",
+      "불가피한 사정으로 조문하지 못하여 송구하오며, 멀리서나마 깊은 애도를 표합니다.",
+      "그 어떠한 말로도 위로가 될 수 없겠지만, 진심을 다해 삼가 조의를 표합니다 🙏",
+      "고인께서 남기신 훌륭한 뜻과 따뜻한 마음을 잊지 않겠습니다. 삼가 고인의 명복을 빕니다.",
+      "큰 슬픔을 당하신 유가족분들께 깊은 위로를 전하며, 고인의 영원한 안식을 간절히 기도합니다 🕊️",
     ],
   };
 

@@ -51,9 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, String>> get _bgList => defaultBackgroundList;
   Map<String, List<String>> get _presetCategories => defaultPresetCategories;
 
-  // 어르신 맞춤형 자주 쓰는 안부 이모티콘 목록
+  // 어르신 맞춤형 자주 쓰는 안부 이모티콘 목록 (추천 문구 포함)
   static const List<String> _quickEmojis = [
-    '🌸', '☀️', '☕', '❤️', '✨', '🍀', '🙏', '🌿', '🌼', '🍁', '🌹', '😊', '🎉', '💖', '🕊️'
+    '❤️', '💖', '😊', '🙏', '🤝', '🤲', '🕊️',
+    '🌸', '🌼', '🌹', '🌷', '🌺', '🍀', '🌿', '🍃', '🍁', '🍂', '🌾',
+    '☀️', '⛅', '☁️', '🌊', '🌅', '🌕', '✨', '🌟',
+    '☕', '🍵', '🍷', '💐', '🎁', '💌', '🕯️', '💎', '🎉'
   ];
 
   @override
@@ -121,30 +124,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _applyTimeBasedDefault() {
     final now = DateTime.now();
-    
-    // 이번 주(2026년 9월 27일 일요일 자정)까지는 무조건 추석 명절 테마 기본 세팅 적용
-    if (now.isBefore(DateTime(2026, 9, 28))) {
-      _textController.text = "둥근 보름달처럼 마음까지 넉넉하고 풍요로운 행복한 한가위 보내시길 바랍니다 🌕";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('chuseok_moon') || bg['path']!.contains('chuseok'));
-      _bgIndex = idx != -1 ? idx : 0;
-      return;
-    }
-
     final hour = now.hour;
+    
     if (hour >= 5 && hour < 12) {
       // 아침 (05:00 ~ 11:59)
       _textController.text = "좋은 아침입니다! 오늘도 희망차고 활기찬 하루 되세요 ☀️";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('hydrangea') || bg['path']!.contains('wildflowers'));
+      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('autumn_cosmos') || bg['path']!.contains('autumn_persimmon'));
       _bgIndex = idx != -1 ? idx : 0;
     } else if (hour >= 12 && hour < 18) {
       // 오후 (12:00 ~ 17:59)
       _textController.text = "건강이 최고의 자산입니다. 오늘 하루도 소중히 챙기세요 💪";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('green_forest') || bg['path']!.contains('meadow'));
+      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('autumn_ginkgo') || bg['path']!.contains('season_autumn'));
       _bgIndex = idx != -1 ? idx : 0;
     } else {
       // 저녁 / 밤 (18:00 ~ 04:59)
       _textController.text = "오늘 하루도 정말 수고 많으셨습니다. 편안한 밤 되세요 🌙";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('sunset_lake') || bg['path']!.contains('moonlight') || bg['name']!.contains('호수'));
+      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('sunset_lake') || bg['path']!.contains('aurora') || bg['name']!.contains('호수'));
       _bgIndex = idx != -1 ? idx : 0;
     }
   }
@@ -194,8 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
       color: Colors.white,
       height: height,
       fontWeight: fontWeight,
+      fontFamilyFallback: const ['Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'],
       shadows: [
-        const Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(2, 2)),
+        const Shadow(color: Colors.black87, blurRadius: 10, offset: Offset(0, 0)), // 이모지 중복방지를 위해 blur 중심
       ],
     );
   }
@@ -258,38 +254,86 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: '문구 직접 수정하기',
                       subtitle: '전하고 싶은 따뜻한 마음을 직접 적어보세요',
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        top: 16,
-                        bottom: 24 + MediaQuery.of(context).padding.bottom,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextField(
-                            controller: _textController,
-                            maxLines: 4,
-                            autofocus: false,
-                            style: const TextStyle(fontSize: 20, height: 1.6, color: Color(0xFF3E2723), fontWeight: FontWeight.w500),
-                            onChanged: (_) {
-                              setState(() {});
-                              _saveUserPreferences();
-                            },
-                            decoration: InputDecoration(
-                              hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
-                              hintStyle: const TextStyle(fontSize: 18, color: Color(0xFF999999)),
-                              filled: true,
-                              fillColor: const Color(0xFFF7F8FA),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFEAEAEA))),
-                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFEAEAEA))),
-                              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 1.5)),
-                              contentPadding: const EdgeInsets.all(20),
+                    Builder(builder: (context) {
+                      final fontSizes = [20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 52.0, 56.0];
+                      final lineHeights = [1.5, 1.48, 1.45, 1.42, 1.38, 1.35, 1.32, 1.28, 1.25, 1.2];
+                      int idx = (effectiveStep - 1).clamp(0, 9);
+                      double dynamicFontSize = fontSizes[idx];
+                      double dynamicHeight = lineHeights[idx];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                          top: 16,
+                          bottom: 24 + MediaQuery.of(context).padding.bottom,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: AspectRatio(
+                                aspectRatio: 1.0,
+                                child: Container(
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    image: DecorationImage(
+                                      image: _getBackgroundImageProvider(),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    boxShadow: const [
+                                      BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
+                                    ],
+                                  ),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.35),
+                                      ),
+                                    ),
+                                    Center(
+                                      child: TextField(
+                                        controller: _textController,
+                                        maxLength: 150,
+                                        maxLines: null,
+                                        keyboardType: TextInputType.multiline,
+                                        autofocus: false,
+                                        textAlign: TextAlign.center,
+                                        style: _getAppliedTextStyle(
+                                          fontSize: dynamicFontSize,
+                                          height: dynamicHeight,
+                                          fontWeight: FontWeight.bold,
+                                        ).copyWith(shadows: []),
+                                        onChanged: (_) {
+                                          if (_fontScaleStep == 0) {
+                                            setModalState(() {
+                                              effectiveStep = _calculateAutoFontStep(_textController.text);
+                                            });
+                                          } else {
+                                            setModalState(() {});
+                                          }
+                                          setState(() {});
+                                          _saveUserPreferences();
+                                        },
+                                        decoration: InputDecoration(
+                                          hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
+                                          hintStyle: TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.7)),
+                                          border: InputBorder.none,
+                                          counterStyle: const TextStyle(color: Colors.white),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 14),
-                          // 자주 쓰는 안부 이모티콘 퀵 바
+                            ),
+                            const SizedBox(height: 14),
+                            // 자주 쓰는 안부 이모티콘 퀵 바
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -336,6 +380,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             _textController.text = '$text$emoji';
                                             _textController.selection = TextSelection.collapsed(offset: _textController.text.length);
                                           }
+                                          if (_fontScaleStep == 0) {
+                                            effectiveStep = _calculateAutoFontStep(_textController.text);
+                                          }
                                           setState(() {});
                                           setModalState(() {});
                                           _saveUserPreferences();
@@ -373,7 +420,52 @@ class _HomeScreenState extends State<HomeScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('글자 크기', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A))),
+                              Row(
+                                children: [
+                                  const Text('글자 크기', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A))),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10.0),
+                                    child: InkWell(
+                                      onTap: _fontScaleStep == 0 ? null : () {
+                                        setState(() => _fontScaleStep = 0);
+                                        setModalState(() {
+                                          effectiveStep = _calculateAutoFontStep(_textController.text);
+                                        });
+                                        _saveUserPreferences();
+                                      },
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: _fontScaleStep == 0 ? const Color(0xFFE0E7FF) : const Color(0xFFF3F4F6),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: _fontScaleStep == 0 ? const Color(0xFF818CF8) : const Color(0xFFE5E7EB),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.auto_awesome_rounded,
+                                              size: 14,
+                                              color: _fontScaleStep == 0 ? const Color(0xFF4F46E5) : const Color(0xFF9CA3AF),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '자동 맞춤',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: _fontScaleStep == 0 ? const Color(0xFF4F46E5) : const Color(0xFF9CA3AF),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                               Row(
                                 children: [
                                   InkWell(
@@ -450,7 +542,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                    ),
+                    );
+                    }),
                   ],
                 ),
               ),
@@ -491,12 +584,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // 시니어 가독성을 위한 필터용 짧은 라벨 매핑
     final categoryMap = {
       '전체': '전체',
-      '🌕 명절 인사': '🌕 명절 (추석·설날)',
       '🌅 아침 인사': '🌅 아침 인사 & 덕담',
-      '💖 건강 & 무병장수': '💖 건강 & 무병장수',
       '🌙 저녁 & 안부': '🌙 저녁 & 안부 인사',
+      '💖 건강 & 무병장수': '💖 건강 & 무병장수',
       '📜 명언 & 지혜': '📜 오늘의 명언 & 지혜',
       '🎉 축하 & 감사': '🎂 축하 & 감사',
+      '💍 결혼 & 축하': '💍 결혼 & 축하',
+      '🕊️ 조의 & 위로': '🕊️ 조의 & 위로',
+      '🌕 명절 인사': '🌕 명절 (추석·설날)',
     };
     
     // 칩 스크롤 연동을 위한 글로벌 키 맵
@@ -597,7 +692,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                     if (nightIdx != -1) _bgIndex = nightIdx;
                                   } else if (actualKey == '🌅 아침 인사 & 덕담') {
                                     _customImagePath = null;
-                                    _bgIndex = 0;
+                                    final morningIdx = _bgList.indexWhere((bg) => bg['path']!.contains('hydrangea') || bg['path']!.contains('wildflowers') || bg['name']!.contains('아침'));
+                                    if (morningIdx != -1) {
+                                      _bgIndex = morningIdx;
+                                    } else {
+                                      _bgIndex = 0;
+                                    }
+                                  } else if (actualKey == '🕊️ 조의 & 위로') {
+                                    _customImagePath = null;
+                                    // 조의/위로에 어울리는 가장 차분한 배경 (사찰, 대나무, 고즈넉한 풍경)
+                                    final calmIdx = _bgList.indexWhere((bg) => bg['name']!.contains('사찰') || bg['name']!.contains('대나무') || bg['name']!.contains('산길'));
+                                    if (calmIdx != -1) _bgIndex = calmIdx;
+                                  } else if (actualKey == '💍 결혼 & 축하') {
+                                    _customImagePath = null;
+                                    // 결혼 축하에 어울리는 화사한 배경 (장미, 부케, 튤립 등)
+                                    final brightIdx = _bgList.indexWhere((bg) => bg['name']!.contains('장미') || bg['name']!.contains('부케') || bg['name']!.contains('봄꽃') || bg['name']!.contains('튤립'));
+                                    if (brightIdx != -1) _bgIndex = brightIdx;
                                   }
                                 });
                                 _saveUserPreferences();
@@ -1334,10 +1444,10 @@ class _HomeScreenState extends State<HomeScreen> {
       // 심리적 성취감과 만족감을 위한 인위적 딜레이 (1.2초)
       await Future.delayed(const Duration(milliseconds: 1200));
 
-      Uint8List? imageBytes = await _screenshotController.capture(pixelRatio: 3.0);
+      Uint8List? imageBytes = await _screenshotController.capture(pixelRatio: 1.5);
       if (imageBytes != null && imageBytes.isNotEmpty) {
         final directory = await getTemporaryDirectory();
-        final fileName = 'good_morning_${DateTime.now().millisecondsSinceEpoch}.webp';
+        final fileName = 'good_morning_${DateTime.now().millisecondsSinceEpoch}.png';
         final imagePath = '${directory.path}/$fileName';
         final file = File(imagePath);
         await file.writeAsBytes(imageBytes);
@@ -1386,27 +1496,12 @@ class _HomeScreenState extends State<HomeScreen> {
     double dynamicFontSize = fontSizes[idx];
     double dynamicHeight = lineHeights[idx];
 
-    // 2. 자동 줄바꿈 포맷팅 적용 (폰트 크기를 전달하여 동적으로 개행 기준 글자수 계산)
-    final displayFormattedText = formatTextWithNaturalBreaks(_textController.text, fontSize: dynamicFontSize);
-
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F5),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
             // 1. 프리미엄 커스텀 앱바 (AppBar)
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 6.0),
@@ -1555,6 +1650,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
             // 2. 메인 콘텐츠 (카드 뷰 + 수정 바 + 보조 버튼 그룹 일체형 통합)
             Expanded(
               child: Align(
@@ -1611,7 +1718,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: SingleChildScrollView(
                                             physics: const NeverScrollableScrollPhysics(),
                                             child: Text(
-                                              displayFormattedText.keepAll,
+                                              _textController.text,
                                               textAlign: TextAlign.center,
                                               style: _getAppliedTextStyle(
                                                 fontSize: dynamicFontSize, 
@@ -1814,9 +1921,14 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required String subtitle,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFFDFBF7), // 고급스러운 웜 아이보리 배경
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         // 1. 그랩 핸들 (상단 중앙 바)
         Padding(
           padding: const EdgeInsets.only(top: 10, bottom: 8),
@@ -1873,23 +1985,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 23,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF1E293B),
                         letterSpacing: -0.5,
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF64748B),
-                        letterSpacing: -0.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -1926,6 +2026,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
       ],
+    ),
     );
   }
 

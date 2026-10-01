@@ -83,7 +83,7 @@ class _BackgroundSelectionBottomSheetState extends State<BackgroundSelectionBott
             gradientColors: [Color(0xFF10B981), Color(0xFF047857)],
             title: '사진 배경 고르기',
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: ElevatedButton.icon(
@@ -122,56 +122,80 @@ class _BackgroundSelectionBottomSheetState extends State<BackgroundSelectionBott
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: categories.map((cat) {
-                final isSelected = selectedCategory == cat;
-                return Padding(
-                  key: bgChipKeys[cat],
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = cat;
-                      });
-                      final chipContext = bgChipKeys[cat]?.currentContext;
-                      if (chipContext != null) {
-                        Scrollable.ensureVisible(
-                          chipContext,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          alignment: 0.5,
-                        );
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
+          Stack(
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: categories.map((cat) {
+                    final isSelected = selectedCategory == cat;
+                    return Padding(
+                      key: bgChipKeys[cat],
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedCategory = cat;
+                          });
+                          final chipContext = bgChipKeys[cat]?.currentContext;
+                          if (chipContext != null) {
+                            Scrollable.ensureVisible(
+                              chipContext,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              alignment: 0.5,
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Text(
+                            cat,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? Colors.white : Colors.black87,
+                            ),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? Colors.white : Colors.black87,
-                        ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 40,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.0),
+                          Colors.white,
+                        ],
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           const Divider(thickness: 1, height: 1, color: Color(0xFFEEEEEE)),
           
           Expanded(

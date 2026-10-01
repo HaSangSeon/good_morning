@@ -4,15 +4,13 @@ import '../modal_header.dart';
 
 class PhraseSelectionBottomSheet extends StatefulWidget {
   final String currentPhrase;
-  final List<Map<String, String>> bgList;
   final Map<String, List<String>> presetCategories;
-  final void Function(String text, int? newBgIndex, bool clearCustomImage) onPhraseSelected;
+  final void Function(String text) onPhraseSelected;
   final VoidCallback onSaveUserPreferences;
 
   const PhraseSelectionBottomSheet({
     super.key,
     required this.currentPhrase,
-    required this.bgList,
     required this.presetCategories,
     required this.onPhraseSelected,
     required this.onSaveUserPreferences,
@@ -148,32 +146,7 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
                       Future.delayed(const Duration(milliseconds: 150), () {
                         if (!mounted) return;
                         
-                        int? newBgIndex;
-                        bool clearCustomImage = false;
-
-                        if (actualKey == '🌙 저녁 & 안부 인사') {
-                          clearCustomImage = true;
-                          final nightIdx = widget.bgList.indexWhere((bg) => bg['name']!.contains('호수') || bg['name']!.contains('커피'));
-                          if (nightIdx != -1) newBgIndex = nightIdx;
-                        } else if (actualKey == '🌅 아침 인사 & 덕담') {
-                          clearCustomImage = true;
-                          final morningIdx = widget.bgList.indexWhere((bg) => bg['path']!.contains('hydrangea') || bg['path']!.contains('wildflowers') || bg['name']!.contains('아침'));
-                          if (morningIdx != -1) {
-                            newBgIndex = morningIdx;
-                          } else {
-                            newBgIndex = 0;
-                          }
-                        } else if (actualKey == '🕊️ 조의 & 위로') {
-                          clearCustomImage = true;
-                          final calmIdx = widget.bgList.indexWhere((bg) => bg['name']!.contains('사찰') || bg['name']!.contains('대나무') || bg['name']!.contains('산길'));
-                          if (calmIdx != -1) newBgIndex = calmIdx;
-                        } else if (actualKey == '💍 결혼 & 축하') {
-                          clearCustomImage = true;
-                          final brightIdx = widget.bgList.indexWhere((bg) => bg['name']!.contains('장미') || bg['name']!.contains('부케') || bg['name']!.contains('봄꽃') || bg['name']!.contains('튤립'));
-                          if (brightIdx != -1) newBgIndex = brightIdx;
-                        }
-
-                        widget.onPhraseSelected(text, newBgIndex, clearCustomImage);
+                        widget.onPhraseSelected(text);
                         widget.onSaveUserPreferences();
                         
                         if (!context.mounted) return;
@@ -248,62 +221,86 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
           ),
           SizedBox(
             height: 60,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: categoryMap.entries.map((entry) {
-                  final label = entry.key;
-                  final actualKey = entry.value;
-                  final isSelected = selectedCategory == actualKey;
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    children: categoryMap.entries.map((entry) {
+                      final label = entry.key;
+                      final actualKey = entry.value;
+                      final isSelected = selectedCategory == actualKey;
 
-                  return Padding(
-                    key: chipKeys[label],
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(22),
-                        onTap: () {
-                          setState(() {
-                            selectedCategory = actualKey;
-                          });
-                          if (listScrollController.hasClients) {
-                            listScrollController.jumpTo(0);
-                          }
-                          final chipContext = chipKeys[label]?.currentContext;
-                          if (chipContext != null) {
-                            Scrollable.ensureVisible(
-                              chipContext,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              alignment: 0.5,
-                            );
-                          }
-                        },
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 44),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF2A2D34) : const Color(0xFFF0F2F5),
+                      return Padding(
+                        key: chipKeys[label],
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
                             borderRadius: BorderRadius.circular(22),
-                            border: isSelected ? null : Border.all(color: const Color(0xFFE2E5EA), width: 1),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: isSelected ? 16 : 15,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected ? Colors.white : const Color(0xFF555555),
+                            onTap: () {
+                              setState(() {
+                                selectedCategory = actualKey;
+                              });
+                              if (listScrollController.hasClients) {
+                                listScrollController.jumpTo(0);
+                              }
+                              final chipContext = chipKeys[label]?.currentContext;
+                              if (chipContext != null) {
+                                Scrollable.ensureVisible(
+                                  chipContext,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  alignment: 0.5,
+                                );
+                              }
+                            },
+                            child: Container(
+                              constraints: const BoxConstraints(minHeight: 44),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: isSelected ? const Color(0xFF2A2D34) : const Color(0xFFF0F2F5),
+                                borderRadius: BorderRadius.circular(22),
+                                border: isSelected ? null : Border.all(color: const Color(0xFFE2E5EA), width: 1),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: isSelected ? 16 : 15,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  color: isSelected ? Colors.white : const Color(0xFF555555),
+                                ),
+                              ),
                             ),
                           ),
                         ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 40,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.0),
+                            Colors.white,
+                          ],
+                        ),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
           const Divider(thickness: 1, height: 1, color: Color(0xFFF0F0F0)),

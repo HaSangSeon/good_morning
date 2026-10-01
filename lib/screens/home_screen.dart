@@ -255,18 +255,11 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return PhraseSelectionBottomSheet(
           currentPhrase: _textController.text.trim(),
-          bgList: _bgList,
           presetCategories: _presetCategories,
-          onPhraseSelected: (text, newBgIndex, clearCustomImage) {
+          onPhraseSelected: (text) {
             setState(() {
               _textController.text = text;
               _fontScaleStep = 0;
-              if (clearCustomImage) {
-                _customImagePath = null;
-              }
-              if (newBgIndex != null) {
-                _bgIndex = newBgIndex;
-              }
             });
           },
           onSaveUserPreferences: _saveUserPreferences,
@@ -405,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // 1. 프리미엄 커스텀 앱바 (AppBar)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 6.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 0.0),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 9.0),
                 decoration: BoxDecoration(
@@ -465,15 +458,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.6,
                                 color: const Color(0xFF1E293B),
-                              ),
-                            ),
-                            const Text(
-                              '따뜻한 아침 안부',
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF64748B),
-                                letterSpacing: -0.2,
                               ),
                             ),
                           ],
@@ -560,27 +544,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
             // 2. 메인 콘텐츠 (카드 뷰 + 수정 바 + 보조 버튼 그룹 일체형 통합)
             Expanded(
-              child: Align(
-                alignment: const Alignment(0.0, -0.2),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // ① [동그라미 1] 앱바와 카드 사이 간격
+                      const SizedBox(height: 12),
+
                       // 캔버스 (화면 캡처 영역) — MaumCard 위젯 import
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -599,6 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       
+                      // ② [동그라미 2] 카드와 글씨 수정 바 사이 간격
                       const SizedBox(height: 12),
                       
                       // 컴팩트 수정 바
@@ -631,6 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
+                      // ③ [동그라미 3] 글씨 수정 바와 추천 문구 버튼 사이 간격
                       const SizedBox(height: 12),
 
                       // 통일된 보조 버튼 그룹 (추천 문구, 배경 사진, 글씨체)
@@ -646,7 +623,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+
+                      // ④ [동그라미 4] 추천 문구 버튼과 배경 사진/글씨체 버튼 사이 간격
+                      const SizedBox(height: 12),
+
                       Row(
                         children: [
                           Expanded(
@@ -668,20 +648,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 32), // 스크롤 시 버튼 아래에 충분한 공백(여백)을 주어 답답함을 해소
+                      const SizedBox(height: 24), // 스크롤 시 버튼 아래에 충분한 공백(여백)
                     ],
                   ),
                 ),
               ),
             ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
       // 💡 하단 고정 영역 (스크롤 침범 원천 차단 및 소프트키 겹침 방지 일체형 통합 독)
       Container(
         decoration: BoxDecoration(

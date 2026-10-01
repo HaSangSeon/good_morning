@@ -11,7 +11,10 @@ class AdService {
 
   String get bannerAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3702899361747571/3890324259'; // Android Real ID (배포용)
+      // 배포 모드면 실제 ID, 디버그 모드면 구글 제공 테스트 ID
+      return kReleaseMode
+          ? 'ca-app-pub-3702899361747571/3890324259' // Android Real ID (배포용)
+          : 'ca-app-pub-3940256099942544/6300978111'; // Android Test ID
     } else if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/2934735716';
     }
@@ -21,7 +24,9 @@ class AdService {
   // 공유시 전면광고 ID
   String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3702899361747571/1772844688'; // 공유시전면광고 Real ID
+      return kReleaseMode
+          ? 'ca-app-pub-3702899361747571/1772844688' // 공유시전면광고 Real ID
+          : 'ca-app-pub-3940256099942544/1033173712'; // Android Test ID
     } else if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/4411468910';
     }
@@ -31,7 +36,9 @@ class AdService {
   // Medium Rectangle 광고 ID (현재는 배너 광고 ID와 동일하게 사용하거나, 리얼 ID가 나오면 교체)
   String get mediumRectangleAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3702899361747571/3890324259'; // 임시로 배너 ID 재사용 (300x250)
+      return kReleaseMode
+          ? 'ca-app-pub-3702899361747571/3890324259' // 임시로 배너 ID 재사용 (300x250)
+          : 'ca-app-pub-3940256099942544/6300978111'; // Android Test ID
     } else if (Platform.isIOS) {
       return 'ca-app-pub-3940256099942544/2934735716';
     }

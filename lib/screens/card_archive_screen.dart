@@ -286,81 +286,172 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF141722) : const Color(0xFFFAF8F5),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF282D4B) : const Color(0xFFEDE8E1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: isDark ? Colors.white : const Color(0xFF2D1810),
-              ),
-            ),
-            tooltip: '뒤로가기',
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
+      backgroundColor: isDark ? const Color(0xFF141722) : const Color(0xFFFAF8F5),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
           children: [
-            Text(
-              '내 카드함',
-              style: GoogleFonts.gowunBatang(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF2D1810),
+            // 🌟 시니어 친화적 프리미엄 플로팅 헤더 (홈 화면과 완벽한 패밀리 룩)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 6.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E2333) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark ? Colors.black38 : const Color(0x0C000000),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF2E344B) : const Color(0xFFF1F5F9),
+                    width: 1.2,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 왼쪽: 뒤로가기 버튼 + 소중한 보관함 뱃지 + 타이틀/서브문구
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 시니어용 큼직하고 뚜렷한 뒤로가기 터치 버튼
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF282D4B) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF3B4268) : const Color(0xFFE2E8F0),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 19,
+                                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // 내카드함 브랜드 뱃지 (따뜻하고 고급스러운 골드/브라운 톤)
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF8B5A2B), Color(0xFF6B4226)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(13),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x336B4226),
+                                blurRadius: 6,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.bookmark_rounded,
+                              color: Color(0xFFFFD700),
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // 타이틀 & 감성 서브타이틀
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '내 카드함',
+                              style: GoogleFonts.gowunBatang(
+                                fontSize: 21,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                                color: isDark ? Colors.white : const Color(0xFF1E293B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    // 오른쪽: 명확하고 품격 있는 보관 개수 뱃지 (총 N장)
+                    ValueListenableBuilder<List<SavedCard>>(
+                      valueListenable: _archiveService.savedCardsNotifier,
+                      builder: (context, cards, _) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isDark
+                                  ? [const Color(0xFF2E334D), const Color(0xFF1F243A)]
+                                  : [const Color(0xFFFFFBEB), const Color(0xFFFEF3C7)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF4A5580) : const Color(0xFFFDE68A),
+                              width: 1,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x0A000000),
+                                blurRadius: 4,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                size: 13,
+                                color: isDark ? const Color(0xFFFFD700) : const Color(0xFFD97706),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '총 ${cards.length}장',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? const Color(0xFFFFD700) : const Color(0xFF92400E),
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            ValueListenableBuilder<List<SavedCard>>(
-              valueListenable: _archiveService.savedCardsNotifier,
-              builder: (context, cards, _) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF282D4B) : const Color(0xFFE8DFD5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${cards.length}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? const Color(0xFFFFD700) : const Color(0xFF5D4037),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        centerTitle: false,
-
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Divider(
-            height: 1,
-            thickness: 1,
-            color: isDark ? Colors.white10 : const Color(0xFFE8E2D8),
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
+            Expanded(
+              child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -674,8 +765,9 @@ if (!AdService.hideBannerAdsForScreenshots && _isBannerAdLoaded && _bannerAd != 
             ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 /// Lightweight Animated Sparkle Painter for Card Archive Background

@@ -229,6 +229,74 @@
       'name': '🌿 햇살 가득한 초원',
       'category': '🌅 일출/자연',
     },
+    {
+      'path': 'assets/images/bg_bamboo.webp',
+      'name': '🎋 곧고 푸른 대나무 숲',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_hanok_lotus.webp',
+      'name': '🪷 정자와 단아한 연꽃',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_mountain_mist.webp',
+      'name': '⛰️ 안개 낀 사색의 산길',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_lake.webp',
+      'name': '🏞️ 잔잔한 물안개 호수',
+      'category': '🌅 일출/자연',
+    },
+    {
+      'path': 'assets/images/bg_tea.webp',
+      'name': '🍵 여유로운 따뜻한 차 한잔',
+      'category': '🌅 일출/자연',
+    },
+
+
+    // ☕ 일상/힐링
+    {
+      'path': 'assets/images/bg_traditional_tea.webp',
+      'name': '🫖 정갈한 전통 차와 다도',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_healing_bench.webp',
+      'name': '🌳 햇살 비추는 공원 벤치',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_healing_tea.webp',
+      'name': '🍵 창가의 따스한 차 한잔',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_healing_terrace.webp',
+      'name': '🪴 싱그러운 화원 테라스',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_window_plants.webp',
+      'name': '🪴 햇살 드는 창가와 차 한잔',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_coffee_1786333143337.webp',
+      'name': '☕ 따뜻한 아침 커피 한잔',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_cozy_coffee.webp',
+      'name': '☕ 포근한 커피 향기',
+      'category': '☕ 일상/힐링',
+    },
+    {
+      'path': 'assets/images/bg_warm_home.webp',
+      'name': '🛋️ 편안한 집에서의 휴식',
+      'category': '☕ 일상/힐링',
+    },
 
 
     // 🌸 꽃/정원
@@ -300,48 +368,10 @@
       'name': '🫖 정갈한 전통 차 시간',
       'category': '🎋 동양/전통',
     },
-
-
-    // 📜 명언·지혜
-    {
-      'path': 'assets/images/bg_traditional_tea.webp',
-      'name': '🫖 정갈한 전통 차와 다도',
-      'category': '📜 명언·지혜',
-    },
     {
       'path': 'assets/images/bg_temple.webp',
       'name': '⛩️ 고즈넉한 천년 사찰',
-      'category': '📜 명언·지혜',
-    },
-    {
-      'path': 'assets/images/bg_bamboo.webp',
-      'name': '🎋 곧고 푸른 대나무 숲',
-      'category': '📜 명언·지혜',
-    },
-    {
-      'path': 'assets/images/bg_hanok_lotus.webp',
-      'name': '🪷 정자와 단아한 연꽃',
-      'category': '📜 명언·지혜',
-    },
-    {
-      'path': 'assets/images/bg_mountain_mist.webp',
-      'name': '⛰️ 안개 낀 사색의 산길',
-      'category': '📜 명언·지혜',
-    },
-    {
-      'path': 'assets/images/bg_lake.webp',
-      'name': '🏞️ 잔잔한 물안개 호수',
-      'category': '📜 명언·지혜',
-    },
-    {
-      'path': 'assets/images/bg_tea.webp',
-      'name': '🍵 여유로운 따뜻한 차 한잔',
-      'category': '📜 명언·지혜',
-    },
-    {
-      'path': 'assets/images/bg_sea_sunrise.webp',
-      'name': '🌅 희망을 품은 붉은 일출',
-      'category': '📜 명언·지혜',
+      'category': '🎋 동양/전통',
     },
 
 
@@ -375,29 +405,6 @@
       'path': 'assets/images/bg_season_summer.webp',
       'name': '🌊 청량한 청정 계곡과 산',
       'category': '🌿 건강·활력',
-    },
-
-
-    // ☕ 일상/힐링
-    {
-      'path': 'assets/images/bg_window_plants.webp',
-      'name': '🪴 햇살 드는 창가와 차 한잔',
-      'category': '☕ 일상/힐링',
-    },
-    {
-      'path': 'assets/images/bg_coffee_1786333143337.webp',
-      'name': '☕ 따뜻한 아침 커피 한잔',
-      'category': '☕ 일상/힐링',
-    },
-    {
-      'path': 'assets/images/bg_cozy_coffee.webp',
-      'name': '☕ 포근한 커피 향기',
-      'category': '☕ 일상/힐링',
-    },
-    {
-      'path': 'assets/images/bg_warm_home.webp',
-      'name': '🛋️ 편안한 집에서의 휴식',
-      'category': '☕ 일상/힐링',
     },
 
 
@@ -521,6 +528,11 @@
       'name': '🌸 사랑이 깃든 눈부신 꽃장식',
       'category': '💍 결혼 & 축하',
     },
+    {
+      'path': 'assets/images/bg_wedding_arch.webp',
+      'name': '🌹 화려한 숲속의 웨딩 아치',
+      'category': '💍 결혼 & 축하',
+    },
 
     // 🕊️ 조의 & 위로
     {
@@ -534,9 +546,14 @@
       'category': '🕊️ 조의 & 위로',
     },
     {
-      'path': 'assets/images/bg_wedding_arch.webp',
-      'name': '🌹 화려한 숲속의 웨딩 아치',
-      'category': '💍 결혼 & 축하',
+      'path': 'assets/images/bg_condolence_candle.webp',
+      'name': '🕯️ 고요하고 따뜻한 추모의 촛불',
+      'category': '🕊️ 조의 & 위로',
+    },
+    {
+      'path': 'assets/images/bg_condolence_misty_lake.webp',
+      'name': '🏞️ 평온한 안식을 기원하는 새벽 호수',
+      'category': '🕊️ 조의 & 위로',
     },
 
 ];

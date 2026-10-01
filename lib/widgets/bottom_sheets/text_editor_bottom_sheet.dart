@@ -134,7 +134,7 @@ class _TextEditorBottomSheetState extends State<TextEditorBottomSheet> {
                                   maxLines: 4,
                                   minLines: 1,
                                   keyboardType: TextInputType.multiline,
-                                  autofocus: true,
+                                  autofocus: false,
                                   style: const TextStyle(fontSize: 16, color: Colors.black87, height: 1.4),
                                   onChanged: (_) {
                                     if (widget.fontScaleStep == 0) {
@@ -168,47 +168,71 @@ class _TextEditorBottomSheetState extends State<TextEditorBottomSheet> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              height: 44,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: AppConstants.textColors.length,
-                                separatorBuilder: (context, index) => const SizedBox(width: 12),
-                                itemBuilder: (context, index) {
-                                  final color = AppConstants.textColors[index];
-                                  final isSelected = widget.selectedTextColor.toARGB32() == color.toARGB32();
-                                  return GestureDetector(
-                                    onTap: () {
-                                      HapticFeedback.lightImpact();
-                                      widget.onTextColorChanged(color);
-                                      _triggerUpdate();
-                                    },
-                                    child: Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: color,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isSelected ? const Color(0xFF6366F1) : (color == Colors.white ? Colors.grey.shade300 : Colors.transparent),
-                                          width: isSelected ? 3 : 1,
+                            Stack(
+                              children: [
+                                SizedBox(
+                                  height: 44,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: AppConstants.textColors.length,
+                                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                                    itemBuilder: (context, index) {
+                                      final color = AppConstants.textColors[index];
+                                      final isSelected = widget.selectedTextColor.toARGB32() == color.toARGB32();
+                                      return GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.onTextColorChanged(color);
+                                          _triggerUpdate();
+                                        },
+                                        child: Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected ? const Color(0xFF6366F1) : (color == Colors.white ? Colors.grey.shade300 : Colors.transparent),
+                                              width: isSelected ? 3 : 1,
+                                            ),
+                                            boxShadow: isSelected ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                                spreadRadius: 2,
+                                              )
+                                            ] : null,
+                                          ),
+                                          child: isSelected
+                                              ? Icon(Icons.check_rounded, color: color == Colors.white || color == const Color(0xFFFFE066) ? Colors.black87 : Colors.white, size: 22)
+                                              : null,
                                         ),
-                                        boxShadow: isSelected ? [
-                                          BoxShadow(
-                                            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            spreadRadius: 2,
-                                          )
-                                        ] : null,
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                          colors: [
+                                            Colors.white.withValues(alpha: 0.0),
+                                            Colors.white,
+                                          ],
+                                        ),
                                       ),
-                                      child: isSelected
-                                          ? Icon(Icons.check_rounded, color: color == Colors.white || color == const Color(0xFFFFE066) ? Colors.black87 : Colors.white, size: 22)
-                                          : null,
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -217,63 +241,87 @@ class _TextEditorBottomSheetState extends State<TextEditorBottomSheet> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              height: 50,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: AppConstants.quickEmojis.length,
-                                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                                itemBuilder: (context, index) {
-                                  final emoji = AppConstants.quickEmojis[index];
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(15),
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        final text = widget.textController.text;
-                                        final selection = widget.textController.selection;
-                                        if (selection.isValid && selection.start >= 0) {
-                                          final newText = text.replaceRange(selection.start, selection.end, emoji);
-                                          widget.textController.value = TextEditingValue(
-                                            text: newText,
-                                            selection: TextSelection.collapsed(offset: selection.start + emoji.length),
-                                          );
-                                        } else {
-                                          widget.textController.text = '$text$emoji';
-                                          widget.textController.selection = TextSelection.collapsed(offset: widget.textController.text.length);
-                                        }
-                                        if (widget.fontScaleStep == 0) {
-                                          effectiveStep = widget.calculateAutoFontStep(widget.textController.text);
-                                        }
-                                        _triggerUpdate();
-                                      },
-                                      child: Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF8FAFC),
+                            Stack(
+                              children: [
+                                SizedBox(
+                                  height: 50,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: AppConstants.quickEmojis.length,
+                                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                                    itemBuilder: (context, index) {
+                                      final emoji = AppConstants.quickEmojis[index];
+                                      return Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
                                           borderRadius: BorderRadius.circular(15),
-                                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color: Color(0x08000000),
-                                              blurRadius: 4,
-                                              offset: Offset(0, 1.5),
+                                          onTap: () {
+                                            HapticFeedback.lightImpact();
+                                            final text = widget.textController.text;
+                                            final selection = widget.textController.selection;
+                                            if (selection.isValid && selection.start >= 0) {
+                                              final newText = text.replaceRange(selection.start, selection.end, emoji);
+                                              widget.textController.value = TextEditingValue(
+                                                text: newText,
+                                                selection: TextSelection.collapsed(offset: selection.start + emoji.length),
+                                              );
+                                            } else {
+                                              widget.textController.text = '$text$emoji';
+                                              widget.textController.selection = TextSelection.collapsed(offset: widget.textController.text.length);
+                                            }
+                                            if (widget.fontScaleStep == 0) {
+                                              effectiveStep = widget.calculateAutoFontStep(widget.textController.text);
+                                            }
+                                            _triggerUpdate();
+                                          },
+                                          child: Container(
+                                            width: 48,
+                                            height: 48,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF8FAFC),
+                                              borderRadius: BorderRadius.circular(15),
+                                              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Color(0x08000000),
+                                                  blurRadius: 4,
+                                                  offset: Offset(0, 1.5),
+                                                ),
+                                              ],
                                             ),
-                                          ],
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              emoji,
+                                              style: const TextStyle(fontSize: 22),
+                                            ),
+                                          ),
                                         ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          emoji,
-                                          style: const TextStyle(fontSize: 22),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                          colors: [
+                                            Colors.white.withValues(alpha: 0.0),
+                                            Colors.white,
+                                          ],
                                         ),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

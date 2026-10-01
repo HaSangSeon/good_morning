@@ -139,7 +139,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
       _isSharingTriggered = true; // 공유 동작 시작 플래그 세팅
       await KakaoShareHelper.share(
         filePath: widget.imagePath,
-        text: '[마음카드] 소중한 분이 보낸 안부 인사입니다.',
+        text: '[마음카드] 소중한 분이 진심을 담아 보낸 카드입니다.',
       );
     } catch (e) {
       debugPrint('Share Error: $e');
@@ -301,46 +301,61 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      '카드가 완성되었어요!',
-                      style: GoogleFonts.gowunBatang(
-                        fontSize: 27,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E293B),
-                        letterSpacing: -0.6,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Text(
+                        '카드가 완성되었어요!',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.gowunBatang(
+                          fontSize: 27,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1E293B),
+                          letterSpacing: -0.6,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
                     
-                    // 프리미엄 프레임 뷰 (상하좌우 완벽한 12dp 균일 대칭 여백)
+                    // 프리미엄 프레임 뷰 (상하좌우 완벽한 12dp 균일 대칭 여백 + 팝업 애니메이션 효과)
                     Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.72,
-                        padding: const EdgeInsets.all(12), // 💡 상하좌우 완벽히 균일한 12dp 대칭 여백!
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x18000000),
-                              blurRadius: 20,
-                              offset: Offset(0, 8),
-                            ),
-                            BoxShadow(
-                              color: Color(0x0A000000),
-                              blurRadius: 6,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: AspectRatio(
-                            aspectRatio: 1.0,
-                            child: Image.file(
-                              File(widget.imagePath),
-                              fit: BoxFit.cover,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0.85, end: 1.0),
+                        duration: const Duration(milliseconds: 700),
+                        curve: Curves.easeOutBack,
+                        builder: (context, scale, child) {
+                          return Transform.scale(
+                            scale: scale,
+                            child: child,
+                          );
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.72,
+                          padding: const EdgeInsets.all(12), // 💡 상하좌우 완벽히 균일한 12dp 대칭 여백!
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x1A000000), // 그림자 농도 살짝 증가
+                                blurRadius: 24,
+                                offset: Offset(0, 10),
+                              ),
+                              BoxShadow(
+                                color: Color(0x0A000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: AspectRatio(
+                              aspectRatio: 1.0,
+                              child: Image.file(
+                                File(widget.imagePath),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
@@ -349,22 +364,28 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                     
                     const SizedBox(height: 22),
                     
-                    // 친절한 안내 문구 (시니어 가독성 유지)
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.favorite_rounded, size: 16, color: Color(0xFFFF6B6B)),
-                        SizedBox(width: 6),
-                        Text(
-                          '소중한 분에게 따뜻한 안부 인사를 건네보세요!',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Color(0xFF64748B),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.3,
+                    // 친절한 안내 문구 (시니어 가독성 유지 및 텍스트 확대 시 오버플로우 방지)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.mail_rounded, size: 18, color: Color(0xFFF59E0B)),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              '소중한 분에게 진심이 담긴 마음을 전해보세요.',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF475569),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.3,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 14),
 
@@ -443,14 +464,13 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                           alignment: Alignment.center,
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: const Color(0xFF334155),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
                             boxShadow: const [
                               BoxShadow(
-                                color: Color(0x0D000000),
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
+                                color: Color(0x26334155),
+                                blurRadius: 12,
+                                offset: Offset(0, 5),
                               ),
                             ],
                           ),
@@ -458,21 +478,21 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                               ? const SizedBox(
                                   width: 32,
                                   height: 32,
-                                  child: CircularProgressIndicator(color: Color(0xFF334155), strokeWidth: 3),
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                                 )
                               : const FittedBox(
                                   fit: BoxFit.scaleDown,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.download_rounded, size: 32, color: Color(0xFF334155)),
+                                      Icon(Icons.download_rounded, size: 32, color: Colors.white),
                                       SizedBox(width: 10),
                                       Text(
                                         '내 폰 사진첩에 저장',
                                         style: TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF334155),
+                                          color: Colors.white,
                                           letterSpacing: -0.5,
                                         ),
                                       ),

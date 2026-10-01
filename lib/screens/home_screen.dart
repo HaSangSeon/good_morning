@@ -375,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            Divider(height: 36, color: Colors.grey.shade200, thickness: 1.5),
                             // 글자 색상 선택 바
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20),
+                            Divider(height: 36, color: Colors.grey.shade200, thickness: 1.5),
                             // 자주 쓰는 안부 이모티콘 퀵 바
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          Divider(height: 36, color: Colors.grey.shade200, thickness: 1.5),
                           // 스텝형 글자 크기 조절기
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -607,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          Divider(height: 40, color: Colors.grey.shade200, thickness: 1.5),
                           SizedBox(
                             width: double.infinity,
                             height: 56,

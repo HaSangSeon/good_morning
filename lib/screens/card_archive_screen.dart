@@ -214,6 +214,30 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
     super.dispose();
   }
 
+  TextStyle _getThumbnailTextStyle(String? fontFamily, int textColorValue) {
+    TextStyle baseStyle;
+    if (fontFamily == 'Jua') baseStyle = GoogleFonts.jua();
+    else if (fontFamily == 'GowunBatang') baseStyle = GoogleFonts.gowunBatang(fontWeight: FontWeight.bold);
+    else if (fontFamily == 'NanumMyeongjo') baseStyle = GoogleFonts.nanumMyeongjo(fontWeight: FontWeight.bold);
+    else if (fontFamily == 'SongMyung') baseStyle = GoogleFonts.songMyung();
+    else if (fontFamily == 'DoHyeon') baseStyle = GoogleFonts.doHyeon();
+    else if (fontFamily == 'NanumBrush') baseStyle = GoogleFonts.nanumBrushScript();
+    else if (fontFamily == 'NanumPen') baseStyle = GoogleFonts.nanumPenScript();
+    else if (fontFamily == 'GamjaFlower') baseStyle = GoogleFonts.gamjaFlower();
+    else if (fontFamily == 'BlackHanSans') baseStyle = GoogleFonts.blackHanSans();
+    else baseStyle = GoogleFonts.jua();
+
+    return baseStyle.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      color: Color(textColorValue),
+      fontFamilyFallback: const ['Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'],
+      shadows: const [
+        Shadow(color: Colors.black87, blurRadius: 4),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -501,14 +525,7 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                                   maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(card.textColorValue),
-                                    shadows: const [
-                                      Shadow(color: Colors.black87, blurRadius: 4),
-                                    ],
-                                  ),
+                                  style: _getThumbnailTextStyle(card.fontFamily, card.textColorValue),
                                 ),
                               ),
                             ),

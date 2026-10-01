@@ -1547,9 +1547,11 @@ class _HomeScreenState extends State<HomeScreen> {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           message: _textController.text,
           backgroundPath: _customImagePath ?? _bgList[_bgIndex]['path']!,
-          textColorValue: Colors.white.toARGB32(),
+          textColorValue: _selectedTextColor.value,
           borderColorValue: null,
-          fontSize: 32.0,
+          fontSize: 32.0, // Legacy support, no longer strictly used
+          fontFamily: _selectedFontFamily,
+          fontStep: _fontScaleStep,
           createdAt: DateTime.now(),
         );
         await CardArchiveService().saveCard(card);
@@ -1688,7 +1690,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _customImagePath = null;
                                   }
                                 }
+                                if (card.fontFamily != null) {
+                                  _selectedFontFamily = card.fontFamily!;
+                                }
+                                if (card.fontStep != null) {
+                                  _fontScaleStep = card.fontStep!;
+                                }
+                                _selectedTextColor = Color(card.textColorValue);
                               });
+                              _saveUserPreferences();
+                              
                               Navigator.pop(context); // Close archive screen
                               
                               // 보관함에서 선택한 카드를 즉시 완성 화면으로 전달

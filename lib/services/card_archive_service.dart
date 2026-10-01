@@ -10,6 +10,8 @@ class SavedCard {
     required this.textColorValue,
     required this.borderColorValue,
     required this.fontSize,
+    this.fontFamily,
+    this.fontStep,
     required this.createdAt,
   });
 
@@ -19,6 +21,8 @@ class SavedCard {
   final int textColorValue;
   final int? borderColorValue;
   final double fontSize;
+  final String? fontFamily;
+  final int? fontStep;
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
@@ -28,6 +32,8 @@ class SavedCard {
     'textColorValue': textColorValue,
     'borderColorValue': borderColorValue,
     'fontSize': fontSize,
+    'fontFamily': fontFamily,
+    'fontStep': fontStep,
     'createdAt': createdAt.toIso8601String(),
   };
 
@@ -37,9 +43,11 @@ class SavedCard {
     backgroundPath: (json['backgroundPath'] as String).startsWith('assets/') 
         ? (json['backgroundPath'] as String).replaceAll('.jpg', '.webp').replaceAll('.png', '.webp') 
         : (json['backgroundPath'] as String),
-    textColorValue: json['textColorValue'] as int,
+    textColorValue: json['textColorValue'] as int? ?? 0xFFFFFFFF,
     borderColorValue: json['borderColorValue'] as int?,
-    fontSize: (json['fontSize'] as num).toDouble(),
+    fontSize: (json['fontSize'] as num?)?.toDouble() ?? 32.0,
+    fontFamily: json['fontFamily'] as String?,
+    fontStep: json['fontStep'] as int?,
     createdAt: DateTime.parse(json['createdAt'] as String),
   );
 }

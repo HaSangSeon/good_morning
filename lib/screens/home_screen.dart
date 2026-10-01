@@ -380,22 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Row(
-                                  children: [
-                                    Icon(Icons.palette_rounded, size: 16, color: Color(0xFFE11D48)),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      '글자 색상',
-                                      style: TextStyle(
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF475569),
-                                        letterSpacing: -0.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
+
                                 SizedBox(
                                   height: 44,
                                   child: ListView.separated(
@@ -448,22 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                  const Row(
-                                children: [
-                                  Icon(Icons.sentiment_satisfied_alt_rounded, size: 16, color: Color(0xFF6366F1)),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    '자주 쓰는 안부 이모티콘 (누르면 입력돼요)',
-                                    style: TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF475569),
-                                      letterSpacing: -0.2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
+
                               SizedBox(
                                 height: 50,
                                 child: ListView.separated(

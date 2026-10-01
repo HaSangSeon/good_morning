@@ -9,7 +9,6 @@ import '../services/card_archive_service.dart';
 import '../services/notification_service.dart';
 import '../services/ad_service.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../widgets/keep_all_text.dart';
 
 class CardArchiveScreen extends StatefulWidget {
   const CardArchiveScreen({super.key, required this.onSelectCard});
@@ -250,16 +249,27 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
 
   TextStyle _getThumbnailTextStyle(String? fontFamily, int textColorValue) {
     TextStyle baseStyle;
-    if (fontFamily == 'Jua') baseStyle = GoogleFonts.jua();
-    else if (fontFamily == 'GowunBatang') baseStyle = GoogleFonts.gowunBatang(fontWeight: FontWeight.bold);
-    else if (fontFamily == 'NanumMyeongjo') baseStyle = GoogleFonts.nanumMyeongjo(fontWeight: FontWeight.bold);
-    else if (fontFamily == 'SongMyung') baseStyle = GoogleFonts.songMyung();
-    else if (fontFamily == 'DoHyeon') baseStyle = GoogleFonts.doHyeon();
-    else if (fontFamily == 'NanumBrush') baseStyle = GoogleFonts.nanumBrushScript();
-    else if (fontFamily == 'NanumPen') baseStyle = GoogleFonts.nanumPenScript();
-    else if (fontFamily == 'GamjaFlower') baseStyle = GoogleFonts.gamjaFlower();
-    else if (fontFamily == 'BlackHanSans') baseStyle = GoogleFonts.blackHanSans();
-    else baseStyle = GoogleFonts.jua();
+    if (fontFamily == 'Jua') {
+      baseStyle = GoogleFonts.jua();
+    } else if (fontFamily == 'GowunBatang') {
+      baseStyle = GoogleFonts.gowunBatang(fontWeight: FontWeight.bold);
+    } else if (fontFamily == 'NanumMyeongjo') {
+      baseStyle = GoogleFonts.nanumMyeongjo(fontWeight: FontWeight.bold);
+    } else if (fontFamily == 'SongMyung') {
+      baseStyle = GoogleFonts.songMyung();
+    } else if (fontFamily == 'DoHyeon') {
+      baseStyle = GoogleFonts.doHyeon();
+    } else if (fontFamily == 'NanumBrush') {
+      baseStyle = GoogleFonts.nanumBrushScript();
+    } else if (fontFamily == 'NanumPen') {
+      baseStyle = GoogleFonts.nanumPenScript();
+    } else if (fontFamily == 'GamjaFlower') {
+      baseStyle = GoogleFonts.gamjaFlower();
+    } else if (fontFamily == 'BlackHanSans') {
+      baseStyle = GoogleFonts.blackHanSans();
+    } else {
+      baseStyle = GoogleFonts.jua();
+    }
 
     return baseStyle.copyWith(
       fontSize: 16,

@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 로컬 디스크에는 앱을 껐다 켜도 계속 유지되어야 할 글로벌 설정(폰트 등)만 저장합니다.
     await prefs.setString('saved_card_font_family', _selectedFontFamily);
     await prefs.setInt('saved_card_font_step', _fontScaleStep);
-    await prefs.setInt('saved_card_text_color', _selectedTextColor.value);
+    await prefs.setInt('saved_card_text_color', _selectedTextColor.toARGB32());
   }
 
   ImageProvider _getBackgroundImageProvider() {
@@ -399,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     separatorBuilder: (context, index) => const SizedBox(width: 12),
                                     itemBuilder: (context, index) {
                                       final color = _textColors[index];
-                                      final isSelected = _selectedTextColor.value == color.value;
+                                      final isSelected = _selectedTextColor.toARGB32() == color.toARGB32();
                                       return GestureDetector(
                                         onTap: () {
                                           HapticFeedback.lightImpact();
@@ -1547,7 +1547,7 @@ class _HomeScreenState extends State<HomeScreen> {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           message: _textController.text,
           backgroundPath: _customImagePath ?? _bgList[_bgIndex]['path']!,
-          textColorValue: _selectedTextColor.value,
+          textColorValue: _selectedTextColor.toARGB32(),
           borderColorValue: null,
           fontSize: 32.0, // Legacy support, no longer strictly used
           fontFamily: _selectedFontFamily,

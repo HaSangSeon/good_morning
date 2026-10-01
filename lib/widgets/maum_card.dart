@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
 import 'keep_all_text.dart';
@@ -71,10 +72,25 @@ class MaumCard extends StatelessWidget {
               child: editingWidget ??
                   SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
-                    child: Text(
-                      text.keepAll,
-                      textAlign: TextAlign.center,
-                      style: textStyle,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 섀도우 레이어 (이모지 렌더링 버그를 피하기 위해 TextStyle.shadows 대신 ImageFiltered 사용)
+                        ImageFiltered(
+                          imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+                          child: Text(
+                            text.keepAll,
+                            textAlign: TextAlign.center,
+                            style: textStyle.copyWith(color: Colors.black87),
+                          ),
+                        ),
+                        // 실제 텍스트
+                        Text(
+                          text.keepAll,
+                          textAlign: TextAlign.center,
+                          style: textStyle,
+                        ),
+                      ],
                     ),
                   ),
             ),

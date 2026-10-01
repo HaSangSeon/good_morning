@@ -25,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
-  final TextEditingController _textController = KeepAllEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   String? _customImagePath;
   int _bgIndex = 0;
@@ -215,9 +215,6 @@ class _HomeScreenState extends State<HomeScreen> {
       height: height,
       fontWeight: fontWeight,
       fontFamilyFallback: const ['Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'],
-      shadows: [
-        const Shadow(color: Colors.black87, blurRadius: 10, offset: Offset(0, 0)), // 이모지 중복방지를 위해 blur 중심
-      ],
     );
   }
 
@@ -258,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final FocusNode editFocusNode = FocusNode();
-    bool isEditing = false;
+
 
     showModalBottomSheet(
       context: context,
@@ -268,21 +265,17 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            editFocusNode.addListener(() {
-              if (!editFocusNode.hasFocus && isEditing) {
-                setModalState(() {
-                  isEditing = false;
-                });
-              }
-            });
-
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildModalHeader(
@@ -314,9 +307,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: GestureDetector(
                                 onTap: () {
-                                  setModalState(() {
-                                    isEditing = true;
-                                  });
                                   WidgetsBinding.instance.addPostFrameCallback((_) {
                                     editFocusNode.requestFocus();
                                   });
@@ -329,59 +319,63 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: dynamicHeight,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                  editingWidget: isEditing
-                                      ? TextField(
-                                          focusNode: editFocusNode,
-                                          controller: _textController,
-                                          maxLength: 150,
-                                          maxLines: null,
-                                          keyboardType: TextInputType.multiline,
-                                          autofocus: true,
-                                          textAlign: TextAlign.center,
-                                          style: _getAppliedTextStyle(
-                                            fontSize: dynamicFontSize,
-                                            height: dynamicHeight,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          onChanged: (_) {
-                                            if (_fontScaleStep == 0) {
-                                              setModalState(() {
-                                                effectiveStep = _calculateAutoFontStep(_textController.text);
-                                              });
-                                            } else {
-                                              setModalState(() {});
-                                            }
-                                            setState(() {});
-                                            _saveUserPreferences();
-                                          },
-                                          decoration: InputDecoration(
-                                            hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
-                                            hintStyle: TextStyle(fontSize: 18, color: Colors.white.withValues(alpha: 0.7)),
-                                            border: InputBorder.none,
-                                            counterText: '',
-                                          ),
-                                        )
-                                      : null,
-                                  overlayWidgets: isEditing
-                                      ? [
-                                          Positioned(
-                                            right: 14,
-                                            bottom: 12,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black54,
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              child: Text(
-                                                '${_textController.text.length}/150',
-                                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                                              ),
-                                            ),
-                                          ),
-                                        ]
-                                      : const [],
+                                  // editingWidget is intentionally removed to keep the layout static
+                                  // overlayWidgets is removed
                                 ),
+                              ),
+                            ),
+                            // --- 새 텍스트 입력창 (카드 하단) ---
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.4), width: 1.5),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    child: TextField(
+                                      focusNode: editFocusNode,
+                                      controller: _textController,
+                                      maxLength: 150,
+                                      maxLines: 4,
+                                      minLines: 1,
+                                      keyboardType: TextInputType.multiline,
+                                      autofocus: true,
+                                      style: const TextStyle(fontSize: 16, color: Colors.black87, height: 1.4),
+                                      onChanged: (_) {
+                                        if (_fontScaleStep == 0) {
+                                          setModalState(() {
+                                            effectiveStep = _calculateAutoFontStep(_textController.text);
+                                          });
+                                        } else {
+                                          setModalState(() {});
+                                        }
+                                        setState(() {});
+                                        _saveUserPreferences();
+                                      },
+                                      decoration: InputDecoration(
+                                        hintText: '여기에 따뜻한 마음을 적어주세요.',
+                                        hintStyle: TextStyle(fontSize: 15, color: Colors.grey.shade500),
+                                        border: InputBorder.none,
+                                        counterText: '',
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 6, right: 4),
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        '${_textController.text.length}/150',
+                                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             Divider(height: 36, color: Colors.grey.shade200, thickness: 1.5),
@@ -509,54 +503,44 @@ class _HomeScreenState extends State<HomeScreen> {
                           // 스텝형 글자 크기 조절기
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Text('글자 크기', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A))),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 10.0),
-                                    child: InkWell(
-                                      onTap: _fontScaleStep == 0 ? null : () {
-                                        setState(() => _fontScaleStep = 0);
-                                        setModalState(() {
-                                          effectiveStep = _calculateAutoFontStep(_textController.text);
-                                        });
-                                        _saveUserPreferences();
-                                      },
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                        decoration: BoxDecoration(
-                                          color: _fontScaleStep == 0 ? const Color(0xFFE0E7FF) : const Color(0xFFF3F4F6),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: _fontScaleStep == 0 ? const Color(0xFF818CF8) : const Color(0xFFE5E7EB),
-                                          ),
+                                  const SizedBox(width: 8),
+                                  InkWell(
+                                    onTap: _fontScaleStep == 0 ? null : () {
+                                      FocusScope.of(context).unfocus();
+                                      HapticFeedback.lightImpact();
+                                      setState(() => _fontScaleStep = 0);
+                                      setModalState(() {
+                                        effectiveStep = _calculateAutoFontStep(_textController.text);
+                                      });
+                                      _saveUserPreferences();
+                                    },
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: _fontScaleStep == 0 ? const Color(0xFFE0E7FF) : const Color(0xFFF3F4F6),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: _fontScaleStep == 0 ? const Color(0xFF818CF8) : const Color(0xFFE5E7EB),
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.auto_awesome_rounded,
-                                              size: 14,
-                                              color: _fontScaleStep == 0 ? const Color(0xFF4F46E5) : const Color(0xFF9CA3AF),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '자동 맞춤',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: _fontScaleStep == 0 ? const Color(0xFF4F46E5) : const Color(0xFF9CA3AF),
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.auto_awesome_rounded,
+                                        size: 16,
+                                        color: _fontScaleStep == 0 ? const Color(0xFF4F46E5) : const Color(0xFF9CA3AF),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   InkWell(
                                     borderRadius: BorderRadius.circular(10),
@@ -582,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   Container(
-                                    width: 80,
+                                    width: 64,
                                     alignment: Alignment.center,
                                     child: Text(
                                       '$effectiveStep단계',
@@ -616,33 +600,44 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          Divider(height: 40, color: Colors.grey.shade200, thickness: 1.5),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF334155),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                elevation: 2,
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('수정 완료', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                            ),
-                          ),
                         ],
                       ),
                     );
                   }),
                 ],
+                  ),
+                  ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, -4)),
+                      ],
+                    ),
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF334155),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 2,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('수정 완료', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 
   void _showPhraseSelectionDialog() {
     // 현재 메인에 적용된 문구가 속한 카테고리 자동 탐색
@@ -2121,3 +2116,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

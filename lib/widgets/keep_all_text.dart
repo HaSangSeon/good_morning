@@ -7,8 +7,9 @@ extension KeepAllStringExtension on String {
   String get keepAll {
     return split('\n').map((line) {
       return line.split(' ').map((word) {
-        // 이모티콘이나 기호에 Word Joiner(\u2060)가 삽입되면 플러터 텍스트 엔진 렌더링 버그(까맣게 변함)가 발생합니다.
-        // 따라서 한글, 영문, 숫자 등 일반 텍스트 덩어리에만 \u2060를 적용합니다.
+        // 이모티콘이나 기호에 Word Joiner(\u2060)가 삽입되거나 텍스트 내에 섞여있으면 안드로이드 텍스트 엔진 렌더링 버그(까맣게 변함)가 발생합니다.
+        // 이모티콘이나 기호에 Word Joiner(\u2060)가 같은 단어 묶음 내에 있으면 플러터 텍스트 엔진 렌더링 버그(까맣게 변함)가 발생합니다.
+        // 일반 텍스트 덩어리에만 \u2060를 적용하여 단어 단위 줄바꿈을 유도합니다.
         return word.replaceAllMapped(RegExp(r'[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+'), (match) {
           return match.group(0)!.characters.join('\u2060');
         });

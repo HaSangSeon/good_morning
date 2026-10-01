@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kakao_flutter_sdk_share/kakao_flutter_sdk_share.dart';
 import 'services/theme_service.dart';
@@ -28,7 +30,12 @@ void main() async {
   } catch (e) {
     debugPrint('NotificationService Init Exception: $e');
   }
-  runApp(const MyApp());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -41,6 +48,7 @@ class MyApp extends StatelessWidget {
       builder: (context, currentMode, child) {
         return MaterialApp(
           title: '마음카드',
+          locale: DevicePreview.locale(context),
           themeMode: currentMode,
 
           // Light Theme (Warm Cream Ivory & Sunset Gold for Seniors)
@@ -70,6 +78,7 @@ class MyApp extends StatelessWidget {
           home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
           builder: (context, child) {
+            child = DevicePreview.appBuilder(context, child);
             final mediaQuery = MediaQuery.of(context);
             // 중장년층 큰 글자 설정(최대 1.35배)은 쾌적하게 수용하고,
             // 1.35배를 초과하는 극단적 시스템 확대(1.5~2.0배)로 인한 UI 깨짐/오버플로우는 방어
@@ -80,7 +89,7 @@ class MyApp extends StatelessWidget {
                   maxScaleFactor: 2.0,
                 ),
               ),
-              child: child ?? const SizedBox.shrink(),
+              child: child,
             );
           },
         );

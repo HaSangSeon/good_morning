@@ -105,85 +105,119 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
+        return Dialog(
           backgroundColor: isDark ? const Color(0xFF1C202E) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-          actionsPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE64A19).withAlpha(25),
-                  shape: BoxShape.circle,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          elevation: 12,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Premium Icon with soft background
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF0ED), // Soft peach
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE64A19).withAlpha(38),
+                        blurRadius: 12,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.delete_sweep_rounded,
+                    color: Color(0xFFE64A19), // Refined burnt orange
+                    size: 36,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Color(0xFFE64A19),
-                  size: 24,
+                const SizedBox(height: 24),
+                // Title
+                Text(
+                  '보관함 카드 지우기',
+                  style: GoogleFonts.gowunBatang(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF2D1810),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '카드 삭제',
-                style: GoogleFonts.gowunBatang(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF2D1810),
+                const SizedBox(height: 12),
+                // Content
+                Text(
+                  '이 카드를 보관함에서\n정말 지우시겠습니까?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    height: 1.5,
+                    color: isDark ? Colors.white70 : const Color(0xFF6B5E5B),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          content: Text(
-            '보관함에서 이 카드를\n정말 삭제하시겠습니까?\n\n삭제된 카드는 복구할 수 없습니다.'.keepAll,
-            style: TextStyle(
-              fontSize: 16,
-              height: 1.5,
-              color: isDark ? Colors.white70 : const Color(0xFF444444),
+                const SizedBox(height: 10),
+                Text(
+                  '지운 카드는 다시 복구할 수 없어요',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: const Color(0xFFE64A19).withAlpha(200),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(dialogContext).pop(false);
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: isDark ? const Color(0xFF2A2D3A) : const Color(0xFFF5F5F5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(
+                          '취소',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white70 : const Color(0xFF757575),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          Navigator.of(dialogContext).pop(true);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: const Color(0xFFE64A19),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: const Text(
+                          '지우기',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.of(dialogContext).pop(false);
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: Text(
-                '취소',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white60 : Colors.grey.shade600,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                Navigator.of(dialogContext).pop(true);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE64A19),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text(
-                '삭제하기',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
         );
       },
     );

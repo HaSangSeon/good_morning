@@ -332,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           },
                                           decoration: InputDecoration(
                                             hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
-                                            hintStyle: TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.7)),
+                                            hintStyle: TextStyle(fontSize: 18, color: Colors.white.withValues(alpha: 0.7)),
                                             border: InputBorder.none,
                                             counterText: '',
                                           ),

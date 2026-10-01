@@ -12,6 +12,7 @@ import '../services/card_archive_service.dart';
 import '../services/notification_service.dart';
 import '../services/ad_service.dart';
 import '../widgets/keep_all_text.dart';
+import '../widgets/maum_card.dart';
 import 'card_archive_screen.dart';
 import 'card_result_screen.dart';
 
@@ -24,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
-  final TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = KeepAllEditingController();
 
   String? _customImagePath;
   int _bgIndex = 0;
@@ -196,6 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+
   Future<void> _pickCustomImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -230,6 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
       effectiveStep = _calculateAutoFontStep(_textController.text);
     }
 
+    final FocusNode editFocusNode = FocusNode();
+    bool isEditing = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -238,6 +244,14 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            editFocusNode.addListener(() {
+              if (!editFocusNode.hasFocus && isEditing) {
+                setModalState(() {
+                  isEditing = false;
+                });
+              }
+            });
+
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -262,82 +276,96 @@ class _HomeScreenState extends State<HomeScreen> {
                       double dynamicHeight = lineHeights[idx];
                       return Padding(
                         padding: EdgeInsets.only(
-                          left: 20,
-                          right: 20,
+                          left: 24,
+                          right: 24,
                           top: 16,
                           bottom: 24 + MediaQuery.of(context).padding.bottom,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // 카드 영역: MaumCard 위젯 import → 메인과 100% 동일
+                            // 패딩 16px 추가 → 바깥 24 + 안쪽 16 = 40px (메인의 20+20과 동일)
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: AspectRatio(
-                                aspectRatio: 1.0,
-                                child: Container(
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    image: DecorationImage(
-                                      image: _getBackgroundImageProvider(),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
-                                    ],
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setModalState(() {
+                                    isEditing = true;
+                                  });
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    editFocusNode.requestFocus();
+                                  });
+                                },
+                                child: MaumCard(
+                                  text: _textController.text,
+                                  backgroundImage: _getBackgroundImageProvider(),
+                                  textStyle: _getAppliedTextStyle(
+                                    fontSize: dynamicFontSize,
+                                    height: dynamicHeight,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.35),
-                                      ),
-                                    ),
-                                    Center(
-                                      child: TextField(
-                                        controller: _textController,
-                                        maxLength: 150,
-                                        maxLines: null,
-                                        keyboardType: TextInputType.multiline,
-                                        autofocus: false,
-                                        textAlign: TextAlign.center,
-                                        style: _getAppliedTextStyle(
-                                          fontSize: dynamicFontSize,
-                                          height: dynamicHeight,
-                                          fontWeight: FontWeight.bold,
-                                        ).copyWith(shadows: []),
-                                        onChanged: (_) {
-                                          if (_fontScaleStep == 0) {
-                                            setModalState(() {
-                                              effectiveStep = _calculateAutoFontStep(_textController.text);
-                                            });
-                                          } else {
-                                            setModalState(() {});
-                                          }
-                                          setState(() {});
-                                          _saveUserPreferences();
-                                        },
-                                        decoration: InputDecoration(
-                                          hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
-                                          hintStyle: TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.7)),
-                                          border: InputBorder.none,
-                                          counterStyle: const TextStyle(color: Colors.white),
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  editingWidget: isEditing
+                                      ? TextField(
+                                          focusNode: editFocusNode,
+                                          controller: _textController,
+                                          maxLength: 150,
+                                          maxLines: null,
+                                          keyboardType: TextInputType.multiline,
+                                          autofocus: true,
+                                          textAlign: TextAlign.center,
+                                          style: _getAppliedTextStyle(
+                                            fontSize: dynamicFontSize,
+                                            height: dynamicHeight,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          onChanged: (_) {
+                                            if (_fontScaleStep == 0) {
+                                              setModalState(() {
+                                                effectiveStep = _calculateAutoFontStep(_textController.text);
+                                              });
+                                            } else {
+                                              setModalState(() {});
+                                            }
+                                            setState(() {});
+                                            _saveUserPreferences();
+                                          },
+                                          decoration: InputDecoration(
+                                            hintText: '여기에 따뜻한 마음을 듬뿍 담아 적어보세요.',
+                                            hintStyle: TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.7)),
+                                            border: InputBorder.none,
+                                            counterText: '',
+                                          ),
+                                        )
+                                      : null,
+                                  overlayWidgets: isEditing
+                                      ? [
+                                          Positioned(
+                                            right: 14,
+                                            bottom: 12,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black54,
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Text(
+                                                '${_textController.text.length}/150',
+                                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                        ]
+                                      : const [],
                                 ),
                               ),
                             ),
-                            ),
                             const SizedBox(height: 14),
                             // 자주 쓰는 안부 이모티콘 퀵 바
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                  const Row(
                                 children: [
                                   Icon(Icons.sentiment_satisfied_alt_rounded, size: 16, color: Color(0xFF6366F1)),
                                   SizedBox(width: 5),
@@ -543,16 +571,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     );
-                    }),
-                  ],
-                ),
+                  }),
+                ],
               ),
-            );
-          }
-        );
-      },
-    );
-  }
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
   void _showPhraseSelectionDialog() {
     // 현재 메인에 적용된 문구가 속한 카테고리 자동 탐색
@@ -1671,69 +1699,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // 캔버스 (화면 캡처 영역)
+                      // 캔버스 (화면 캡처 영역) — MaumCard 위젯 import
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: GestureDetector(
                           onTap: _showTextEditorDialog,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: const [
-                                BoxShadow(color: Color(0x33000000), blurRadius: 20, offset: Offset(0, 10)),
-                              ],
+                          child: MaumCard(
+                            text: _textController.text,
+                            backgroundImage: _getBackgroundImageProvider(),
+                            textStyle: _getAppliedTextStyle(
+                              fontSize: dynamicFontSize,
+                              height: dynamicHeight,
+                              fontWeight: FontWeight.bold,
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
-                              child: Screenshot(
-                                controller: _screenshotController,
-                                child: AspectRatio(
-                                  aspectRatio: 1.0,
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      Image(
-                                        image: _getBackgroundImageProvider(),
-                                        fit: BoxFit.cover,
-                                      ),
-                                      Positioned.fill(
-                                        child: DecoratedBox(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Colors.black.withValues(alpha: 0.35),
-                                                Colors.black.withValues(alpha: 0.35),
-                                                Colors.black.withValues(alpha: 0.35),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      // 3. 안전 영역 래핑 (Overflow 방지)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-                                        child: Center(
-                                          child: SingleChildScrollView(
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            child: Text(
-                                              _textController.text,
-                                              textAlign: TextAlign.center,
-                                              style: _getAppliedTextStyle(
-                                                fontSize: dynamicFontSize, 
-                                                height: dynamicHeight,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
+                            screenshotController: _screenshotController,
                           ),
                         ),
                       ),

@@ -49,6 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   String _selectedFontFamily = 'Jua';
 
+  static const List<Color> _textColors = [
+    Colors.white,
+    Colors.black,
+    Color(0xFFFFE066), // 연노랑
+    Color(0xFFFFB3B3), // 연분홍
+    Color(0xFF99FF99), // 연두
+    Color(0xFF99CCFF), // 연하늘
+  ];
+  Color _selectedTextColor = Colors.white;
+
   List<Map<String, String>> get _bgList => defaultBackgroundList;
   Map<String, List<String>> get _presetCategories => defaultPresetCategories;
 
@@ -149,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     final savedFontFamily = prefs.getString('saved_card_font_family');
     final savedFontStep = prefs.getInt('saved_card_font_step');
+    final savedTextColor = prefs.getInt('saved_card_text_color');
 
     setState(() {
       // 앱이 처음 켜질 때 무조건 현재 시간대에 맞는 스마트 기본 카드로 리셋합니다.
@@ -161,6 +172,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (savedFontStep != null) {
         _fontScaleStep = savedFontStep;
       }
+      if (savedTextColor != null) {
+        _selectedTextColor = Color(savedTextColor);
+      }
     });
   }
 
@@ -170,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 로컬 디스크에는 앱을 껐다 켜도 계속 유지되어야 할 글로벌 설정(폰트 등)만 저장합니다.
     await prefs.setString('saved_card_font_family', _selectedFontFamily);
     await prefs.setInt('saved_card_font_step', _fontScaleStep);
+    await prefs.setInt('saved_card_text_color', _selectedTextColor.value);
   }
 
   ImageProvider _getBackgroundImageProvider() {
@@ -187,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     return (fontConfig['font'] as TextStyle).copyWith(
       fontSize: fontSize,
-      color: Colors.white,
+      color: _selectedTextColor,
       height: height,
       fontWeight: fontWeight,
       fontFamilyFallback: const ['Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'],
@@ -360,7 +375,75 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 20),
+                            // 글자 색상 선택 바
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.palette_rounded, size: 16, color: Color(0xFFE11D48)),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      '글자 색상',
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF475569),
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 44,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: _textColors.length,
+                                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                                    itemBuilder: (context, index) {
+                                      final color = _textColors[index];
+                                      final isSelected = _selectedTextColor.value == color.value;
+                                      return GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.lightImpact();
+                                          setModalState(() {
+                                            _selectedTextColor = color;
+                                          });
+                                          setState(() {}); // 메인 화면 반영
+                                          _saveUserPreferences();
+                                        },
+                                        child: Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected ? const Color(0xFF6366F1) : (color == Colors.white ? Colors.grey.shade300 : Colors.transparent),
+                                              width: isSelected ? 3 : 1,
+                                            ),
+                                            boxShadow: isSelected ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                                spreadRadius: 2,
+                                              )
+                                            ] : null,
+                                          ),
+                                          child: isSelected
+                                              ? Icon(Icons.check_rounded, color: color == Colors.white || color == const Color(0xFFFFE066) ? Colors.black87 : Colors.white, size: 22)
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
                             // 자주 쓰는 안부 이모티콘 퀵 바
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

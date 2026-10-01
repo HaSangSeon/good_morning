@@ -52,10 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
   static const List<Color> _textColors = [
     Colors.white,
     Colors.black,
+    Color(0xFFE4E4E7), // 밝은 회색
+    Color(0xFFFFD700), // 황금색
     Color(0xFFFFE066), // 연노랑
     Color(0xFFFFB3B3), // 연분홍
+    Color(0xFFF472B6), // 진달래
+    Color(0xFFEF4444), // 빨강
+    Color(0xFFF97316), // 주황
     Color(0xFF99FF99), // 연두
+    Color(0xFF22C55E), // 초록
     Color(0xFF99CCFF), // 연하늘
+    Color(0xFF3B82F6), // 파랑
+    Color(0xFFC084FC), // 연보라
+    Color(0xFF8B5CF6), // 보라
   ];
   Color _selectedTextColor = Colors.white;
 

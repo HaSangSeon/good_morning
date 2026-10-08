@@ -59,7 +59,7 @@ class KakaoShareHelper {
               ),
               buttons: [
                 Button(
-                  title: '나도 카드 만들기',
+                  title: '나도 마음카드 만들기 (무료)',
                   link: Link(
                     androidExecutionParams: {'route': '/home'},
                     webUrl: Uri.parse(playStoreUrl),

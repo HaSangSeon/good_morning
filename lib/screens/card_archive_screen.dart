@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -535,6 +536,30 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                if (kDebugMode && !_isNotifLoading)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          NotificationService.instance.showTestNotification(delaySeconds: 5);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('5초 뒤에 테스트 알림이 발송됩니다. 앱을 백그라운드로 내려보세요!'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.bug_report, color: Colors.grey, size: 16),
+                        label: const Text(
+                          '알림 테스트 (5초 후 발송)',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                      ),
                     ),
                   ),
                 Expanded(

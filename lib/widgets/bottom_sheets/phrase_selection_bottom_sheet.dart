@@ -28,6 +28,10 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
 
   final Map<String, String> categoryMap = {
     '전체': '전체',
+    '🍁 가을 인사': '🍁 가을 인사 & 안부',
+    '❄️ 겨울 인사': '❄️ 겨울 인사 & 안부',
+    '🌸 봄 인사': '🌸 봄 인사 & 안부',
+    '🍉 여름 인사': '🍉 여름 인사 & 안부',
     '🌅 아침 인사': '🌅 아침 인사 & 덕담',
     '🌙 저녁 & 안부': '🌙 저녁 & 안부 인사',
     '💖 건강 & 무병장수': '💖 건강 & 무병장수',

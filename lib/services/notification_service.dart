@@ -5,6 +5,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'dart:math' as math;
+import '../data/notification_quotes.dart';
 
 /// 푸시 알림으로 전달되는 오늘의 추천 아침 안부 & 덕담 데이터셋
 class NotificationQuoteData {
@@ -210,7 +212,7 @@ class NotificationService {
 
     // 2. Android 초기화 설정
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/ic_notification');
 
     // 3. iOS 초기화 설정
     const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
@@ -304,7 +306,8 @@ class NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       showWhen: true,
-      icon: '@mipmap/ic_launcher',
+      icon: '@drawable/ic_notification',
+      color: Color(0xFFE64A19), // 브랜드 컬러(오렌지/레드 계열)
       styleInformation: BigTextStyleInformation(''),
     );
 
@@ -321,21 +324,35 @@ class NotificationService {
 
     
 
-    // 요일별 카피 정의
-    final Map<int, Map<String, String>> dowQuotes = {
-      1: {'title': '🌅 기분 좋은 월요일 아침!', 'body': '☀️ 새로운 한 주가 밝았습니다. 소중한 지인분들께 따뜻한 첫인사를 건네보세요.'}, // 월
-      2: {'title': '🌸 상쾌한 화요일 아침!', 'body': '😊 오늘도 환하게 웃는 하루 되세요! 예쁜 아침 카드가 준비되어 있습니다.'}, // 화
-      3: {'title': '🍀 활기찬 수요일 아침!', 'body': '🍀 한 주의 절반을 향해 달리는 오늘, 가족들에게 힘찬 응원을 보내볼까요?'}, // 수
-      4: {'title': '🌷 여유로운 목요일 아침!', 'body': '☕ 따뜻한 차 한 잔과 함께 기분 좋게 하루를 시작하세요. 오늘의 카드를 확인해보세요.'}, // 목
-      5: {'title': '🌿 행복한 금요일 아침!', 'body': '🎉 주말이 코앞으로 다가왔습니다. 한 주간 고마웠던 분들께 감사를 전해보세요.'}, // 금
-      6: {'title': '🎈 즐거운 토요일 아침!', 'body': '🎈 편안하고 여유로운 주말입니다. 보고 싶은 분들께 다정한 안부를 나눠보세요.'}, // 토
-      7: {'title': '💖 포근한 일요일 아침!', 'body': '🛌 몸과 마음을 푹 쉬는 일요일, 사랑하는 사람들에게 따뜻한 마음카드를 띄워보세요.'}, // 일
-    };
+    final random = math.Random();
+    final now = DateTime.now();
+    final month = now.month;
+
+    List<Map<String, String>> seasonQuotes = [];
+    if (month >= 3 && month <= 5) {
+      seasonQuotes = NotificationQuotes.springQuotes;
+    } else if (month >= 6 && month <= 8) {
+      seasonQuotes = NotificationQuotes.summerQuotes;
+    } else if (month >= 9 && month <= 11) {
+      seasonQuotes = NotificationQuotes.autumnQuotes;
+    } else {
+      seasonQuotes = NotificationQuotes.winterQuotes;
+    }
 
     for (int dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
-      // 해당 요일의 가장 가까운 날짜 계산
       tz.TZDateTime scheduledDate = _nextInstanceOfDayOfWeek(hour, minute, dayOfWeek);
-      final quote = dowQuotes[dayOfWeek]!;
+      Map<String, String> quote;
+
+      if (dayOfWeek == 1) { // 월요일
+        quote = NotificationQuotes.mondayQuotes[random.nextInt(NotificationQuotes.mondayQuotes.length)];
+      } else if (dayOfWeek == 5) { // 금요일
+        quote = NotificationQuotes.fridayQuotes[random.nextInt(NotificationQuotes.fridayQuotes.length)];
+      } else if (dayOfWeek == 6 || dayOfWeek == 7) { // 주말
+        quote = NotificationQuotes.weekendQuotes[random.nextInt(NotificationQuotes.weekendQuotes.length)];
+      } else { // 평일 (화, 수, 목) - 일반 문구와 계절 문구를 섞어서 사용
+        final pool = [...NotificationQuotes.generalQuotes, ...seasonQuotes];
+        quote = pool[random.nextInt(pool.length)];
+      }
       
       await _notificationsPlugin.zonedSchedule(
         id: _notificationId + dayOfWeek,
@@ -343,9 +360,9 @@ class NotificationService {
         body: quote['body'],
         scheduledDate: scheduledDate,
         notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        payload: 'morning_greeting',
+        payload: quote['body'],
       );
     }
 
@@ -372,7 +389,9 @@ class NotificationService {
 
   /// 즉시 또는 지연(초) 테스트 알림 발송 (앱을 닫고 테스트할 수 있도록 delay 지원)
   Future<void> showTestNotification({int delaySeconds = 10}) async {
-    final quote = NotificationQuoteData.getTodayQuote();
+    await requestPermissions();
+    final random = math.Random();
+    final quote = NotificationQuotes.generalQuotes[random.nextInt(NotificationQuotes.generalQuotes.length)];
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       _channelId,
@@ -380,7 +399,8 @@ class NotificationService {
       channelDescription: _channelDescription,
       importance: Importance.max,
       priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
+      icon: '@drawable/ic_notification',
+      color: Color(0xFFE64A19),
       styleInformation: BigTextStyleInformation(''),
     );
 
@@ -402,17 +422,15 @@ class NotificationService {
         payload: quote['body'],
       );
     } else {
-      final scheduledDate =
-          tz.TZDateTime.now(tz.local).add(Duration(seconds: delaySeconds));
-      await _notificationsPlugin.zonedSchedule(
-        id: 9999,
-        title: quote['title'],
-        body: quote['body'],
-        scheduledDate: scheduledDate,
-        notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        payload: quote['body'],
-      );
+      Future.delayed(Duration(seconds: delaySeconds), () async {
+        await _notificationsPlugin.show(
+          id: 9999,
+          title: quote['title'],
+          body: quote['body'],
+          notificationDetails: notificationDetails,
+          payload: quote['body'],
+        );
+      });
     }
   }
 

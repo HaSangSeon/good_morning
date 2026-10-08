@@ -60,8 +60,15 @@ class _HomeScreenState extends State<HomeScreen> {
     // 알림 탭(Deep Link) 시 즉시 시간 기반 기본 카드로 강제 리프레시 (백그라운드에서 복귀할 때 대비)
     NotificationService.instance.onNotificationClick = (payload) {
       if (mounted) {
+        // 어디에 있든(내 카드함 등) 모든 화면을 닫고 메인 화면으로 돌아옵니다.
+        Navigator.of(context).popUntil((route) => route.isFirst);
+
         setState(() {
-          _applyTimeBasedDefault();
+          if (payload.isNotEmpty && payload != 'morning_greeting') {
+            _textController.text = payload;
+          } else {
+            _applyTimeBasedDefault();
+          }
         });
       }
     };

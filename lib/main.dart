@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kakao_flutter_sdk_share/kakao_flutter_sdk_share.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'services/theme_service.dart';
 import 'services/card_archive_service.dart';
 import 'services/notification_service.dart';
@@ -30,9 +31,18 @@ void main() async {
   } catch (e) {
     debugPrint('NotificationService Init Exception: $e');
   }
+
+  // 핵심 폰트(기본체 2종) 백그라운드 프리로드 (오프라인/지연 방지)
+  GoogleFonts.pendingFonts([
+    GoogleFonts.jua(),
+    GoogleFonts.gowunBatang(fontWeight: FontWeight.bold),
+  ]).catchError((e) {
+    debugPrint('Font preload warm-up exception: $e');
+    return <void>[];
+  });
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
+      enabled: false,
       builder: (context) => const MyApp(),
     ),
   );

@@ -340,6 +340,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     try {
+      // 선택된 폰트가 네트워크에서 다운로드 완료될 때까지 안전하게 대기 (기본 시스템 폰트로 찍히는 FOUT 방지)
+      try {
+        final fontConfig = AppConstants.seniorFonts.firstWhere(
+          (f) => f['id'] == _selectedFontFamily,
+          orElse: () => AppConstants.seniorFonts.first,
+        );
+        await GoogleFonts.pendingFonts([fontConfig['font'] as TextStyle]);
+      } catch (e) {
+        debugPrint('Pending font wait exception: $e');
+      }
+
       // 심리적 성취감과 만족감을 위한 인위적 딜레이 (1.2초)
       await Future.delayed(const Duration(milliseconds: 1200));
 
@@ -423,54 +434,57 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // 브랜드 로고 뱃지
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFF5E62), Color(0xFFFF9966)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(13),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x33FF5E62),
-                                blurRadius: 6,
-                                offset: Offset(0, 2),
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 브랜드 로고 뱃지
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF5E62), Color(0xFFFF9966)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                            ],
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.favorite_rounded,
-                              color: Colors.white,
-                              size: 22,
+                              borderRadius: BorderRadius.circular(13),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x33FF5E62),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '마음카드',
-                              style: GoogleFonts.gowunBatang(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.6,
-                                color: const Color(0xFF1E293B),
+                            child: const Center(
+                              child: Icon(
+                                Icons.favorite_rounded,
+                                color: Colors.white,
+                                size: 22,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '마음카드',
+                                style: GoogleFonts.gowunBatang(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: -0.6,
+                                  color: const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -527,21 +541,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                             border: Border.all(color: const Color(0xFF5C3A21), width: 0.8),
                           ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.bookmark_rounded, color: Color(0xFFFFD700), size: 19),
-                              SizedBox(width: 5),
-                              Text(
-                                '내카드함',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  letterSpacing: -0.3,
+                          child: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.bookmark_rounded, color: Color(0xFFFFD700), size: 19),
+                                SizedBox(width: 5),
+                                Text(
+                                  '내카드함',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    letterSpacing: -0.3,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -563,20 +580,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       // ① [동그라미 1] 앱바와 카드 사이 간격
                       const SizedBox(height: 12),
 
-                      // 캔버스 (화면 캡처 영역) — MaumCard 위젯 import
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: GestureDetector(
-                          onTap: _showTextEditorDialog,
-                          child: MaumCard(
-                            text: _textController.text,
-                            backgroundImage: _getBackgroundImageProvider(),
-                            textStyle: _getAppliedTextStyle(
-                              fontSize: dynamicFontSize,
-                              height: dynamicHeight,
-                              fontWeight: FontWeight.bold,
+                      // 캔버스 (화면 캡처 영역) — MaumCard 위젯 import (태블릿/폴더블 최적화 제약 포함)
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 440),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: GestureDetector(
+                            onTap: _showTextEditorDialog,
+                            child: MaumCard(
+                              text: _textController.text,
+                              backgroundImage: _getBackgroundImageProvider(),
+                              textStyle: _getAppliedTextStyle(
+                                fontSize: dynamicFontSize,
+                                height: dynamicHeight,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              screenshotController: _screenshotController,
                             ),
-                            screenshotController: _screenshotController,
                           ),
                         ),
                       ),

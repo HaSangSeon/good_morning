@@ -757,6 +757,40 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                                 ),
                               ),
                             ),
+
+                            // 우측 하단 브랜드 서명 (♥ 마음카드)
+                            Positioned(
+                              right: 8,
+                              bottom: 8,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.favorite_rounded,
+                                    size: 9,
+                                    color: Color(0xFFFF8A7A),
+                                    shadows: [
+                                      Shadow(color: Colors.black87, blurRadius: 4),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 2.5),
+                                  Text(
+                                    '마음카드',
+                                    textScaler: TextScaler.noScaling,
+                                    style: GoogleFonts.gowunBatang(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white.withAlpha(240),
+                                      letterSpacing: 0.5,
+                                      shadows: const [
+                                        Shadow(color: Colors.black87, blurRadius: 4),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),

@@ -164,30 +164,51 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
     HapticFeedback.mediumImpact();
     
     try {
-      final bool hasAccess = await Gal.requestAccess(toAlbum: true);
-      if (hasAccess) {
-        await Gal.putImage(widget.imagePath);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('기기 사진첩에 저장되었습니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
-              backgroundColor: Color(0xFF2E7D32),
-              duration: Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+      final bool hasAccess = await Gal.hasAccess(toAlbum: false);
+      if (!hasAccess) {
+        final bool granted = await Gal.requestAccess(toAlbum: false);
+        if (!granted) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('사진을 저장하려면 사진첩 접근 권한이 필요합니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
+                backgroundColor: Color(0xFFE64A19),
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
         }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('사진첩 접근 권한이 필요합니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
-              backgroundColor: Color(0xFFE64A19),
-              duration: Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
+      }
+
+      await Gal.putImage(widget.imagePath);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('기기 사진첩에 저장되었습니다.', style: TextStyle(fontSize: 16, color: Colors.white)),
+            backgroundColor: Color(0xFF2E7D32),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } on GalException catch (e) {
+      debugPrint('GalException during save: ${e.type}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.type == GalExceptionType.accessDenied 
+                  ? '사진첩 접근 권한이 허용되지 않았습니다.' 
+                  : '사진첩 저장 중 오류가 발생했습니다.', 
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
-          );
-        }
+            backgroundColor: const Color(0xFFE64A19),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Gallery save error: $e');

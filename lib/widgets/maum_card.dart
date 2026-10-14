@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:screenshot/screenshot.dart';
 import 'keep_all_text.dart';
 
@@ -95,7 +96,9 @@ class MaumCard extends StatelessWidget {
                   ),
             ),
           ),
-          // 4. 추가 오버레이 위젯 (글자 수 카운터 등)
+          // 4. 우측 하단 브랜드 서명 (작품 낙관 느낌 — 이미지만 재공유돼도 출처 전달)
+          const Positioned.fill(child: IgnorePointer(child: _CardSignature())),
+          // 5. 추가 오버레이 위젯 (글자 수 카운터 등)
           ...overlayWidgets,
         ],
       ),
@@ -118,6 +121,80 @@ class MaumCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: cardInner,
       ),
+    );
+  }
+}
+
+/// 카드 우측 하단 브랜드 서명: ── ♥ 마음카드
+/// - 앱 로고(코랄 하트)와 앱 제목 서체(고운바탕)로 브랜드 통일
+/// - 카드 폭에 비례한 크기 + 시스템 글자 확대 무시 → 어떤 폰에서 만들어도
+///   공유되는 이미지 속 서명이 항상 같은 비율·같은 품격으로 찍힘
+/// - 모서리에만 아주 옅은 비네팅을 깔아 밝은 사진 위에서도 또렷하게 읽힘
+class _CardSignature extends StatelessWidget {
+  const _CardSignature();
+
+  static const Color _brandCoral = Color(0xFFFF8A7A);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double w = constraints.maxWidth;
+        final double fs = (w * 0.052).clamp(14.0, 22.0);
+        const textShadows = [
+          Shadow(color: Color(0x73000000), blurRadius: 8, offset: Offset(0, 1)),
+          Shadow(color: Color(0x59000000), blurRadius: 2, offset: Offset(0, 0.5)),
+        ];
+
+        return Stack(
+          children: [
+            // 우측 하단 모서리 은은한 비네팅 (사진 보정처럼 자연스럽게)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.bottomRight,
+                    radius: 0.75,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.28),
+                      Colors.black.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: w * 0.045,
+              bottom: w * 0.04,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_rounded,
+                    size: fs * 0.82,
+                    color: _brandCoral,
+                    shadows: textShadows,
+                  ),
+                  SizedBox(width: fs * 0.3),
+                  Text(
+                    '마음카드',
+                    textScaler: TextScaler.noScaling,
+                    style: GoogleFonts.gowunBatang(
+                      fontSize: fs,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withValues(alpha: 0.95),
+                      letterSpacing: fs * 0.06,
+                      height: 1.0,
+                      shadows: textShadows,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

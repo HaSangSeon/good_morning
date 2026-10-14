@@ -52,6 +52,8 @@ class KakaoShareHelper {
             final FeedTemplate template = FeedTemplate(
               content: Content(
                 imageUrl: Uri.parse(imageUrl),
+                imageWidth: 800,
+                imageHeight: 800,
                 link: Link(
                   webUrl: Uri.parse(imageUrl),
                   mobileWebUrl: Uri.parse(imageUrl),

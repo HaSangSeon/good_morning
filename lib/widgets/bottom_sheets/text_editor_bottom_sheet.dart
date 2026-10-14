@@ -36,11 +36,13 @@ class TextEditorBottomSheet extends StatefulWidget {
 
 class _TextEditorBottomSheetState extends State<TextEditorBottomSheet> {
   late int effectiveStep;
+  late Color currentTextColor;
   final FocusNode editFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    currentTextColor = widget.selectedTextColor;
     if (widget.fontScaleStep == 0) {
       effectiveStep = widget.calculateAutoFontStep(widget.textController.text);
     } else {
@@ -171,18 +173,23 @@ class _TextEditorBottomSheetState extends State<TextEditorBottomSheet> {
                             Stack(
                               children: [
                                 SizedBox(
-                                  height: 44,
+                                  height: 52,
                                   child: ListView.separated(
                                     scrollDirection: Axis.horizontal,
+                                    clipBehavior: Clip.none,
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
                                     physics: const BouncingScrollPhysics(),
                                     itemCount: AppConstants.textColors.length,
                                     separatorBuilder: (context, index) => const SizedBox(width: 12),
                                     itemBuilder: (context, index) {
                                       final color = AppConstants.textColors[index];
-                                      final isSelected = widget.selectedTextColor.toARGB32() == color.toARGB32();
+                                      final isSelected = currentTextColor.toARGB32() == color.toARGB32();
                                       return GestureDetector(
                                         onTap: () {
                                           HapticFeedback.lightImpact();
+                                          setState(() {
+                                            currentTextColor = color;
+                                          });
                                           widget.onTextColorChanged(color);
                                           _triggerUpdate();
                                         },

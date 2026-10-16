@@ -702,11 +702,13 @@ class _SharePreviewDialogState extends State<SharePreviewDialog> {
                           color: isDark ? Colors.white60 : Colors.black54,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          '보내기를 누르면 카카오톡 친구/채팅방 선택창으로 직행합니다.',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: isDark ? Colors.white60 : Colors.black54,
+                        Flexible(
+                          child: Text(
+                            '보내기를 누르면 카카오톡 친구/채팅방 선택창으로 직행합니다.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
                           ),
                         ),
                       ],

@@ -71,28 +71,36 @@ class MaumCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
             child: Center(
               child: editingWidget ??
-                  SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // 섀도우 레이어 (이모지 렌더링 버그를 피하기 위해 TextStyle.shadows 대신 ImageFiltered 사용)
-                        ImageFiltered(
-                          imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
-                          child: Text(
-                            text.keepAll,
-                            textAlign: TextAlign.center,
-                            style: textStyle.copyWith(color: Colors.black87),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // 섀도우 레이어 (이모지 렌더링 버그를 피하기 위해 TextStyle.shadows 대신 ImageFiltered 사용)
+                              ImageFiltered(
+                                imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+                                child: Text(
+                                  text.keepAll,
+                                  textAlign: TextAlign.center,
+                                  style: textStyle.copyWith(color: Colors.black87),
+                                ),
+                              ),
+                              // 실제 텍스트
+                              Text(
+                                text.keepAll,
+                                textAlign: TextAlign.center,
+                                style: textStyle,
+                              ),
+                            ],
                           ),
                         ),
-                        // 실제 텍스트
-                        Text(
-                          text.keepAll,
-                          textAlign: TextAlign.center,
-                          style: textStyle,
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
             ),
           ),

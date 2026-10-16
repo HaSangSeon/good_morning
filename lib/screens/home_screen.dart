@@ -227,8 +227,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return 10;                                 // 56.0
   }
 
+  double _getCardWidth(BuildContext context) {
+    return (MediaQuery.of(context).size.width - 80.0).clamp(0.0, 400.0);
+  }
+
   // 텍스트 직접 수정 모달
   void _showTextEditorDialog() {
+    final cardWidth = _getCardWidth(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -236,6 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         return TextEditorBottomSheet(
+          cardWidth: cardWidth,
           textController: _textController,
           fontScaleStep: _fontScaleStep,
           selectedTextColor: _selectedTextColor,
@@ -409,7 +415,7 @@ class _HomeScreenState extends State<HomeScreen> {
     double dynamicHeight = lineHeights[idx];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8F5),
+      backgroundColor: const Color(0xFFFAF9F6),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -421,11 +427,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 9.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0x0C000000),
-                      blurRadius: 10,
+                      blurRadius: 12,
                       offset: Offset(0, 3),
                     ),
                   ],
@@ -507,9 +513,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (card.fontFamily != null) {
                                   _selectedFontFamily = card.fontFamily!;
                                 }
-                                if (card.fontStep != null) {
-                                  _fontScaleStep = card.fontStep!;
-                                }
+                                _fontScaleStep = card.fontStep ?? 0;
                                 _selectedTextColor = Color(card.textColorValue);
                               });
                               _saveUserPreferences();
@@ -527,19 +531,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF8B5A2B), Color(0xFF6B4226)], // 따뜻하고 고급스러운 브라운 톤
+                              colors: [Color(0xFF2A2D34), Color(0xFF1E2128)], // 기품 있는 차콜 네이비
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: const [
                               BoxShadow(
-                                color: Color(0x2E6B4226),
-                                blurRadius: 6,
+                                color: Color(0x24000000),
+                                blurRadius: 8,
                                 offset: Offset(0, 2),
                               ),
                             ],
-                            border: Border.all(color: const Color(0xFF5C3A21), width: 0.8),
+                            border: Border.all(color: const Color(0xFF3F4450), width: 1),
                           ),
                           child: const FittedBox(
                             fit: BoxFit.scaleDown,
@@ -552,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   '내카드함',
                                   style: TextStyle(
                                     fontSize: 15,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
                                     color: Colors.white,
                                     letterSpacing: -0.3,
                                   ),
@@ -605,29 +609,56 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       
                       // 컴팩트 수정 바
-                      InkWell(
-                        onTap: _showTextEditorDialog,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          width: double.infinity,
-                          height: 56, // 하단 기능 버튼(PremiumButtonWidget)과 동일한 높이로 통일
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF6ED), // 연한 웜톤(오렌지) 배경으로 터치 유도
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFFFE4C4)), 
-                            boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.edit_rounded, color: Color(0xFFE05220), size: 22),
-                                  SizedBox(width: 8),
-                                  Text('터치해서 글씨 수정하기', style: TextStyle(fontSize: 16, color: Color(0xFFE05220), fontWeight: FontWeight.w700)),
-                                ],
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x0C000000),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              _showTextEditorDialog();
+                            },
+                            borderRadius: BorderRadius.circular(18),
+                            splashColor: const Color(0xFFEA580C).withValues(alpha: 0.1),
+                            highlightColor: const Color(0xFFEA580C).withValues(alpha: 0.05),
+                            child: Container(
+                              width: double.infinity,
+                              height: 56, // 하단 기능 버튼(PremiumButtonWidget)과 동일한 높이로 통일
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF7ED), // 연한 웜톤(크림 앰버) 배경으로 터치 유도
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(color: const Color(0xFFFED7AA), width: 1.4), 
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.edit_rounded, color: Color(0xFFEA580C), size: 22),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        '터치해서 글씨 수정하기',
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          color: Color(0xFFC2410C),
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: -0.3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -642,9 +673,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Expanded(
                             child: PremiumButtonWidget(
-                              icon: Icons.auto_awesome,
+                              icon: Icons.chat_bubble_rounded,
                               label: '추천 문구',
-                              gradient: const LinearGradient(colors: [Color(0xFFFF8A65), Color(0xFFE64A19)]), // 따뜻한 코랄/오렌지 (포근함)
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // 세련된 로열 블루 (추천 문구 팝업과 통일)
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                               onTap: _showPhraseSelectionDialog,
                             ),
                           ),
@@ -658,18 +693,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Expanded(
                             child: PremiumButtonWidget(
-                              icon: Icons.image,
+                              icon: Icons.image_rounded,
                               label: '배경 사진',
-                              gradient: const LinearGradient(colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)]), // 화사한 포레스트 그린 (자연)
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF10B981), Color(0xFF047857)], // 싱그러운 에메랄드 그린 (배경 사진 팝업과 통일)
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                               onTap: _showBackgroundSelectionDialog,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: PremiumButtonWidget(
-                              icon: Icons.font_download,
+                              icon: Icons.edit_note_rounded,
                               label: '글씨체',
-                              gradient: const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1565C0)]), // 차분한 스카이블루 (신뢰/맑음)
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)], // 기품 있는 로열 바이올렛 (글씨체 팝업과 통일)
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                               onTap: _showFontSelectionDialog,
                             ),
                           ),
@@ -699,6 +742,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: SafeArea(
           top: false,
+          minimum: const EdgeInsets.only(bottom: 6),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -708,8 +752,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: _isCompleting ? null : _completeCard,
+                    onTap: _isCompleting ? null : () {
+                      HapticFeedback.mediumImpact();
+                      _completeCard();
+                    },
                     borderRadius: BorderRadius.circular(22),
+                    splashColor: Colors.white.withValues(alpha: 0.3),
+                    highlightColor: Colors.white.withValues(alpha: 0.15),
                     child: Container(
                       width: double.infinity,
                       height: 68,
@@ -717,17 +766,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFFDE00), Color(0xFFFACC15)],
+                          colors: [Color(0xFFFFDF00), Color(0xFFF59E0B)], // 따뜻하고 깊이 있는 골드 앰버
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(22),
-                        border: Border.all(color: const Color(0xFFF59E0B), width: 1),
+                        border: Border.all(color: const Color(0xFFD97706), width: 1.2),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0x38F59E0B),
-                            blurRadius: 14,
-                            offset: Offset(0, 4),
+                            color: Color(0x3BD97706),
+                            blurRadius: 16,
+                            offset: Offset(0, 5),
                           ),
                         ],
                       ),
@@ -736,14 +785,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle_rounded, size: 28, color: Color(0xFF2D1A0E)),
+                            Icon(Icons.check_circle_rounded, size: 28, color: Color(0xFF2E1700)),
                             SizedBox(width: 10),
                             Text(
                               '카드 완성하기',
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
-                                color: Color(0xFF2D1A0E),
+                                color: Color(0xFF2E1700),
                                 letterSpacing: -0.5,
                               ),
                             ),

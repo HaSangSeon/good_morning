@@ -9,6 +9,7 @@ import '../data/home_card_data.dart';
 import '../services/card_archive_service.dart';
 import '../services/notification_service.dart';
 import '../services/ad_service.dart';
+import '../widgets/maum_card.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class CardArchiveScreen extends StatefulWidget {
@@ -102,120 +103,173 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
   Future<void> _confirmDelete(BuildContext context, SavedCard card) async {
     HapticFeedback.lightImpact();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1C202E) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          backgroundColor: isDark ? const Color(0xFF1B1E2B) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
           elevation: 12,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Premium Icon with soft background
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF0ED), // Soft peach
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFE64A19).withAlpha(38),
-                        blurRadius: 12,
-                        spreadRadius: 4,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 340),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1B1E2B) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? Colors.white.withAlpha(25) : const Color(0xFFEBE5DF),
+                width: 1.2,
+              ),
+            ),
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 1. 세련된 원형 삭제 아이콘 뱃지
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF2E1B22) : const Color(0xFFFFF0EE),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF5A2530) : const Color(0xFFFFD8D3),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFE53935).withAlpha(isDark ? 40 : 25),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.delete_outline_rounded,
+                        size: 28,
+                        color: isDark ? const Color(0xFFFF8A80) : const Color(0xFFE53935),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // 2. 제목 문구
+                  Text(
+                    '카드를 삭제할까요?',
+                    style: GoogleFonts.gowunBatang(
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : const Color(0xFF231C18),
+                      letterSpacing: -0.3,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // 3. 안내 설명
+                  Text(
+                    '보관함에서 카드를 삭제합니다.\n삭제된 카드는 다시 복구할 수 없어요.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.5,
+                      color: isDark ? Colors.white70 : const Color(0xFF6B5E57),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 4. 시니어 맞춤 큼직한 액션 버튼들 (취소 / 삭제하기)
+                  Row(
+                    children: [
+                      // [ 취소 ] 버튼
+                      Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.of(dialogContext).pop(false);
+                            },
+                            borderRadius: BorderRadius.circular(15),
+                            child: Ink(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF282C3D) : const Color(0xFFF1EFEA),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: isDark ? Colors.white12 : const Color(0xFFDDD8D1),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '취소',
+                                  style: TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white70 : const Color(0xFF5C544E),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // [ 삭제하기 ] 버튼 (고급스러운 크림슨 레드 그라데이션)
+                      Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              Navigator.of(dialogContext).pop(true);
+                            },
+                            borderRadius: BorderRadius.circular(15),
+                            child: Ink(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFFE53935), Color(0xFFC62828)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFC62828).withAlpha(65),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  '삭제하기',
+                                  style: TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.delete_sweep_rounded,
-                    color: Color(0xFFE64A19), // Refined burnt orange
-                    size: 36,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Title
-                Text(
-                  '보관함 카드 지우기',
-                  style: GoogleFonts.gowunBatang(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF2D1810),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Content
-                Text(
-                  '이 카드를 보관함에서\n정말 지우시겠습니까?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 17,
-                    height: 1.5,
-                    color: isDark ? Colors.white70 : const Color(0xFF6B5E5B),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '지운 카드는 다시 복구할 수 없어요',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: const Color(0xFFE64A19).withAlpha(200),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.of(dialogContext).pop(false);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: isDark ? const Color(0xFF2A2D3A) : const Color(0xFFF5F5F5),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: Text(
-                          '취소',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white70 : const Color(0xFF757575),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          Navigator.of(dialogContext).pop(true);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: const Color(0xFFE64A19),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: const Text(
-                          '지우기',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -225,18 +279,27 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
     if (confirmed == true && mounted) {
       await _archiveService.deleteCard(card.id);
       if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              '카드가 보관함에서 삭제되었습니다.',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-            backgroundColor: const Color(0xFF424242),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(Icons.check_circle_outline_rounded, color: Color(0xFFFF8A80), size: 20),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '카드가 보관함에서 삭제되었습니다.',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+              ),
+            ],
           ),
-        );
+          backgroundColor: const Color(0xFF2C2F3E),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          duration: const Duration(milliseconds: 2200),
+        ),
+      );
     }
   }
 
@@ -248,11 +311,29 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
     super.dispose();
   }
 
-  TextStyle _getThumbnailTextStyle(String? fontFamily, int textColorValue) {
+  int _calculateAutoFontStep(String text) {
+    final rawText = text.trim();
+    if (rawText.isEmpty) return 8;
+    final lineCount = rawText.split('\n').length;
+    final len = rawText.length;
+    
+    if (lineCount >= 6 || len >= 60) return 1;
+    if (lineCount == 5 || len >= 50) return 2;
+    if (lineCount == 4 || len >= 40) return 4;
+    if (lineCount == 3 || len >= 30) return 5;
+    if (lineCount == 2 || len >= 20) return 7;
+    if (len >= 10) return 8;
+    return 10;
+  }
+
+  TextStyle _getCardTextStyle(
+    String? fontFamily,
+    int textColorValue, {
+    int? fontStep,
+    required String message,
+  }) {
     TextStyle baseStyle;
-    if (fontFamily == 'Jua') {
-      baseStyle = GoogleFonts.jua();
-    } else if (fontFamily == 'GowunBatang') {
+    if (fontFamily == 'GowunBatang') {
       baseStyle = GoogleFonts.gowunBatang(fontWeight: FontWeight.bold);
     } else if (fontFamily == 'NanumMyeongjo') {
       baseStyle = GoogleFonts.nanumMyeongjo(fontWeight: FontWeight.bold);
@@ -272,14 +353,23 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
       baseStyle = GoogleFonts.jua();
     }
 
+    final fontSizes = [20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 52.0, 56.0];
+    final lineHeights = [1.5, 1.48, 1.45, 1.42, 1.38, 1.35, 1.32, 1.28, 1.25, 1.2];
+
+    int activeStep = fontStep ?? 0;
+    if (activeStep <= 0) {
+      activeStep = _calculateAutoFontStep(message);
+    }
+    int idx = (activeStep - 1).clamp(0, 9);
+    double fontSize = fontSizes[idx];
+    double height = lineHeights[idx];
+
     return baseStyle.copyWith(
-      fontSize: 16,
+      fontSize: fontSize,
+      height: height,
       fontWeight: FontWeight.bold,
       color: Color(textColorValue),
       fontFamilyFallback: const ['Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'],
-      shadows: const [
-        Shadow(color: Colors.black87, blurRadius: 4),
-      ],
     );
   }
 
@@ -621,178 +711,148 @@ class _CardArchiveScreenState extends State<CardArchiveScreen> with SingleTicker
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.80,
+                    childAspectRatio: 0.82,
                     crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
+                    mainAxisSpacing: 16,
                   ),
                   itemCount: cards.length,
                   itemBuilder: (context, index) {
                     final card = cards[index];
                     final hourStr = card.createdAt.hour.toString().padLeft(2, '0');
                     final minStr = card.createdAt.minute.toString().padLeft(2, '0');
+                    final double cardCanvasWidth = (MediaQuery.of(context).size.width - 80.0).clamp(0.0, 400.0);
 
                     return InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () => widget.onSelectCard(card),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x28000000),
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                          image: DecorationImage(
-                            image: card.backgroundPath.startsWith('assets/')
-                                ? (defaultBackgroundList.any((bg) => bg['path'] == card.backgroundPath)
-                                    ? AssetImage(card.backgroundPath)
-                                    : const AssetImage('assets/images/bg_season_spring.webp'))
-                                : (File(card.backgroundPath).existsSync()
-                                    ? FileImage(File(card.backgroundPath))
-                                    : const AssetImage('assets/images/bg_season_spring.webp')) as ImageProvider,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: Stack(
-                          children: [
-                            Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 1. 실제 완성 카드와 100% 동일한 1:1 정사각형 카드
+                          AspectRatio(
+                            aspectRatio: 1.0,
+                            child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
-                                border: card.borderColorValue != null
-                                    ? Border.all(
-                                        color: Color(card.borderColorValue!),
-                                        width: 2.5,
-                                      )
-                                    : null,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.black.withAlpha(40),
-                                    Colors.transparent,
-                                    Colors.black.withAlpha(60),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Center(
-                                child: Text(
-                                  card.message,
-                                  maxLines: 5,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                  style: _getThumbnailTextStyle(card.fontFamily, card.textColorValue),
-                                ),
-                              ),
-                            ),
-                            // Refined Floating Delete Button (Well-spaced & Frosted Glass Aesthetic)
-                            Positioned(
-                              right: 8,
-                              top: 8,
-                              child: GestureDetector(
-                                onTap: () => _confirmDelete(context, card),
-                                child: Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withAlpha(140),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withAlpha(60),
-                                      width: 1,
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.close_rounded,
-                                    size: 15,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            // Bottom Sent Tag with Detailed Time (e.g. 8월 17일 23:33)
-                            Positioned(
-                              left: 8,
-                              bottom: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withAlpha(120),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.white.withAlpha(45),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.access_time_rounded,
-                                      size: 10,
-                                      color: Color(0xFFFFD700),
-                                    ),
-                                    const SizedBox(width: 3.5),
-                                    Text(
-                                      '${card.createdAt.month}월 ${card.createdAt.day}일 $hourStr:$minStr',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: -0.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            // 우측 하단 브랜드 서명 (♥ 마음카드)
-                            Positioned(
-                              right: 8,
-                              bottom: 8,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.favorite_rounded,
-                                    size: 9,
-                                    color: Color(0xFFFF8A7A),
-                                    shadows: [
-                                      Shadow(color: Colors.black87, blurRadius: 4),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 2.5),
-                                  Text(
-                                    '마음카드',
-                                    textScaler: TextScaler.noScaling,
-                                    style: GoogleFonts.gowunBatang(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white.withAlpha(240),
-                                      letterSpacing: 0.5,
-                                      shadows: const [
-                                        Shadow(color: Colors.black87, blurRadius: 4),
-                                      ],
-                                    ),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x28000000),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
                                   ),
                                 ],
                               ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    // 홈 화면과 100% 동일한 MaumCard를 기준 캔버스로 렌더링 후 비율 축소
+                                    FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: SizedBox(
+                                        width: cardCanvasWidth,
+                                        height: cardCanvasWidth,
+                                        child: MaumCard(
+                                          text: card.message,
+                                          backgroundImage: card.backgroundPath.startsWith('assets/')
+                                              ? (defaultBackgroundList.any((bg) => bg['path'] == card.backgroundPath)
+                                                  ? AssetImage(card.backgroundPath)
+                                                  : const AssetImage('assets/images/bg_season_spring.webp'))
+                                              : (File(card.backgroundPath).existsSync()
+                                                  ? FileImage(File(card.backgroundPath))
+                                                  : const AssetImage('assets/images/bg_season_spring.webp')) as ImageProvider,
+                                          textStyle: _getCardTextStyle(
+                                            card.fontFamily,
+                                            card.textColorValue,
+                                            fontStep: card.fontStep,
+                                            message: card.message,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 테두리 (border)가 저장되어 있는 경우 표시
+                                    if (card.borderColorValue != null)
+                                      IgnorePointer(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(
+                                              color: Color(card.borderColorValue!),
+                                              width: 2.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                    // 우측 상단 플로팅 삭제 버튼
+                                    Positioned(
+                                      right: 8,
+                                      top: 8,
+                                      child: GestureDetector(
+                                        onTap: () => _confirmDelete(context, card),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withAlpha(140),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white.withAlpha(60),
+                                              width: 1,
+                                            ),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Colors.black26,
+                                                blurRadius: 4,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Icon(
+                                            Icons.close_rounded,
+                                            size: 15,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+
+                          // 2. 카드 아래 분리된 등록일자 영역
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.access_time_rounded,
+                                  size: 12,
+                                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    '${card.createdAt.month}월 ${card.createdAt.day}일 $hourStr:$minStr',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -810,7 +870,7 @@ if (!AdService.hideBannerAdsForScreenshots && _isBannerAdLoaded && _bannerAd != 
             Padding(
               padding: EdgeInsets.only(
                 top: 8,
-                bottom: MediaQuery.of(context).padding.bottom,
+                bottom: math.max(MediaQuery.of(context).padding.bottom, 6.0),
               ),
               child: SizedBox(
                 width: _bannerAd!.size.width.toDouble(),
@@ -820,7 +880,7 @@ if (!AdService.hideBannerAdsForScreenshots && _isBannerAdLoaded && _bannerAd != 
             )
           else
             SizedBox(
-              height: MediaQuery.of(context).padding.bottom,
+              height: math.max(MediaQuery.of(context).padding.bottom, 8.0),
             ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gal/gal.dart';
@@ -229,119 +230,196 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = (screenWidth * 0.80).clamp(260.0, 340.0);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8F5),
+      backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            // 1. 프리미엄 상단 닫기 버튼 바 (우측 정렬 및 고급스러운 캡슐형 스타일)
+            // 1. 프리미엄 상단 네비게이션 헤더 바 (수정하기 / 카드완성 뱃지 / 처음으로)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 4.0),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(22),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0C000000),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.close_rounded,
-                            size: 20,
-                            color: Color(0xFF475569),
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            '닫기',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF334155),
-                              letterSpacing: -0.3,
+              padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 6.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // 수정하기 버튼 (뒤로가기)
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(22),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x08000000),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.arrow_back_ios_new_rounded, size: 15, color: Color(0xFF334155)),
+                                SizedBox(width: 4),
+                                Text(
+                                  '수정하기',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF334155),
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 6),
+
+                  // 중앙 완성 뱃지
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFFDE68A), width: 1),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🎉', style: TextStyle(fontSize: 13)),
+                            SizedBox(width: 5),
+                            Text(
+                              '카드 완성',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFB45309),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+
+                  // 우측 닫기/처음으로 버튼
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(22),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x08000000),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.close_rounded, size: 18, color: Color(0xFF334155)),
+                                SizedBox(width: 2),
+                                Text(
+                                  '닫기',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF334155),
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             
-            // 2. 메인 콘텐츠 (확대된 카드 및 카카오톡 전송 버튼)
+            // 2. 메인 콘텐츠 (확대된 카드 및 전송 액션)
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    const SizedBox(height: 12),
-                    
-                    // 완성 축하 뱃지 & 타이틀
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEF3C7),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFFDE68A), width: 1),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('🎉', style: TextStyle(fontSize: 14)),
-                          SizedBox(width: 6),
-                          Text(
-                            '정성껏 만든 마음카드',
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFFB45309),
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
+
+                    // 완성 축하 타이틀
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Text(
                         '카드가 완성되었어요!',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.gowunBatang(
-                          fontSize: 27,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E293B),
+                          color: const Color(0xFF0F172A),
                           letterSpacing: -0.6,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 6),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Text(
+                        '소중한 분에게 따뜻한 마음을 선물해보세요.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
                     
-                    // 프리미엄 프레임 뷰 (상하좌우 완벽한 12dp 균일 대칭 여백 + 팝업 애니메이션 효과)
+                    // 프리미엄 명화 액자 프레임 뷰 (0.80 화면 폭으로 큼직하고 시원하게 확대)
                     Center(
                       child: TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0.85, end: 1.0),
-                        duration: const Duration(milliseconds: 700),
+                        tween: Tween<double>(begin: 0.88, end: 1.0),
+                        duration: const Duration(milliseconds: 650),
                         curve: Curves.easeOutBack,
                         builder: (context, scale, child) {
                           return Transform.scale(
@@ -350,27 +428,27 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                           );
                         },
                         child: Container(
-                          width: MediaQuery.of(context).size.width * 0.72,
-                          padding: const EdgeInsets.all(12), // 💡 상하좌우 완벽히 균일한 12dp 대칭 여백!
+                          width: cardWidth,
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
                             boxShadow: const [
                               BoxShadow(
-                                color: Color(0x1A000000), // 그림자 농도 살짝 증가
+                                color: Color(0x180F172A),
                                 blurRadius: 24,
                                 offset: Offset(0, 10),
                               ),
                               BoxShadow(
-                                color: Color(0x0A000000),
+                                color: Color(0x080F172A),
                                 blurRadius: 8,
-                                offset: Offset(0, 4),
+                                offset: Offset(0, 3),
                               ),
                             ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(16),
                             child: AspectRatio(
                               aspectRatio: 1.0,
                               child: Image.file(
@@ -383,147 +461,201 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
                       ),
                     ),
                     
-                    const SizedBox(height: 22),
-                    
-                    // 친절한 안내 문구 (시니어 가독성 유지 및 텍스트 확대 시 오버플로우 방지)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    // 고화질 카드 뱃지
+                    Container(
+                      margin: const EdgeInsets.only(top: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4.5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x06000000),
+                            blurRadius: 4,
+                            offset: Offset(0, 1.5),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.mail_rounded, size: 18, color: Color(0xFFF59E0B)),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              '소중한 분에게 진심이 담긴 마음을 전해보세요.',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF475569),
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.3,
-                              ),
-                              textAlign: TextAlign.center,
+                          Icon(Icons.verified_rounded, size: 14, color: Color(0xFF10B981)),
+                          SizedBox(width: 5),
+                          Text(
+                            '고화질 카드 제작 완료',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF334155),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
 
-                    // 카카오톡 전송 버튼 (시니어 맞춤 대형 사이즈 74dp + 골든 옐로우 그라데이션)
+                    const SizedBox(height: 20),
+
+                    // 1. 카카오톡 전송 버튼 (1순위 메인 버튼: 대형 70dp + 골든 옐로우 그라데이션)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: InkWell(
-                        onTap: _isSharing ? null : () {
-                          HapticFeedback.mediumImpact();
-                          _shareToKakao();
-                        },
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          width: double.infinity,
-                          height: 74,
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFEE500), Color(0xFFFFDE00)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _isSharing ? null : () {
+                            HapticFeedback.mediumImpact();
+                            _shareToKakao();
+                          },
+                          borderRadius: BorderRadius.circular(24),
+                          child: Container(
+                            width: double.infinity,
+                            height: 70,
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFEE500), Color(0xFFFFDE00)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: const Color(0xFFF5C518), width: 1.2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x35F59E0B),
+                                  blurRadius: 16,
+                                  offset: Offset(0, 6),
+                                ),
+                              ],
                             ),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: const Color(0xFFF5C518), width: 1),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x3DF59E0B),
-                                blurRadius: 14,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: _isSharing
-                              ? const SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: CircularProgressIndicator(color: Color(0xFF191919), strokeWidth: 3),
-                                )
-                              : const FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.send_rounded, size: 32, color: Color(0xFF191919)),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        '카카오톡으로 전송',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF191919),
-                                          letterSpacing: -0.5,
+                            child: _isSharing
+                                ? const SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: CircularProgressIndicator(color: Color(0xFF191919), strokeWidth: 3),
+                                  )
+                                : const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.send_rounded, size: 30, color: Color(0xFF191919)),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          '카카오톡으로 전송',
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w900,
+                                            color: Color(0xFF191919),
+                                            letterSpacing: -0.5,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
                     
-                    // 기기 사진첩에 저장 버튼 (시니어 맞춤 대형 사이즈 74dp + 프리미엄 엘레강스 화이트 카드 스타일)
+                    // 2. 기기 사진첩에 저장 버튼 (2순위 버튼: 70dp + 프리미엄 딥 다크 네이비 그라데이션)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: InkWell(
-                        onTap: _isSavingGallery ? null : () {
-                          HapticFeedback.lightImpact();
-                          _saveToGallery();
-                        },
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          width: double.infinity,
-                          height: 74,
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF334155),
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x26334155),
-                                blurRadius: 12,
-                                offset: Offset(0, 5),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _isSavingGallery ? null : () {
+                            HapticFeedback.lightImpact();
+                            _saveToGallery();
+                          },
+                          borderRadius: BorderRadius.circular(22),
+                          child: Container(
+                            width: double.infinity,
+                            height: 70,
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                            ],
-                          ),
-                          child: _isSavingGallery
-                              ? const SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                                )
-                              : const FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.download_rounded, size: 32, color: Colors.white),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        '내 폰 사진첩에 저장',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.white,
-                                          letterSpacing: -0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: const Color(0xFF334155), width: 1.2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x180F172A),
+                                  blurRadius: 12,
+                                  offset: Offset(0, 5),
                                 ),
+                              ],
+                            ),
+                            child: _isSavingGallery
+                                ? const SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                                  )
+                                : const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.download_rounded, size: 28, color: Colors.white),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          '내 폰 사진첩에 저장',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                            letterSpacing: -0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+
+                    // 3. 하단 문구/배경 다시 수정하기 링크
+                    Padding(
+                      padding: const EdgeInsets.only(top: 14, bottom: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(context);
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.edit_note_rounded, size: 18, color: Color(0xFF64748B)),
+                                SizedBox(width: 4),
+                                Text(
+                                  '문구나 배경 다시 수정하기',
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF64748B),
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Color(0xFFCBD5E1),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -534,7 +666,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
               Padding(
                 padding: EdgeInsets.only(
                   top: 8,
-                  bottom: MediaQuery.of(context).padding.bottom,
+                  bottom: math.max(MediaQuery.of(context).padding.bottom, 6.0),
                 ),
                 child: SizedBox(
                   width: _bannerAd!.size.width.toDouble(),
@@ -544,7 +676,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
               )
             else
               SizedBox(
-                height: MediaQuery.of(context).padding.bottom,
+                height: math.max(MediaQuery.of(context).padding.bottom, 8.0),
               ),
           ],
         ),

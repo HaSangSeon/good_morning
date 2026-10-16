@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../modal_header.dart';
 
 class BackgroundSelectionBottomSheet extends StatefulWidget {
@@ -73,267 +74,395 @@ class _BackgroundSelectionBottomSheetState extends State<BackgroundSelectionBott
   Widget build(BuildContext context) {
     final isCustomSelected = widget.customImagePath != null;
 
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ModalHeaderWidget(
-            icon: Icons.image_rounded,
-            gradientColors: [Color(0xFF10B981), Color(0xFF047857)],
-            title: '사진 배경 고르기',
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: ElevatedButton.icon(
-              onPressed: widget.onCustomImageRequested,
-              icon: Icon(
-                isCustomSelected ? Icons.check_circle_rounded : Icons.photo_library_rounded,
-                size: 28,
-                color: isCustomSelected ? const Color(0xFF60A5FA) : Colors.white,
-              ),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    isCustomSelected ? '내 앨범 사진 적용 중' : '내 앨범에서 사진 고르기',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  if (isCustomSelected) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB),
-                        borderRadius: BorderRadius.circular(10),
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const ModalHeaderWidget(
+              icon: Icons.image_rounded,
+              gradientColors: [Color(0xFF10B981), Color(0xFF047857)],
+              title: '사진 배경 고르기',
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    widget.onCustomImageRequested();
+                  },
+                  child: Container(
+                    height: 58,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isCustomSelected ? const Color(0xFFECFDF5) : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isCustomSelected ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+                        width: isCustomSelected ? 2 : 1.2,
                       ),
-                      child: const Text('선택됨', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isCustomSelected
+                              ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                              : const Color(0x080F172A),
+                          blurRadius: isCustomSelected ? 10 : 6,
+                          offset: const Offset(0, 2.5),
+                        ),
+                      ],
                     ),
-                  ],
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                backgroundColor: isCustomSelected ? const Color(0xFF1E293B) : const Color(0xFF333333),
-                side: isCustomSelected ? const BorderSide(color: Color(0xFF2563EB), width: 2) : null,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: isCustomSelected ? const Color(0xFF10B981) : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isCustomSelected ? Icons.check_rounded : Icons.add_photo_alternate_rounded,
+                            size: 22,
+                            color: isCustomSelected ? Colors.white : const Color(0xFF047857),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            isCustomSelected ? '내 앨범 사진 적용 중' : '내 앨범에서 사진 고르기',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: isCustomSelected ? const Color(0xFF065F46) : const Color(0xFF1E293B),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ),
+                        if (isCustomSelected)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              '현재 적용 중',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '불러오기',
+                                  style: TextStyle(
+                                    color: Color(0xFF047857),
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 2),
+                                Icon(Icons.chevron_right_rounded, color: Color(0xFF047857), size: 16),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          
-          Stack(
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: categories.map((cat) {
-                    final isSelected = selectedCategory == cat;
-                    return Padding(
-                      key: bgChipKeys[cat],
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedCategory = cat;
-                          });
-                          final chipContext = bgChipKeys[cat]?.currentContext;
-                          if (chipContext != null) {
-                            Scrollable.ensureVisible(
-                              chipContext,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              alignment: 0.5,
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade100,
+            Container(
+              height: 52,
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.transparent,
+                      Colors.white,
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                    stops: [0.0, 0.04, 0.96, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: categories.map((cat) {
+                      final isSelected = selectedCategory == cat;
+                      return Padding(
+                        key: bgChipKeys[cat],
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
-                            ),
-                          ),
-                          child: Text(
-                            cat,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: IgnorePointer(
-                  child: Container(
-                    width: 40,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Colors.white.withValues(alpha: 0.0),
-                          Colors.white,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Divider(thickness: 1, height: 1, color: Color(0xFFEEEEEE)),
-          
-          Expanded(
-            child: Builder(
-              builder: (context) {
-                final Map<String, List<Map<String, dynamic>>> groupedBgs = {};
-                for (int i = 0; i < widget.bgList.length; i++) {
-                  final bg = widget.bgList[i];
-                  final category = bg['category'] ?? '기타';
-                  
-                  if (selectedCategory != '전체' && category != selectedCategory) {
-                    continue;
-                  }
-                  
-                  if (!groupedBgs.containsKey(category)) {
-                    groupedBgs[category] = [];
-                  }
-                  groupedBgs[category]!.add({
-                    'index': i,
-                    'bg': bg,
-                  });
-                }
-
-                return ListView.builder(
-                  padding: EdgeInsets.only(
-                    bottom: 20 + MediaQuery.of(context).padding.bottom
-                  ),
-                  itemCount: groupedBgs.keys.length,
-                  itemBuilder: (context, sectionIndex) {
-                    final category = groupedBgs.keys.elementAt(sectionIndex);
-                    final items = groupedBgs[category]!;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-                          child: Text(
-                            category,
-                            style: const TextStyle(
-                              fontSize: 19, 
-                              fontWeight: FontWeight.w700, 
-                              color: Color(0xFF333333)
-                            ),
-                          ),
-                        ),
-                        GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            final globalIndex = items[index]['index'] as int;
-                            final item = items[index]['bg'] as Map<String, String>;
-                            final isSelected = widget.currentBgIndex == globalIndex && widget.customImagePath == null;
-                            return GestureDetector(
-                              key: isSelected ? selectedBgKey : null,
-                              onTap: () {
-                                widget.onBgSelected(globalIndex);
-                                widget.onSaveUserPreferences();
-                                Navigator.pop(context);
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: isSelected
-                                      ? Border.all(color: const Color(0xFF2563EB), width: 3.5)
-                                      : Border.all(color: const Color(0xFFEEEEEE), width: 1.2),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: isSelected ? const Color(0x332563EB) : const Color(0x0D000000),
-                                      blurRadius: isSelected ? 8 : 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                selectedCategory = cat;
+                              });
+                              final chipContext = bgChipKeys[cat]?.currentContext;
+                              if (chipContext != null) {
+                                Scrollable.ensureVisible(
+                                  chipContext,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  alignment: 0.5,
+                                );
+                              }
+                            },
+                            child: Container(
+                              constraints: const BoxConstraints(minHeight: 38),
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+                              decoration: BoxDecoration(
+                                gradient: isSelected
+                                    ? const LinearGradient(
+                                        colors: [Color(0xFF10B981), Color(0xFF047857)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      )
+                                    : null,
+                                color: isSelected ? null : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected ? const Color(0xFF047857) : const Color(0xFFE2E8F0),
+                                  width: 1.2,
                                 ),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(13),
-                                      child: Image.asset(
-                                        item['path']!,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    if (isSelected)
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF2563EB),
-                                            borderRadius: BorderRadius.circular(12),
-                                            boxShadow: const [
-                                              BoxShadow(color: Color(0x4D000000), blurRadius: 4, offset: Offset(0, 2)),
-                                            ],
-                                          ),
-                                          child: const Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(Icons.check_circle_rounded, color: Colors.white, size: 16),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                '선택됨',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isSelected
+                                        ? const Color(0xFF10B981).withValues(alpha: 0.3)
+                                        : const Color(0x06000000),
+                                    blurRadius: isSelected ? 8 : 4,
+                                    offset: Offset(0, isSelected ? 2 : 1),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                cat,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                  color: isSelected ? Colors.white : const Color(0xFF475569),
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                          ),
                         ),
-                        if (sectionIndex < groupedBgs.keys.length - 1)
-                          const SizedBox(height: 16),
-                      ],
-                    );
-                  },
-                );
-              }
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            const Divider(thickness: 1, height: 1, color: Color(0xFFE2E8F0)),
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final Map<String, List<Map<String, dynamic>>> groupedBgs = {};
+                  for (int i = 0; i < widget.bgList.length; i++) {
+                    final bg = widget.bgList[i];
+                    final category = bg['category'] ?? '기타';
+                    
+                    if (selectedCategory != '전체' && category != selectedCategory) {
+                      continue;
+                    }
+                    
+                    if (!groupedBgs.containsKey(category)) {
+                      groupedBgs[category] = [];
+                    }
+                    groupedBgs[category]!.add({
+                      'index': i,
+                      'bg': bg,
+                    });
+                  }
+
+                  return ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(
+                      bottom: 24 + MediaQuery.of(context).padding.bottom,
+                    ),
+                    itemCount: groupedBgs.keys.length,
+                    itemBuilder: (context, sectionIndex) {
+                      final category = groupedBgs.keys.elementAt(sectionIndex);
+                      final items = groupedBgs[category]!;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 4,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  category,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF0F172A),
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE2E8F0),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '${items.length}장',
+                                    style: const TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF475569),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GridView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: 1.0,
+                            ),
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              final globalIndex = items[index]['index'] as int;
+                              final item = items[index]['bg'] as Map<String, String>;
+                              final isSelected = widget.currentBgIndex == globalIndex && widget.customImagePath == null;
+                              return GestureDetector(
+                                key: isSelected ? selectedBgKey : null,
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  widget.onBgSelected(globalIndex);
+                                  widget.onSaveUserPreferences();
+                                  Navigator.pop(context);
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+                                      width: isSelected ? 3 : 1.2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: isSelected
+                                            ? const Color(0xFF10B981).withValues(alpha: 0.3)
+                                            : const Color(0x0A000000),
+                                        blurRadius: isSelected ? 10 : 5,
+                                        offset: const Offset(0, 2.5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        Image.asset(
+                                          item['path']!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        if (isSelected)
+                                          Positioned(
+                                            top: 8,
+                                            right: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [Color(0xFF10B981), Color(0xFF047857)],
+                                                ),
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: const [
+                                                  BoxShadow(color: Color(0x40000000), blurRadius: 4, offset: Offset(0, 2)),
+                                                ],
+                                              ),
+                                              child: const Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.check_rounded, color: Colors.white, size: 15),
+                                                  SizedBox(width: 3),
+                                                  Text(
+                                                    '현재 배경',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          if (sectionIndex < groupedBgs.keys.length - 1)
+                            const SizedBox(height: 16),
+                        ],
+                      );
+                    },
+                  );
+                }
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+

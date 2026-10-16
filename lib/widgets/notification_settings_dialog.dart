@@ -99,9 +99,14 @@ class _NotificationSettingsDialogState
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       backgroundColor: isDark ? const Color(0xFF1B1E2B) : Colors.white,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
           // 1. 상단 선셋 골드 그라데이션 헤더
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 14, 20),
@@ -402,7 +407,9 @@ class _NotificationSettingsDialogState
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 
   /// 7시, 8시, 9시 시간 버튼 위젯 (누르면 즉시 저장 & 안내문구 갱신)

@@ -11,6 +11,7 @@ class LoadingDialogWidget extends StatelessWidget {
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 36),
       child: Container(
+        constraints: const BoxConstraints(maxWidth: 380),
         padding: const EdgeInsets.symmetric(vertical: 34, horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -24,8 +25,9 @@ class LoadingDialogWidget extends StatelessWidget {
           ],
           border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
           children: [
             // 1. 프리미엄 회전 링 & 중앙 마음 뱃지
             SizedBox(
@@ -125,6 +127,7 @@ class LoadingDialogWidget extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

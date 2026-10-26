@@ -29,6 +29,8 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
 
   final Map<String, String> categoryMap = {
     '전체': '전체',
+    '🎯 합격 & 기원': '🎯 합격 & 기원',
+    '🍀 응원 & 격려': '🍀 응원 & 격려',
     '🍁 가을 인사': '🍁 가을 인사 & 안부',
     '❄️ 겨울 인사': '❄️ 겨울 인사 & 안부',
     '🌸 봄 인사': '🌸 봄 인사 & 안부',
@@ -36,7 +38,6 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
     '🌅 아침 인사': '🌅 아침 인사 & 덕담',
     '🌙 저녁 & 안부': '🌙 저녁 & 안부 인사',
     '💖 건강 & 무병장수': '💖 건강 & 무병장수',
-    '🍀 응원 & 격려': '🍀 응원 & 격려',
     '👶 손주 & 자녀': '👶 손주 & 자녀 사랑',
     '🌺 들꽃 & 풍경': '🌺 들꽃 & 풍경 감성',
     '📜 명언 & 지혜': '📜 오늘의 명언 & 지혜',

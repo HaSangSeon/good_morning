@@ -196,8 +196,8 @@ class _BackgroundSelectionBottomSheetState extends State<BackgroundSelectionBott
               ),
             ),
             Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              height: 58,
+              padding: const EdgeInsets.only(top: 4, bottom: 12),
               child: ShaderMask(
                 shaderCallback: (Rect bounds) {
                   return const LinearGradient(

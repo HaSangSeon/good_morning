@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/release
 /android/build/
 /blog_image_*.png
+shorts_output/

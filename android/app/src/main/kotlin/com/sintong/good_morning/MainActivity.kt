@@ -1,5 +1,6 @@
 package com.sintong.good_morning
 
+import android.content.ClipData
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -64,6 +65,8 @@ class MainActivity : FlutterActivity() {
 
                                     type = "image/jpeg"
                                     putExtra(Intent.EXTRA_STREAM, contentUri)
+                                    // Android 10~15 보안 정책 및 Chooser 권한 유실 방지 필수 처리
+                                    clipData = ClipData.newRawUri("카드 이미지", contentUri)
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                 }
                             } else {
@@ -72,10 +75,19 @@ class MainActivity : FlutterActivity() {
                             if (!text.isNullOrEmpty()) {
                                 putExtra(Intent.EXTRA_TEXT, text)
                             }
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
 
-                        val chooser = Intent.createChooser(intent, "카카오톡으로 공유하기")
-                        startActivity(chooser)
+                        // 1순위: 카카오톡 앱 직접 실행 (중간 선택창 없이 단톡방/친구 선택으로 즉시 직행)
+                        // 2순위: 특수 제조사 환경이나 실패 시 Intent.createChooser로 안전하게 폴백
+                        try {
+                            startActivity(intent)
+                        } catch (e: Exception) {
+                            val chooser = Intent.createChooser(intent, "카카오톡으로 공유하기").apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(chooser)
+                        }
                         result.success(true)
                     } catch (e: Throwable) {
                         result.error("SHARE_ERROR", e.message, null)

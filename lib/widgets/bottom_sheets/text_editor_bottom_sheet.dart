@@ -492,12 +492,18 @@ class _TextEditorBottomSheetState extends State<TextEditorBottomSheet> {
                                           onTap: () {
                                             HapticFeedback.lightImpact();
                                             final text = widget.textController.text;
+                                            // 150자 초과 방어
+                                            if (text.length + emoji.length > 150) {
+                                              return;
+                                            }
                                             final selection = widget.textController.selection;
                                             if (selection.isValid && selection.start >= 0) {
-                                              final newText = text.replaceRange(selection.start, selection.end, emoji);
+                                              final start = selection.start.clamp(0, text.length);
+                                              final end = selection.end.clamp(0, text.length);
+                                              final newText = text.replaceRange(start, end, emoji);
                                               widget.textController.value = TextEditingValue(
                                                 text: newText,
-                                                selection: TextSelection.collapsed(offset: selection.start + emoji.length),
+                                                selection: TextSelection.collapsed(offset: start + emoji.length),
                                               );
                                             } else {
                                               widget.textController.text = '$text$emoji';

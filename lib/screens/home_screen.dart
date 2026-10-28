@@ -60,6 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // 알림 탭(Deep Link) 시 즉시 시간 기반 기본 카드로 강제 리프레시 (백그라운드에서 복귀할 때 대비)
     NotificationService.instance.onNotificationClick = (payload) {
       if (mounted) {
+        // 카드 제작 다이얼로그 실행 중인 경우 네비게이션 충돌 방지
+        if (_isCompleting) return;
+
         // 어디에 있든(내 카드함 등) 모든 화면을 닫고 메인 화면으로 돌아옵니다.
         Navigator.of(context).popUntil((route) => route.isFirst);
 
@@ -125,21 +128,45 @@ class _HomeScreenState extends State<HomeScreen> {
   void _applyTimeBasedDefault() {
     final now = DateTime.now();
     final hour = now.hour;
+    final month = now.month;
     
     if (hour >= 5 && hour < 12) {
       // 아침 (05:00 ~ 11:59)
       _textController.text = "좋은 아침입니다! 오늘도 희망차고 활기찬 하루 되세요 ☀️";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('autumn_cosmos') || bg['path']!.contains('autumn_persimmon'));
+      int idx = -1;
+      if (month >= 9 && month <= 11) {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('autumn_cosmos') || bg['path']!.contains('autumn_persimmon'));
+      } else if (month >= 3 && month <= 5) {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('spring_forsythia') || bg['path']!.contains('cherry_blossom'));
+      } else if (month >= 6 && month <= 8) {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('sunflower') || bg['path']!.contains('summer_valley'));
+      } else {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('winter_snow_hanok') || bg['path']!.contains('winter_camellia'));
+      }
       _bgIndex = idx != -1 ? idx : 0;
     } else if (hour >= 12 && hour < 18) {
       // 오후 (12:00 ~ 17:59)
       _textController.text = "건강이 최고의 자산입니다. 오늘 하루도 소중히 챙기세요 💪";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('autumn_ginkgo') || bg['path']!.contains('season_autumn'));
+      int idx = -1;
+      if (month >= 9 && month <= 11) {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('autumn_ginkgo') || bg['path']!.contains('season_autumn'));
+      } else if (month >= 3 && month <= 5) {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('season_spring') || bg['path']!.contains('spring_magnolia'));
+      } else if (month >= 6 && month <= 8) {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('green_forest') || bg['path']!.contains('season_summer'));
+      } else {
+        idx = _bgList.indexWhere((bg) => bg['path']!.contains('winter_snow_forest') || bg['path']!.contains('season_winter'));
+      }
       _bgIndex = idx != -1 ? idx : 0;
     } else {
       // 저녁 / 밤 (18:00 ~ 04:59)
       _textController.text = "오늘 하루도 정말 수고 많으셨습니다. 편안한 밤 되세요 🌙";
-      final idx = _bgList.indexWhere((bg) => bg['path']!.contains('sunset_lake') || bg['path']!.contains('aurora') || bg['name']!.contains('호수'));
+      // 🌙 밤/감성 카테고리 또는 밤 관련 배경 우선 매칭
+      final idx = _bgList.indexWhere((bg) =>
+          bg['category'] == '🌙 밤/감성' ||
+          bg['path']!.contains('aurora') ||
+          bg['path']!.contains('moonlight') ||
+          bg['path']!.contains('night'));
       _bgIndex = idx != -1 ? idx : 0;
     }
   }
@@ -201,13 +228,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   Future<void> _pickCustomImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _customImagePath = image.path;
-      });
-      _saveUserPreferences();
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 90,
+      );
+      if (image != null) {
+        setState(() {
+          _customImagePath = image.path;
+        });
+        _saveUserPreferences();
+      }
+    } catch (e) {
+      debugPrint('Pick custom image exception: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('사진을 불러오지 못했습니다. 다시 시도해 주세요.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -330,10 +374,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isCompleting = false;
 
+  void _cleanupOldCaptureFiles(Directory directory) {
+    Future.microtask(() async {
+      try {
+        final now = DateTime.now();
+        final entities = directory.listSync();
+        for (final entity in entities) {
+          if (entity is File && entity.path.contains('good_morning_')) {
+            final stat = entity.statSync();
+            if (now.difference(stat.modified).inHours > 24) {
+              entity.deleteSync();
+            }
+          }
+        }
+      } catch (_) {}
+    });
+  }
+
   Future<void> _completeCard() async {
     if (_isCompleting) return;
     setState(() => _isCompleting = true);
     HapticFeedback.mediumImpact();
+
+    bool isDialogShown = true;
+    void closeLoadingDialog() {
+      if (isDialogShown && mounted) {
+        isDialogShown = false;
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
 
     // 시니어 사용자를 위한 큼직하고 친절하며 품격 있는 카드 제작 중(로딩) 다이얼로그
     showDialog(
@@ -343,10 +412,19 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (BuildContext dialogContext) {
         return const LoadingDialogWidget();
       },
-    );
+    ).then((_) {
+      isDialogShown = false;
+    });
 
     try {
-      // 선택된 폰트가 네트워크에서 다운로드 완료될 때까지 안전하게 대기 (기본 시스템 폰트로 찍히는 FOUT 방지)
+      // 1. 배경 이미지가 완전히 메모리에 디코딩될 때까지 사전 대기 (빈 배경/검은 배경 캡처 원천 방지)
+      try {
+        await precacheImage(_getBackgroundImageProvider(), context);
+      } catch (e) {
+        debugPrint('Precache background exception: $e');
+      }
+
+      // 2. 선택된 폰트가 네트워크에서 다운로드 완료될 때까지 안전하게 대기 (기본 시스템 폰트로 찍히는 FOUT 방지)
       try {
         final fontConfig = AppConstants.seniorFonts.firstWhere(
           (f) => f['id'] == _selectedFontFamily,
@@ -360,9 +438,12 @@ class _HomeScreenState extends State<HomeScreen> {
       // 심리적 성취감과 만족감을 위한 인위적 딜레이 (1.2초)
       await Future.delayed(const Duration(milliseconds: 1200));
 
-      Uint8List? imageBytes = await _screenshotController.capture(pixelRatio: 1.5);
+      // 3. 선명한 고화질 캡처 (pixelRatio: 2.0으로 쨍한 화질 보장)
+      Uint8List? imageBytes = await _screenshotController.capture(pixelRatio: 2.0);
       if (imageBytes != null && imageBytes.isNotEmpty) {
         final directory = await getTemporaryDirectory();
+        _cleanupOldCaptureFiles(directory);
+
         final fileName = 'good_morning_${DateTime.now().millisecondsSinceEpoch}.png';
         final imagePath = '${directory.path}/$fileName';
         final file = File(imagePath);
@@ -384,17 +465,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (!mounted) return;
         
-        Navigator.pop(context); // 로딩 다이얼로그 닫기
+        closeLoadingDialog(); // 로딩 다이얼로그 안전 닫기
 
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => CardResultScreen(imagePath: imagePath)),
         );
+      } else {
+        closeLoadingDialog();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('카드 제작 중 오류가 발생했습니다. 다시 시도해 주세요.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Capture Error: $e');
-      if (mounted) Navigator.pop(context); // 에러 발생 시 다이얼로그 닫기
+      closeLoadingDialog();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('카드 제작 중 오류가 발생했습니다. 다시 시도해 주세요.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     } finally {
+      closeLoadingDialog();
       if (mounted) setState(() => _isCompleting = false);
     }
   }
@@ -502,7 +602,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               setState(() {
                                 _textController.text = card.message;
                                 if (card.backgroundPath.startsWith('/')) {
-                                  _customImagePath = card.backgroundPath;
+                                  final file = File(card.backgroundPath);
+                                  if (file.existsSync()) {
+                                    _customImagePath = card.backgroundPath;
+                                  } else {
+                                    _customImagePath = null;
+                                    _bgIndex = 0;
+                                  }
                                 } else {
                                   final idx = _bgList.indexWhere((bg) => bg['path'] == card.backgroundPath);
                                   if (idx != -1) {

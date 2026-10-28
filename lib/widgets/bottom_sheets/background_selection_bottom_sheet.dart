@@ -140,7 +140,7 @@ class _BackgroundSelectionBottomSheetState extends State<BackgroundSelectionBott
                         const SizedBox(width: 14),
                         Expanded(
                           child: Text(
-                            isCustomSelected ? '내 앨범 사진 적용 중' : '내 앨범에서 사진 고르기',
+                            isCustomSelected ? '내 앨범 사진 적용 중' : '내 앨범 사진',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,

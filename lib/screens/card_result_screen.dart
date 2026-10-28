@@ -24,6 +24,7 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
   bool _isSharing = false;
   bool _isSavingGallery = false;
   bool _isSharingTriggered = false; // 카카오톡 공유 진입 여부 플래그
+  bool _hasLeftAppForSharing = false; // 실제로 외부(카카오톡/공유창)로 나갔는지 확인 플래그
 
   bool _isAdLoading = false;
 
@@ -54,10 +55,17 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // 사용자가 카카오톡에서 돌아왔을 때 (AppLifecycleState.resumed)
-    if (state == AppLifecycleState.resumed) {
+    // 1. 카카오톡/공유 화면으로 전환되어 앱이 백그라운드로 내려갔을 때
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       if (_isSharingTriggered) {
-        _isSharingTriggered = false; // 플래그 즉시 초기화 (오작동 방지)
+        _hasLeftAppForSharing = true;
+      }
+    }
+    // 2. 카카오톡 전송을 완전히 마치고 앱으로 복귀했을 때만 (resumed) 전면광고 노출
+    else if (state == AppLifecycleState.resumed) {
+      if (_isSharingTriggered && _hasLeftAppForSharing) {
+        _isSharingTriggered = false;
+        _hasLeftAppForSharing = false;
         _showInterstitialAd();
       }
     }
@@ -138,12 +146,15 @@ class _CardResultScreenState extends State<CardResultScreen> with WidgetsBinding
     setState(() => _isSharing = true);
     try {
       _isSharingTriggered = true; // 공유 동작 시작 플래그 세팅
+      _hasLeftAppForSharing = false;
       await KakaoShareHelper.share(
         filePath: widget.imagePath,
         text: '[마음카드] 소중한 분이 진심을 담아 보낸 카드입니다.',
       );
     } catch (e) {
       debugPrint('Share Error: $e');
+      _isSharingTriggered = false;
+      _hasLeftAppForSharing = false;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

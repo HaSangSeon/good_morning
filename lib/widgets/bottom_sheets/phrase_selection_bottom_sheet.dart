@@ -32,6 +32,8 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
     '🎯 합격 & 기원': '🎯 합격 & 기원',
     '🍀 응원 & 격려': '🍀 응원 & 격려',
     '🍁 가을 인사': '🍁 가을 인사 & 안부',
+    '☃️ 첫눈': '☃️ 첫눈',
+    '🎁 기념일 & 빼빼로': '🎁 기념일 & 빼빼로',
     '❄️ 겨울 인사': '❄️ 겨울 인사 & 안부',
     '🌸 봄 인사': '🌸 봄 인사 & 안부',
     '🍉 여름 인사': '🍉 여름 인사 & 안부',
@@ -65,7 +67,7 @@ class _PhraseSelectionBottomSheetState extends State<PhraseSelectionBottomSheet>
       selectedCategory = matchedCategory;
     } else {
       final hour = DateTime.now().hour;
-      if (hour >= 6 && hour < 12) {
+      if (hour >= 5 && hour < 12) {
         selectedCategory = '🌅 아침 인사 & 덕담';
       } else if (hour >= 18) {
         selectedCategory = '🌙 저녁 & 안부 인사';

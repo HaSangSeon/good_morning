@@ -44,9 +44,10 @@ class KakaoShareHelper {
         if (isAvailable) {
           final File imageFile = File(filePath);
           if (imageFile.existsSync()) {
-            // 카카오 이미지 서버에 카드 업로드 (링크 말풍선 고화질 노출용)
-            final ImageUploadResult uploadResult =
-                await ShareClient.instance.uploadImage(imagePath: filePath);
+            // 카카오 이미지 서버에 카드 업로드 (링크 말풍선 고화질 노출용) - 불안정한 네트워크 환경 대비 7초 타임아웃
+            final ImageUploadResult uploadResult = await ShareClient.instance
+                .uploadImage(imagePath: filePath)
+                .timeout(const Duration(seconds: 7));
             final String imageUrl = uploadResult.infos.original.url;
 
             final FeedTemplate template = FeedTemplate(
@@ -71,7 +72,9 @@ class KakaoShareHelper {
               ],
             );
 
-            await ShareClient.instance.shareDefault(template: template);
+            await ShareClient.instance
+                .shareDefault(template: template)
+                .timeout(const Duration(seconds: 7));
             sharedDirectly = true;
           }
         }
@@ -98,9 +101,10 @@ class KakaoShareHelper {
     // 3. 카카오톡 미설치 기기이거나 모든 카카오 전송이 불가할 때: 표준 시스템 공유 시트 실행
     if (!sharedDirectly) {
       if (filePath != null && filePath.isNotEmpty) {
+        final String mime = filePath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
         // ignore: deprecated_member_use
         await Share.shareXFiles(
-          [XFile(filePath, mimeType: 'image/jpeg')],
+          [XFile(filePath, mimeType: mime)],
           text: text,
           subject: subject,
         );
